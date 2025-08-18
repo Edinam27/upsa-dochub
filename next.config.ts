@@ -9,9 +9,7 @@ const nextConfig: NextConfig = {
   },
   output: 'standalone',
   trailingSlash: false,
-  experimental: {
-    outputFileTracingRoot: undefined,
-  },
+
 };
 
 export default nextConfig;
