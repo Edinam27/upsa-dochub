@@ -7,6 +7,11 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  output: 'standalone',
+  trailingSlash: false,
+  experimental: {
+    outputFileTracingRoot: undefined,
+  },
 };
 
 export default nextConfig;
