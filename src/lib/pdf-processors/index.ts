@@ -4,7 +4,7 @@ import { ProcessingOptions, ProcessedFile, PDFPageInfo } from '../types';
 import { fileUtils, errorUtils } from '../utils';
 
 // PDF Processing Base Class
-export abstract class PDFProcessor {
+abstract class PDFProcessor {
   protected options: ProcessingOptions;
   
   constructor(options: ProcessingOptions = {}) {
@@ -58,7 +58,7 @@ export abstract class PDFProcessor {
 }
 
 // PDF Merger
-export class PDFMerger extends PDFProcessor {
+class PDFMerger extends PDFProcessor {
   async process(files: File[]): Promise<ProcessedFile> {
     if (files.length < 2) {
       throw errorUtils.createError(
@@ -93,7 +93,7 @@ export class PDFMerger extends PDFProcessor {
 }
 
 // PDF Splitter
-export class PDFSplitter extends PDFProcessor {
+class PDFSplitter extends PDFProcessor {
   async process(file: File): Promise<ProcessedFile[]> {
     try {
       const pdf = await this.loadPDF(file);
@@ -123,7 +123,7 @@ export class PDFSplitter extends PDFProcessor {
 }
 
 // PDF Page Extractor
-export class PDFPageExtractor extends PDFProcessor {
+class PDFPageExtractor extends PDFProcessor {
   private pageRange: string;
   
   constructor(options: ProcessingOptions & { pageRange: string }) {
@@ -188,7 +188,7 @@ export class PDFPageExtractor extends PDFProcessor {
 }
 
 // PDF Compressor
-export class PDFCompressor extends PDFProcessor {
+class PDFCompressor extends PDFProcessor {
   async process(file: File): Promise<ProcessedFile> {
     try {
       const pdf = await this.loadPDF(file);
@@ -264,7 +264,7 @@ export class PDFCompressor extends PDFProcessor {
 }
 
 // PDF Watermark
-export class PDFWatermark extends PDFProcessor {
+class PDFWatermark extends PDFProcessor {
   private watermarkText: string;
   private position: string;
   
@@ -336,7 +336,7 @@ export class PDFWatermark extends PDFProcessor {
 }
 
 // PDF Password Protector
-export class PDFPasswordProtector extends PDFProcessor {
+class PDFPasswordProtector extends PDFProcessor {
   private password: string;
   
   constructor(options: ProcessingOptions & { password: string }) {
@@ -366,7 +366,7 @@ export class PDFPasswordProtector extends PDFProcessor {
 }
 
 // PDF to Images Converter
-export class PDFToImagesConverter extends PDFProcessor {
+class PDFToImagesConverter extends PDFProcessor {
   async process(file: File): Promise<ProcessedFile[]> {
     try {
       // This is a simplified implementation
@@ -419,7 +419,7 @@ export class PDFToImagesConverter extends PDFProcessor {
 }
 
 // PDF Info Extractor
-export class PDFInfoExtractor {
+class PDFInfoExtractor {
   static async extractInfo(file: File): Promise<{
     pageCount: number;
     title?: string;
@@ -473,7 +473,7 @@ export class PDFInfoExtractor {
 }
 
 // PDF Annotator
-export class PDFAnnotator extends PDFProcessor {
+class PDFAnnotator extends PDFProcessor {
   private annotations: any[];
   
   constructor(options: ProcessingOptions & { annotations: any[] }) {
