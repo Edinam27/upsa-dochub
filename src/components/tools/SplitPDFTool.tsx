@@ -64,7 +64,7 @@ const SplitPDFTool: React.FC<SplitPDFToolProps> = ({ onProcess, isProcessing }) 
       return;
     }
 
-    let options: any = { operation: 'split' };
+    let options: any = { operation: 'split', splitMode };
 
     switch (splitMode) {
       case 'range':

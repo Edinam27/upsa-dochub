@@ -76,21 +76,9 @@ class PDFSplitProcessor implements PDFProcessor {
       }
     }
     
+    // Set default splitMode if not provided
     if (!options.splitMode) {
-      // Default behavior: split by range
-      const startPage = options.startPage || 1;
-      const endPage = options.endPage || totalPages;
-      
-      const newPdf = await PDFDocument.create();
-      const pagesToCopy = [];
-      for (let i = startPage - 1; i < Math.min(endPage, totalPages); i++) {
-        pagesToCopy.push(i);
-      }
-      
-      const copiedPages = await newPdf.copyPages(pdfDoc, pagesToCopy);
-      copiedPages.forEach(page => newPdf.addPage(page));
-      
-      return new Uint8Array(await newPdf.save());
+      options.splitMode = 'range';
     }
     
     const results: Uint8Array[] = [];
@@ -144,7 +132,8 @@ class PDFSplitProcessor implements PDFProcessor {
         const copiedPages = await newPdf.copyPages(pdfDoc, pagesToCopy);
         copiedPages.forEach(page => newPdf.addPage(page));
         
-        return new Uint8Array(await newPdf.save());
+        results.push(new Uint8Array(await newPdf.save()));
+        break;
     }
     
     return results;
