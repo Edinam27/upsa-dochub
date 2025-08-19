@@ -130,6 +130,60 @@ export async function POST(request: NextRequest) {
           details: error instanceof Error ? error.message : 'Unknown error'
         } as APIResponse<null>, { status: 500 });
       }
+    } else if (toolId === 'pdf-merge') {
+      try {
+        if (fileList.length < 2) {
+          throw new Error('At least 2 PDF files are required for merging');
+        }
+        
+        // Prepare the main file and additional files for merging
+        const mainFile = fileList[0];
+        const additionalFiles = [];
+        
+        // Convert all additional files to Uint8Array
+        for (let i = 1; i < fileList.length; i++) {
+          const file = fileList[i];
+          if (!file || file.size === 0) {
+            throw new Error(`Invalid or empty file: ${file?.name || 'unknown'}`);
+          }
+          
+          const arrayBuffer = await file.arrayBuffer();
+          if (arrayBuffer.byteLength === 0) {
+            throw new Error(`File contains no data: ${file.name}`);
+          }
+          
+          additionalFiles.push(new Uint8Array(arrayBuffer));
+        }
+        
+        // Process the main file with additional files for merging
+        const mainArrayBuffer = await mainFile.arrayBuffer();
+        if (mainArrayBuffer.byteLength === 0) {
+          throw new Error(`Main file contains no data: ${mainFile.name}`);
+        }
+        
+        const result = await processor.process(new Uint8Array(mainArrayBuffer), {
+          ...options,
+          additionalFiles
+        });
+        
+        processedFiles.push({
+          id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          name: `merged_${Date.now()}.pdf`,
+          originalName: `merged_${fileList.length}_files.pdf`,
+          size: result.byteLength,
+          type: getOutputMimeType(toolId),
+          data: Array.from(result),
+          processedAt: new Date().toISOString(),
+          toolUsed: toolId
+        });
+      } catch (error) {
+        console.error('Error merging PDF files:', error);
+        return NextResponse.json({
+          success: false,
+          error: 'Failed to merge PDF files',
+          details: error instanceof Error ? error.message : 'Unknown error'
+        } as APIResponse<null>, { status: 500 });
+      }
     } else {
       // Process each file individually for other tools
       for (const file of fileList) {
