@@ -44,7 +44,8 @@ const PDFToWordTool: React.FC<PDFToWordToolProps> = ({ onProcess, isProcessing }
     convertAllPages: true
   });
 
-  const handleFilesSelected = (selectedFiles: File[]) => {
+  const handleFilesAdded = (fileInfos: any[]) => {
+    const selectedFiles = fileInfos.map(fileInfo => fileInfo.file);
     setFiles(selectedFiles);
   };
 
@@ -98,7 +99,7 @@ const PDFToWordTool: React.FC<PDFToWordToolProps> = ({ onProcess, isProcessing }
       {/* File Upload */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">
         <FileUpload
-          onFilesSelected={handleFilesSelected}
+          onFilesAdded={handleFilesAdded}
           maxFiles={5}
           maxFileSize={50 * 1024 * 1024}
           acceptedTypes={['.pdf', 'application/pdf']}

@@ -35,7 +35,8 @@ const ExtractPagesTool: React.FC<ExtractPagesToolProps> = ({ onProcess, isProces
   const [extractMode, setExtractMode] = useState<'ranges' | 'individual'>('ranges');
   const [selectedPages, setSelectedPages] = useState<number[]>([]);
 
-  const handleFilesSelected = (selectedFiles: File[]) => {
+  const handleFilesAdded = (fileInfos: any[]) => {
+    const selectedFiles = fileInfos.map(fileInfo => fileInfo.file);
     setFiles(selectedFiles);
     // In a real implementation, you would extract page count from PDF
     setTotalPages(10); // Mock value
@@ -103,7 +104,7 @@ const ExtractPagesTool: React.FC<ExtractPagesToolProps> = ({ onProcess, isProces
       {/* File Upload */}
       <div className="bg-white rounded-xl border border-gray-200 p-6">
         <FileUpload
-          onFilesSelected={handleFilesSelected}
+          onFilesAdded={handleFilesAdded}
           maxFiles={1}
           maxFileSize={100 * 1024 * 1024}
           acceptedTypes={['.pdf', 'application/pdf']}

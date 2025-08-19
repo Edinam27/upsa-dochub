@@ -124,11 +124,21 @@ class PDFSplitter extends PDFProcessor {
 
 // PDF Page Extractor
 class PDFPageExtractor extends PDFProcessor {
-  private pageRange: string;
+  private extractMode: string;
+  private pageRanges: string[];
+  private selectedPages: number[];
   
-  constructor(options: ProcessingOptions & { pageRange: string }) {
+  constructor(options: ProcessingOptions & { extractMode?: string; pageRanges?: string[]; selectedPages?: number[]; pageRange?: string }) {
     super(options);
-    this.pageRange = options.pageRange;
+    this.extractMode = options.extractMode || 'individual';
+    this.pageRanges = options.pageRanges || [];
+    this.selectedPages = options.selectedPages || [];
+    
+    // Support legacy pageRange format
+    if (options.pageRange && !options.extractMode) {
+      this.extractMode = 'ranges';
+      this.pageRanges = [options.pageRange];
+    }
   }
 
   async process(file: File): Promise<ProcessedFile> {
@@ -136,12 +146,25 @@ class PDFPageExtractor extends PDFProcessor {
       const pdf = await this.loadPDF(file);
       const pageCount = pdf.getPageCount();
       
-      const pageIndices = this.parsePageRange(this.pageRange, pageCount);
+      let pageIndices: number[] = [];
+      
+      if (this.extractMode === 'individual' && this.selectedPages.length > 0) {
+        // Convert 1-based page numbers to 0-based indices
+        pageIndices = this.selectedPages.map(page => page - 1).filter(index => index >= 0 && index < pageCount);
+      } else if (this.extractMode === 'ranges' && this.pageRanges.length > 0) {
+        // Parse page ranges
+        for (const range of this.pageRanges) {
+          const rangeIndices = this.parsePageRange(range, pageCount);
+          pageIndices.push(...rangeIndices);
+        }
+        // Remove duplicates and sort
+        pageIndices = [...new Set(pageIndices)].sort((a, b) => a - b);
+      }
       
       if (pageIndices.length === 0) {
         throw errorUtils.createError(
           'INVALID_INPUT',
-          'No valid pages specified in the range.'
+          'No valid pages specified for extraction.'
         );
       }
       
@@ -628,7 +651,19 @@ export function createPDFProcessor(
       case 'split':
         return new PDFSplitter(options);
       case 'extract':
-        return new PDFPageExtractor(options as any);
+      case 'pdf-extract':
+        console.log('Creating PDFPageExtractor with options:', options);
+        console.error('Creating PDFPageExtractor with options:', options);
+        try {
+          const extractor = new PDFPageExtractor(options as any);
+          console.log('PDFPageExtractor created successfully:', !!extractor);
+          console.error('PDFPageExtractor created successfully:', !!extractor);
+          return extractor;
+        } catch (extractorError) {
+          console.error('Error in PDFPageExtractor constructor:', extractorError);
+          console.error('Constructor error stack:', extractorError.stack);
+          throw extractorError;
+        }
       case 'compress':
         return new PDFCompressor(options);
       case 'watermark':

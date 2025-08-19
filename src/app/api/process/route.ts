@@ -3,6 +3,7 @@ import { PDFDocument } from 'pdf-lib';
 import sharp from 'sharp';
 import { createPDFProcessor } from '@/lib/pdf-processors';
 import { ProcessingOptions, APIResponse, ProcessedFile } from '@/lib/types';
+import { fileUtils } from '@/lib/utils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -32,22 +33,12 @@ export async function POST(request: NextRequest) {
     
     // Create processor instance with annotations for pdf-annotate tool
     const processorOptions = toolId === 'pdf-annotate' ? { ...options, annotations } : options;
-    console.log('=== ENHANCED DEBUG START ===');
-    console.log('Creating processor for toolId:', toolId);
-    console.log('Processor options:', JSON.stringify(processorOptions, null, 2));
-    console.error('=== USING CONSOLE.ERROR FOR VISIBILITY ===');
-    console.error('Creating processor for toolId:', toolId);
-    console.error('Processor options:', JSON.stringify(processorOptions, null, 2));
+    
     let processor;
     try {
-      console.log('About to call createPDFProcessor with:', { toolId, processorOptions });
       processor = createPDFProcessor(toolId, processorOptions);
-      console.log('createPDFProcessor returned:', processor);
-      console.log('Processor created successfully:', !!processor);
-      console.log('Processor type:', processor?.constructor?.name);
     } catch (error) {
       console.error('Error creating PDF processor:', error);
-      console.error('Error stack:', error.stack);
       console.error('Error details:', JSON.stringify(error, null, 2));
       return NextResponse.json({
         success: false,
@@ -153,7 +144,7 @@ export async function POST(request: NextRequest) {
             throw new Error('File contains no data');
           }
           
-          const uint8Array = new Uint8Array(arrayBuffer);
+          const uint8Array = new Uint8Array(arrayBuffer)
           
           // Process the file based on tool type
           const result = await processor.process(uint8Array, options);
@@ -163,7 +154,7 @@ export async function POST(request: NextRequest) {
             // Multiple files returned (e.g., PDF split)
             result.forEach((fileData, index) => {
               const baseName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
-              const extension = toolId === 'pdf-split' ? '.pdf' : getFileExtension(getOutputMimeType(toolId));
+              const extension = toolId === 'pdf-split' ? '.pdf' : fileUtils.getFileExtension(getOutputMimeType(toolId));
               
               processedFiles.push({
                 id: `processed_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 9)}`,

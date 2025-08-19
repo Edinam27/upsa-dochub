@@ -1,5 +1,6 @@
 import { PDFDocument, rgb, StandardFonts, PageSizes, degrees } from 'pdf-lib';
 import { ProcessingOptions, ProcessedFile } from './types';
+import { fileUtils } from './utils';
 
 export interface PDFProcessor {
   process(fileData: Uint8Array, options: ProcessingOptions): Promise<Uint8Array | Uint8Array[]>;
@@ -32,6 +33,48 @@ class PDFSplitProcessor implements PDFProcessor {
   async process(fileData: Uint8Array, options: ProcessingOptions): Promise<Uint8Array | Uint8Array[]> {
     const pdfDoc = await PDFDocument.load(fileData);
     const totalPages = pdfDoc.getPageCount();
+    
+    // Handle extract pages mode (from ExtractPagesTool)
+    if (options.extractMode) {
+      console.log('Processing extract mode:', options.extractMode);
+      console.log('Page ranges:', options.pageRanges);
+      console.log('Selected pages:', options.selectedPages);
+      
+      const results: Uint8Array[] = [];
+      
+      if (options.extractMode === 'ranges' && options.pageRanges && options.pageRanges.length > 0) {
+        // Extract page ranges
+        for (const range of options.pageRanges) {
+          const newPdf = await PDFDocument.create();
+          const pagesToCopy = [];
+          
+          for (let i = range.start - 1; i < Math.min(range.end, totalPages); i++) {
+            if (i >= 0) pagesToCopy.push(i);
+          }
+          
+          if (pagesToCopy.length > 0) {
+            const copiedPages = await newPdf.copyPages(pdfDoc, pagesToCopy);
+            copiedPages.forEach(page => newPdf.addPage(page));
+            results.push(new Uint8Array(await newPdf.save()));
+          }
+        }
+        return results;
+      } else if (options.extractMode === 'individual' && options.selectedPages && options.selectedPages.length > 0) {
+        // Extract individual pages
+        for (const pageNum of options.selectedPages) {
+          if (pageNum > 0 && pageNum <= totalPages) {
+            const newPdf = await PDFDocument.create();
+            const [copiedPage] = await newPdf.copyPages(pdfDoc, [pageNum - 1]);
+            newPdf.addPage(copiedPage);
+            results.push(new Uint8Array(await newPdf.save()));
+          }
+        }
+        return results;
+      } else {
+        // If extract mode is set but no valid ranges/pages, return error
+        throw new Error(`Invalid extract mode configuration: mode=${options.extractMode}, ranges=${options.pageRanges?.length || 0}, pages=${options.selectedPages?.length || 0}`);
+      }
+    }
     
     if (!options.splitMode) {
       // Default behavior: split by range
@@ -411,6 +454,7 @@ export function createPDFProcessor(toolId: string, options: any = {}): PDFProces
     case 'pdf-merge':
       return new PDFMergeProcessor();
     case 'pdf-split':
+    case 'pdf-extract':
       return new PDFSplitProcessor();
     case 'pdf-compress':
       return new PDFCompressProcessor();

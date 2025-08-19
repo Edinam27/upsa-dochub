@@ -130,7 +130,7 @@ export default function ToolPage() {
         return <OCRScannerTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
       case 'images-to-pdf':
         return <ImagesToPDFTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
-      case 'pdf-extract-pages':
+      case 'pdf-extract':
         return <ExtractPagesTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
       case 'pdf-annotate':
         return <AnnotatePDFTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
