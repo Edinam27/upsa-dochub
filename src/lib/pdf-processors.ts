@@ -459,6 +459,9 @@ export function createPDFProcessor(toolId: string, options: any = {}): PDFProces
       return new ImageToPDFProcessor();
     case 'watermark-removal':
       return new WatermarkRemovalProcessor();
+    case 'pdf-to-images':
+      // PDF to images conversion should be handled client-side only
+      throw new Error('PDF to images conversion is handled client-side and should not use server-side processing');
     case 'pdf-annotate':
     case 'annotate':
       // Import PDFAnnotator from the index file

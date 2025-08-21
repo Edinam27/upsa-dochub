@@ -30,6 +30,7 @@ import PasswordProtectPDFTool from '@/components/tools/PasswordProtectPDFTool';
 import OCRScannerTool from '@/components/tools/OCRScannerTool';
 import ImagesToPDFTool from '@/components/tools/ImagesToPDFTool';
 import ExtractPagesTool from '@/components/tools/ExtractPagesTool';
+import PDFToImagesTool from '@/components/tools/PDFToImagesTool';
 import AnnotatePDFTool from '@/components/tools/AnnotatePDFTool';
 import RotatePDFTool from '@/components/tools/RotatePDFTool';
 import RepairPDFTool from '@/components/tools/RepairPDFTool';
@@ -130,6 +131,8 @@ export default function ToolPage() {
         return <OCRScannerTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
       case 'images-to-pdf':
         return <ImagesToPDFTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
+      case 'pdf-to-images':
+        return <PDFToImagesTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
       case 'pdf-extract':
         return <ExtractPagesTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
       case 'pdf-annotate':

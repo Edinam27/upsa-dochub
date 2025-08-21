@@ -38,6 +38,20 @@ export default function ToolsPage() {
   const { preferences } = useUserPreferencesStore();
   const favoriteTools = preferences.favoriteTools || [];
   
+  // Helper function to get the correct route for each tool
+  const getToolRoute = (toolId: string) => {
+    switch (toolId) {
+      case 'pdf-to-word':
+        return '/processing/pdf-to-word';
+      case 'pdf-to-images':
+        return '/processing/pdf-to-images';
+      case 'pdf-ocr':
+        return '/processing/ocr-text-extraction';
+      default:
+        return `/tools/${toolId}`;
+    }
+  };
+  
   // Filter and sort tools
   const filteredTools = useMemo(() => {
     let tools = Object.values(TOOLS);
@@ -300,7 +314,7 @@ export default function ToolsPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.05 * index }}
                       >
-                        <Link href={`/tools/${tool.id}`}>
+                        <Link href={getToolRoute(tool.id)}>
                           <ToolCard tool={tool} />
                         </Link>
                       </motion.div>
@@ -316,7 +330,7 @@ export default function ToolsPage() {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.05 * index }}
                       >
-                        <Link href={`/tools/${tool.id}`}>
+                        <Link href={getToolRoute(tool.id)}>
                           <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:border-upsa-gold">
                             <div className="flex items-center space-x-4">
                               <div className={`p-3 rounded-xl bg-gradient-to-r ${tool.color} text-white`}>

@@ -12,7 +12,9 @@ import {
   Type,
   Image,
   Layout,
-  Zap
+  Zap,
+  Cloud,
+  Shield
 } from 'lucide-react';
 import FileUpload from '@/components/upload/FileUpload';
 import ProcessingProgress from '@/components/upload/ProcessingProgress';
@@ -297,7 +299,7 @@ const PDFToWordTool: React.FC<PDFToWordToolProps> = ({ onProcess, isProcessing }
             </div>
             <div className="mt-4 text-center">
               <p className="text-sm text-gray-600">
-                Converting to {settings.outputFormat.toUpperCase()} with {settings.preserveLayout ? 'layout preservation' : 'text extraction'}
+                Converting to {settings.outputFormat.toUpperCase()} using CloudConvert API with {settings.preserveLayout ? 'layout preservation' : 'text extraction'}
                 {settings.ocrEnabled && ' and OCR enabled'}
               </p>
             </div>
@@ -310,7 +312,7 @@ const PDFToWordTool: React.FC<PDFToWordToolProps> = ({ onProcess, isProcessing }
         <ProcessingProgress
           progress={65}
           currentFile={files[0]?.name}
-          message="Converting to Word..."
+          message="Converting to Word using CloudConvert..."
         />
       )}
 
@@ -329,7 +331,7 @@ const PDFToWordTool: React.FC<PDFToWordToolProps> = ({ onProcess, isProcessing }
         {isProcessing ? (
           <div className="flex items-center justify-center space-x-2">
             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            <span>Converting to Word...</span>
+            <span>Converting with CloudConvert...</span>
           </div>
         ) : (
           <div className="flex items-center justify-center space-x-2">
@@ -339,17 +341,22 @@ const PDFToWordTool: React.FC<PDFToWordToolProps> = ({ onProcess, isProcessing }
         )}
       </motion.button>
 
-      {/* Info */}
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+      {/* CloudConvert Info */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
         <div className="flex items-start space-x-3">
-          <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5" />
+          <Cloud className="w-5 h-5 text-blue-600 mt-0.5" />
           <div className="text-sm text-blue-800">
-            <p className="font-medium mb-1">Conversion Features:</p>
+            <p className="font-medium mb-2 flex items-center">
+              <Shield className="w-4 h-4 mr-1" />
+              Powered by CloudConvert Professional API
+            </p>
             <ul className="space-y-1 text-blue-700">
-              <li>• <strong>Layout Preservation:</strong> Maintain original document structure</li>
-              <li>• <strong>Image Extraction:</strong> Include all images and graphics</li>
-              <li>• <strong>Format Support:</strong> Both DOCX and legacy DOC formats</li>
-              <li>• <strong>OCR Support:</strong> Extract text from scanned documents</li>
+              <li>• <strong>Enterprise-Grade Conversion:</strong> Professional PDF to Word conversion engine</li>
+              <li>• <strong>Layout Preservation:</strong> Maintains original formatting, images, and tables</li>
+              <li>• <strong>High Accuracy:</strong> Advanced text recognition and document structure analysis</li>
+              <li>• <strong>Cloud Processing:</strong> Fast, reliable conversion with enterprise infrastructure</li>
+              <li>• <strong>Format Support:</strong> Outputs high-quality DOCX files compatible with Microsoft Word</li>
+              <li>• <strong>Secure Processing:</strong> Files are processed securely and automatically deleted</li>
             </ul>
           </div>
         </div>

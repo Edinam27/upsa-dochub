@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, Star } from 'lucide-react';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 interface Tool {
   id: string;
@@ -21,21 +21,30 @@ interface ToolCardProps {
 
 const ToolCard = ({ tool }: ToolCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
-  const router = useRouter();
 
-  const handleToolClick = () => {
-    router.push(`/tools/${tool.id}`);
+  const getToolRoute = () => {
+    // Route to dedicated processing pages for specific tools
+    switch (tool.id) {
+      case 'pdf-to-word':
+        return '/processing/pdf-to-word';
+      case 'pdf-to-images':
+        return '/processing/pdf-to-images';
+      case 'pdf-ocr':
+        return '/processing/ocr-text-extraction';
+      default:
+        return `/tools/${tool.id}`;
+    }
   };
 
   return (
-    <motion.div
-      className="relative group cursor-pointer"
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
-      whileHover={{ y: -8 }}
-      transition={{ duration: 0.3 }}
-      onClick={handleToolClick}
-    >
+    <Link href={getToolRoute()} prefetch={false}>
+      <motion.div
+        className="relative group cursor-pointer"
+        onHoverStart={() => setIsHovered(true)}
+        onHoverEnd={() => setIsHovered(false)}
+        whileHover={{ y: -8 }}
+        transition={{ duration: 0.3 }}
+      >
       <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:border-white/40 transition-all duration-300 hover:bg-white/15 h-full">
         {/* Tool Icon */}
         <div className="flex items-center justify-between mb-4">
@@ -128,6 +137,7 @@ const ToolCard = ({ tool }: ToolCardProps) => {
         animate={{ opacity: isHovered ? 0.2 : 0 }}
       />
     </motion.div>
+    </Link>
   );
 };
 

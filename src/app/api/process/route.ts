@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PDFDocument } from 'pdf-lib';
 import sharp from 'sharp';
-import { createPDFProcessor } from '@/lib/pdf-processors';
+import { createPDFProcessor } from '@/lib/pdf-processors/index';
 import { ProcessingOptions, APIResponse, ProcessedFile } from '@/lib/types';
 import { fileUtils } from '@/lib/utils';
 
@@ -201,35 +201,37 @@ export async function POST(request: NextRequest) {
           const uint8Array = new Uint8Array(arrayBuffer)
           
           // Process the file based on tool type
-          const result = await processor.process(uint8Array, options);
+          const result = await processor.process(file, options);
           
           // Handle both single and multiple file outputs
           if (Array.isArray(result)) {
             // Multiple files returned (e.g., PDF split)
-            result.forEach((fileData, index) => {
-              const baseName = file.name.replace(/\.[^/.]+$/, ""); // Remove extension
-              const extension = toolId === 'pdf-split' ? '.pdf' : fileUtils.getFileExtension(getOutputMimeType(toolId));
+            for (let index = 0; index < result.length; index++) {
+              const processedFile = result[index];
+              const fileData = await processedFile.blob.arrayBuffer();
               
               processedFiles.push({
                 id: `processed_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 9)}`,
-                name: `${baseName}_part_${index + 1}${extension}`,
+                name: processedFile.name,
                 originalName: file.name,
-                size: fileData.byteLength,
-                type: getOutputMimeType(toolId),
-                data: Array.from(fileData),
+                size: processedFile.size,
+                type: processedFile.type,
+                data: Array.from(new Uint8Array(fileData)),
                 processedAt: new Date().toISOString(),
                 toolUsed: toolId
               });
-            });
+            }
           } else {
             // Single file returned
+            const fileData = await result.blob.arrayBuffer();
+            
             processedFiles.push({
               id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-              name: `processed_${file.name}`,
+              name: result.name,
               originalName: file.name,
-              size: result.byteLength,
-              type: getOutputMimeType(toolId),
-              data: Array.from(result),
+              size: result.size,
+              type: result.type,
+              data: Array.from(new Uint8Array(fileData)),
               processedAt: new Date().toISOString(),
               toolUsed: toolId
             });

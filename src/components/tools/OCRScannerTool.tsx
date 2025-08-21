@@ -64,19 +64,11 @@ export default function OCRScannerTool({ onProcess, isProcessing }: OCRScannerTo
       const initPdfJs = async () => {
         try {
           const pdfjsLib = await import('pdfjs-dist');
-          // Use a working CDN path
-          pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://unpkg.com/pdfjs-dist@4.4.168/build/pdf.worker.min.js';
+          // Set worker source to local file
+          pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
           setPdfLibLoaded(true);
         } catch (error) {
-          console.error('Failed to load PDF.js:', error);
-          // Try alternative stable version
-          try {
-            const pdfjsLib = await import('pdfjs-dist');
-            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.worker.min.js';
-            setPdfLibLoaded(true);
-          } catch (fallbackError) {
-            console.error('Failed to load PDF.js with fallback CDN:', fallbackError);
-          }
+          console.error('Failed to initialize PDF.js:', error);
         }
       };
       initPdfJs();

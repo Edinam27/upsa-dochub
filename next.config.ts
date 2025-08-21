@@ -9,7 +9,9 @@ const nextConfig: NextConfig = {
   },
   output: 'standalone',
   trailingSlash: false,
-
+  experimental: {
+    optimizePackageImports: ['framer-motion', 'lucide-react'],
+  },
 };
 
 export default nextConfig;

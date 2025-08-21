@@ -388,45 +388,551 @@ class PDFPasswordProtector extends PDFProcessor {
   }
 }
 
-// PDF to Images Converter
-class PDFToImagesConverter extends PDFProcessor {
-  async process(file: File): Promise<ProcessedFile[]> {
+// PDF to Word Converter
+class PDFToWordConverter extends PDFProcessor {
+  constructor(options: ProcessingOptions = {}) {
+    super(options);
+  }
+
+  async process(file: File, conversionOptions?: any): Promise<ProcessedFile> {
     try {
-      // This is a simplified implementation
-      // In a real application, you would use a library like pdf2pic or PDF.js
+      console.log('PDFToWordConverter: Processing PDF to Word file type conversion');
       
-      const pdf = await this.loadPDF(file);
-      const pageCount = pdf.getPageCount();
-      const results: ProcessedFile[] = [];
+      // Import required libraries dynamically
+      const { Document, Packer, Paragraph, TextRun, HeadingLevel, Table, TableRow, TableCell, WidthType, AlignmentType } = await import('docx');
       
-      // Placeholder: In reality, you'd convert each page to an image
-      for (let i = 0; i < pageCount; i++) {
-        // This would be the actual image conversion logic
-        const canvas = document.createElement('canvas');
-        canvas.width = 800;
-        canvas.height = 1000;
+      // Get basic PDF info using pdf-lib
+      const arrayBuffer = await file.arrayBuffer();
+      const { PDFDocument } = await import('pdf-lib');
+      const pdfDoc = await PDFDocument.load(arrayBuffer);
+      const pageCount = pdfDoc.getPageCount();
+      
+      console.log(`PDF loaded for file type conversion: ${pageCount} pages`);
+      
+      let extractedText = '';
+      const paragraphs = [];
+      
+      // Add professional document header optimized for Word format
+      paragraphs.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `Document Conversion Report`,
+              bold: true,
+              size: 28,
+              color: "2E74B5"
+            })
+          ],
+          heading: HeadingLevel.HEADING_1,
+          alignment: AlignmentType.CENTER
+        }),
+        new Paragraph({ children: [new TextRun({ text: "" })] }), // Empty line
         
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.fillStyle = 'white';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-          ctx.fillStyle = 'black';
-          ctx.font = '20px Arial';
-          ctx.fillText(`Page ${i + 1} of ${file.name}`, 50, 50);
+        // Document information table
+        new Table({
+          width: {
+            size: 100,
+            type: WidthType.PERCENTAGE,
+          },
+          rows: [
+            new TableRow({
+              children: [
+                new TableCell({
+                  children: [new Paragraph({ children: [new TextRun({ text: "Original File:", bold: true })] })],
+                  width: { size: 30, type: WidthType.PERCENTAGE }
+                }),
+                new TableCell({
+                  children: [new Paragraph({ children: [new TextRun({ text: file?.name || 'document.pdf' })] })],
+                  width: { size: 70, type: WidthType.PERCENTAGE }
+                })
+              ]
+            }),
+            new TableRow({
+              children: [
+                new TableCell({
+                  children: [new Paragraph({ children: [new TextRun({ text: "Total Pages:", bold: true })] })]
+                }),
+                new TableCell({
+                  children: [new Paragraph({ children: [new TextRun({ text: pageCount.toString() })] })]
+                })
+              ]
+            }),
+            new TableRow({
+              children: [
+                new TableCell({
+                  children: [new Paragraph({ children: [new TextRun({ text: "Conversion Date:", bold: true })] })]
+                }),
+                new TableCell({
+                  children: [new Paragraph({ children: [new TextRun({ text: new Date().toLocaleDateString() })] })]
+                })
+              ]
+            }),
+            new TableRow({
+              children: [
+                new TableCell({
+                  children: [new Paragraph({ children: [new TextRun({ text: "File Type:", bold: true })] })]
+                }),
+                new TableCell({
+                  children: [new Paragraph({ children: [new TextRun({ text: "PDF → DOCX Conversion" })] })]
+                })
+              ]
+            })
+          ]
+        }),
+        new Paragraph({ children: [new TextRun({ text: "" })] }), // Empty line
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Document Content",
+              bold: true,
+              size: 24,
+              color: "2E74B5"
+            })
+          ],
+          heading: HeadingLevel.HEADING_2
+        }),
+        new Paragraph({ children: [new TextRun({ text: "" })] }) // Empty line
+      );
+      
+      // Track conversion statistics for better Word document structure
+      const documentSections = [];
+      let totalTextLength = 0;
+      
+      // Extract text using PDF.js with enhanced file type conversion processing
+      try {
+        const pdfjsLib = await import('pdfjs-dist');
+        // Set worker source to local file
+        pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
+        
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        const pageCount = pdf.numPages;
+        
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+          const page = await pdf.getPage(pageNum);
+          const textContent = await page.getTextContent();
+          
+          let pageText = '';
+          let formattedItems = [];
+          
+          // Process text items with position and formatting information for better conversion
+          textContent.items.forEach((item: any) => {
+            if (item.str && item.str.trim()) {
+              formattedItems.push({
+                text: item.str,
+                x: item.transform[4],
+                y: item.transform[5],
+                fontSize: item.height || 12,
+                fontName: item.fontName || 'default'
+              });
+              pageText += item.str + ' ';
+            }
+          });
+          
+          if (pageText.trim()) {
+            extractedText += pageText + '\n\n';
+            totalTextLength += pageText.length;
+            
+            // Add page header with enhanced formatting for Word conversion
+            paragraphs.push(
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `Page ${pageNum}`,
+                    bold: true,
+                    size: 22,
+                    color: "2E74B5"
+                  })
+                ],
+                heading: HeadingLevel.HEADING_2
+              })
+            );
+            
+            // Process text with improved paragraph detection for Word format
+            const sentences = pageText.split(/[.!?]+/).filter(s => s.trim());
+            let currentParagraph = '';
+            
+            sentences.forEach((sentence, index) => {
+              currentParagraph += sentence.trim();
+              
+              // Create paragraph breaks based on content length and structure
+              if (currentParagraph.length > 200 || index === sentences.length - 1) {
+                if (currentParagraph.trim()) {
+                  paragraphs.push(
+                    new Paragraph({
+                      children: [
+                        new TextRun({
+                          text: currentParagraph.trim() + (currentParagraph.trim().match(/[.!?]$/) ? '' : '.'),
+                          size: 22
+                        })
+                      ]
+                    })
+                  );
+                }
+                currentParagraph = '';
+              } else {
+                currentParagraph += '. ';
+              }
+            });
+            
+            // Add spacing between pages
+            paragraphs.push(
+              new Paragraph({ children: [new TextRun({ text: "" })] })
+            );
+            
+            documentSections.push({
+              pageNumber: pageNum,
+              textLength: pageText.length,
+              hasContent: true
+            });
+          } else {
+            // No text found on this page - optimized message for file conversion
+            paragraphs.push(
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: `Page ${pageNum}`,
+                    bold: true,
+                    size: 22,
+                    color: "2E74B5"
+                  })
+                ],
+                heading: HeadingLevel.HEADING_2
+              }),
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: "[This page contains visual content (images, charts, or graphics) that cannot be directly converted to text format. Consider using OCR tools for scanned content.]",
+                    italics: true,
+                    size: 20,
+                    color: "666666"
+                  })
+                ]
+              }),
+              new Paragraph({ children: [new TextRun({ text: "" })] })
+            );
+            
+            documentSections.push({
+              pageNumber: pageNum,
+              textLength: 0,
+              hasContent: false
+            });
+          }
         }
         
-        const blob = await new Promise<Blob>((resolve) => {
-          canvas.toBlob((blob) => resolve(blob!), 'image/png');
-        });
+        console.log(`File type conversion completed: extracted text from ${pdf.numPages} pages, total text length: ${totalTextLength} characters`);
         
-        const filename = `${file.name.replace('.pdf', '')}_page_${i + 1}.png`;
-        results.push({
-          name: filename,
-          size: blob.size,
-          type: 'image/png',
-          blob,
-          downloadUrl: URL.createObjectURL(blob)
-        });
+      } catch (pdfError) {
+        console.warn('PDF.js text extraction failed, creating document with metadata only:', pdfError);
+        
+        // Fallback: Create document with conversion notice
+        paragraphs.push(
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Text Extraction Notice",
+                bold: true,
+                size: 24
+              })
+            ],
+            heading: HeadingLevel.HEADING_2
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Text extraction from this PDF was not possible. This may be because:",
+                size: 22
+              })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "• The PDF contains scanned images or is image-based",
+                size: 20
+              })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "• The PDF has security restrictions",
+                size: 20
+              })
+            ]
+          }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "• The PDF format is not supported for text extraction",
+                size: 20
+              })
+            ]
+          }),
+          new Paragraph({ children: [new TextRun({ text: "" })] }),
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "For scanned PDFs or image-based documents, please use the OCR Text Extraction tool.",
+                size: 22,
+                italics: true,
+                color: "0066CC"
+              })
+            ]
+          })
+        );
+      }
+      
+      // Add conversion summary section
+      paragraphs.push(
+        new Paragraph({ children: [new TextRun({ text: "" })] }), // Empty line
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Conversion Summary",
+              bold: true,
+              size: 24,
+              color: "2E74B5"
+            })
+          ],
+          heading: HeadingLevel.HEADING_2
+        }),
+        new Table({
+          width: {
+            size: 100,
+            type: WidthType.PERCENTAGE,
+          },
+          rows: [
+            new TableRow({
+              children: [
+                new TableCell({
+                  children: [new Paragraph({ children: [new TextRun({ text: "Conversion Type:", bold: true })] })],
+                  width: { size: 40, type: WidthType.PERCENTAGE }
+                }),
+                new TableCell({
+                  children: [new Paragraph({ children: [new TextRun({ text: "PDF to Word Document (File Type Conversion)" })] })],
+                  width: { size: 60, type: WidthType.PERCENTAGE }
+                })
+              ]
+            }),
+            new TableRow({
+              children: [
+                new TableCell({
+                  children: [new Paragraph({ children: [new TextRun({ text: "Total Characters:", bold: true })] })]
+                }),
+                new TableCell({
+                  children: [new Paragraph({ children: [new TextRun({ text: totalTextLength.toLocaleString() })] })]
+                })
+              ]
+            }),
+            new TableRow({
+              children: [
+                new TableCell({
+                  children: [new Paragraph({ children: [new TextRun({ text: "Pages with Content:", bold: true })] })]
+                }),
+                new TableCell({
+                  children: [new Paragraph({ children: [new TextRun({ text: `${documentSections.filter(s => s.hasContent).length} of ${pageCount}` })] })]
+                })
+              ]
+            }),
+            new TableRow({
+              children: [
+                new TableCell({
+                  children: [new Paragraph({ children: [new TextRun({ text: "Conversion Quality:", bold: true })] })]
+                }),
+                new TableCell({
+                  children: [new Paragraph({ children: [new TextRun({ 
+                    text: totalTextLength > 1000 ? "High - Rich text content detected" : 
+                          totalTextLength > 100 ? "Medium - Moderate text content" : 
+                          "Low - Limited text content (may contain mostly images)",
+                    color: totalTextLength > 1000 ? "008000" : totalTextLength > 100 ? "FF8C00" : "FF0000"
+                  })] })]
+                })
+              ]
+            })
+          ]
+        }),
+        new Paragraph({ children: [new TextRun({ text: "" })] }), // Empty line
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "Note: This conversion focuses on file type transformation from PDF to Word format. For PDFs that originated from Word documents, this process reconstructs the document structure while preserving the original content as much as possible.",
+              italics: true,
+              size: 20,
+              color: "666666"
+            })
+          ]
+        })
+      );
+      
+      // Create Word document with enhanced properties for file type conversion
+      const doc = new Document({
+        creator: "UPSA DocHub - PDF to Word Converter",
+        title: `Converted: ${file?.name || 'document.pdf'}`,
+        description: "File type conversion from PDF to Word document format",
+        sections: [{
+          properties: {
+            page: {
+              margin: {
+                top: 720,    // 0.5 inch
+                right: 720,  // 0.5 inch
+                bottom: 720, // 0.5 inch
+                left: 720    // 0.5 inch
+              }
+            }
+          },
+          children: paragraphs
+        }]
+      });
+      
+      console.log('Word document created with enhanced file type conversion formatting');
+      
+      // Generate the Word document buffer
+      const buffer = await Packer.toBuffer(doc);
+      
+      console.log(`Document buffer generated: ${buffer.length} bytes`);
+      
+      // Create blob from buffer
+      const blob = new Blob([buffer], { 
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
+      });
+      
+      // Create output filename with conversion indicator
+      const originalName = file?.name?.replace(/\.pdf$/i, '') || 'converted-document';
+      const outputFilename = `${originalName}_converted.docx`;
+      
+      return {
+        name: outputFilename,
+        size: blob.size,
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        blob,
+        downloadUrl: URL.createObjectURL(blob)
+      };
+    } catch (error) {
+      console.error('Error in PDFToWordConverter:', error);
+      throw errorUtils.createError(
+        'PROCESSING_FAILED',
+        'Failed to convert PDF to Word.',
+        error
+      );
+    }
+  }
+}
+
+// PDF to Images Converter
+class PDFToImagesConverter extends PDFProcessor {
+  async process(file: File): Promise<ProcessedFile> {
+    try {
+      // Import PDF.js dynamically
+      const pdfjsLib = await import('pdfjs-dist');
+      
+      // Set up worker
+      if (typeof window !== 'undefined' && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
+      }
+      
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const results: ProcessedFile[] = [];
+      
+      // Extract options from this.options
+      const {
+        outputFormat = 'png',
+        quality = 'high',
+        resolution = 300,
+        pageRange = 'all',
+        startPage,
+        endPage,
+        specificPages
+      } = this.options;
+      
+      // Determine which pages to convert
+      let pagesToConvert: number[] = [];
+      
+      if (pageRange === 'all') {
+        pagesToConvert = Array.from({ length: pdf.numPages }, (_, i) => i + 1);
+      } else if (pageRange === 'range' && startPage && endPage) {
+        for (let i = startPage; i <= Math.min(endPage, pdf.numPages); i++) {
+          pagesToConvert.push(i);
+        }
+      } else if (pageRange === 'specific' && specificPages) {
+        // Parse specific pages (e.g., "1, 3, 5-7, 10")
+        const pageRanges = specificPages.split(',').map(s => s.trim());
+        for (const range of pageRanges) {
+          if (range.includes('-')) {
+            const [start, end] = range.split('-').map(n => parseInt(n.trim()));
+            for (let i = start; i <= Math.min(end, pdf.numPages); i++) {
+              if (i > 0) pagesToConvert.push(i);
+            }
+          } else {
+            const pageNum = parseInt(range);
+            if (pageNum > 0 && pageNum <= pdf.numPages) {
+              pagesToConvert.push(pageNum);
+            }
+          }
+        }
+        // Remove duplicates and sort
+        pagesToConvert = [...new Set(pagesToConvert)].sort((a, b) => a - b);
+      }
+      
+      // Set scale based on quality
+      let scale = 1.0;
+      switch (quality) {
+        case 'high':
+          scale = 2.0;
+          break;
+        case 'medium':
+          scale = 1.5;
+          break;
+        case 'low':
+          scale = 1.0;
+          break;
+      }
+      
+      // Convert each page to image
+      for (const pageNum of pagesToConvert) {
+        const page = await pdf.getPage(pageNum);
+        const viewport = page.getViewport({ scale });
+        
+        // Check if we're in a browser environment
+        if (typeof document === 'undefined') {
+          throw errorUtils.createError(
+            'PROCESSING_FAILED',
+            'PDF to images conversion is only supported in browser environment.'
+          );
+        }
+        
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        
+        if (context) {
+          await page.render({
+            canvasContext: context,
+            viewport: viewport
+          }).promise;
+          
+          // Convert canvas to blob
+          const mimeType = outputFormat === 'jpg' ? 'image/jpeg' : 
+                          outputFormat === 'webp' ? 'image/webp' : 'image/png';
+          const qualityValue = quality === 'high' ? 0.95 : quality === 'medium' ? 0.8 : 0.6;
+          
+          const blob = await new Promise<Blob>((resolve) => {
+            canvas.toBlob((blob) => resolve(blob!), mimeType, qualityValue);
+          });
+          
+          const baseFilename = file.name.replace(/\.pdf$/i, '');
+          const extension = outputFormat === 'jpg' ? 'jpg' : outputFormat === 'webp' ? 'webp' : 'png';
+          const filename = `${baseFilename}_page_${pageNum.toString().padStart(3, '0')}.${extension}`;
+          
+          results.push({
+            name: filename,
+            size: blob.size,
+            type: mimeType,
+            blob,
+            downloadUrl: URL.createObjectURL(blob)
+          });
+        }
       }
       
       return results;
@@ -621,6 +1127,7 @@ export {
   PDFCompressor,
   PDFWatermark,
   PDFPasswordProtector,
+  PDFToWordConverter,
   PDFToImagesConverter,
   PDFInfoExtractor,
   PDFAnnotator
@@ -632,11 +1139,16 @@ export function createPDFProcessor(
   options: ProcessingOptions = {}
 ): PDFProcessor | null {
   // IMMEDIATE ENTRY LOGGING
-  console.log('🚀 IMMEDIATE ENTRY: createPDFProcessor function started');
-  console.error('🚀 IMMEDIATE ENTRY: createPDFProcessor function started');
+  console.log('🚀🚀🚀 IMMEDIATE ENTRY: createPDFProcessor function started with type:', type);
+  console.error('🚀🚀🚀 IMMEDIATE ENTRY: createPDFProcessor function started with type:', type);
   
-  console.log('FUNCTION ENTRY: createPDFProcessor called');
-  console.error('FUNCTION ENTRY: createPDFProcessor called');
+  if (!type) {
+    console.error('❌ ERROR: type is null or undefined:', type);
+    return null;
+  }
+  
+  console.log('✅ FUNCTION ENTRY: createPDFProcessor called');
+  console.error('✅ FUNCTION ENTRY: createPDFProcessor called');
   console.log('=== createPDFProcessor START ===');
   console.error('=== createPDFProcessor START ===');
   console.log('createPDFProcessor called with type:', type, 'options:', options);
@@ -645,6 +1157,11 @@ export function createPDFProcessor(
   console.error('Type is:', JSON.stringify(type));
   
   try {
+    console.log('🔍 SWITCH STATEMENT: About to enter switch with type:', JSON.stringify(type));
+    console.error('🔍 SWITCH STATEMENT: About to enter switch with type:', JSON.stringify(type));
+    console.log('🔍 Type comparison: type === "pdf-to-word":', type === 'pdf-to-word');
+    console.error('🔍 Type comparison: type === "pdf-to-word":', type === 'pdf-to-word');
+    
     switch (type) {
       case 'merge':
         return new PDFMerger(options);
@@ -671,6 +1188,14 @@ export function createPDFProcessor(
       case 'protect':
         return new PDFPasswordProtector(options as any);
       case 'convert':
+      case 'pdf-to-images':
+        // PDF to images conversion requires browser environment
+        if (typeof document === 'undefined') {
+          throw errorUtils.createError(
+            'PROCESSING_FAILED',
+            'PDF to images conversion is only supported in browser environment. Please use client-side processing.'
+          );
+        }
         return new PDFToImagesConverter(options);
       case 'pdf-annotate':
       case 'annotate':
@@ -696,6 +1221,23 @@ export function createPDFProcessor(
           console.error('Constructor error stack:', constructorError.stack);
           throw constructorError;
         }
+      case 'pdf-to-word':
+        console.log('Creating CloudConvert PDF to Word converter with options:', options);
+        try {
+          const { CloudConvertPDFProcessor } = require('./cloudconvert-processor');
+          const converter = new CloudConvertPDFProcessor(options);
+          console.log('CloudConvert PDF processor created successfully:', !!converter);
+          return converter;
+        } catch (constructorError) {
+          console.error('Error in CloudConvert PDF processor constructor:', constructorError);
+          throw constructorError;
+        }
+      case 'pdf-ocr':
+        // OCR text extraction is handled client-side only
+        throw errorUtils.createError(
+          'PROCESSING_FAILED',
+          'OCR text extraction is handled client-side and should not use server-side processing. Please use the client-side OCR tool.'
+        );
       default:
         throw errorUtils.createError(
           'INVALID_PROCESSOR',

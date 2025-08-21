@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -8,7 +8,6 @@ export const metadata: Metadata = {
   description: "Complete PDF management solution for University of Professional Studies, Accra (UPSA) students. Merge, split, compress, convert, and process PDFs with ease.",
   keywords: "PDF tools, UPSA, University of Professional Studies Accra, student tools, PDF converter, PDF merger",
   authors: [{ name: "UPSA DocHub Team" }],
-  viewport: "width=device-width, initial-scale=1",
   robots: "index, follow",
   openGraph: {
     title: "UPSA DocHub - PDF Tools for Students",
@@ -16,6 +15,11 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
   },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 export default function RootLayout({
