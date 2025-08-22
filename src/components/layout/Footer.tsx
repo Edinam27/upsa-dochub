@@ -17,10 +17,10 @@ const Footer = () => {
   ];
 
   const supportLinks = [
-    { name: 'How to Use', href: '#help' },
-    { name: 'Privacy Policy', href: '#privacy' },
-    { name: 'Terms of Service', href: '#terms' },
-    { name: 'Contact Support', href: '#contact' },
+    { name: 'How to Use', href: '/how-to-use' },
+    { name: 'Privacy Policy', href: '/privacy-policy' },
+    { name: 'Terms of Service', href: '/terms-of-service' },
+    { name: 'Contact Support', href: '/contact-support' },
   ];
 
   return (
