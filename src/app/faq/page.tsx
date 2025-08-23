@@ -114,9 +114,9 @@ const faqData: FAQItem[] = [
   {
     id: '15',
     question: 'Can I edit PDFs directly in UPSA DocHub?',
-    answer: 'Yes, our PDF Editor tool allows you to make basic edits including adding text, images, annotations, and signatures. For more advanced editing features, you might need specialized PDF editing software.',
+    answer: 'Yes, our PDF Editor tool allows you to make basic edits including adding text, images, and signatures. For more advanced editing features, you might need specialized PDF editing software.',
     category: 'PDF Editing',
-    tags: ['pdf editing', 'annotations', 'text editing', 'signatures']
+    tags: ['pdf editing', 'text editing', 'signatures']
   }
 ];
 

@@ -122,7 +122,7 @@ const ToolCard = ({ tool }: ToolCardProps) => {
         )}
 
         {/* New Badge for newer tools */}
-        {['annotate-pdf', 'organize-pages'].includes(tool.id) && (
+        {['organize-pages'].includes(tool.id) && (
           <div className="absolute -top-2 -right-2">
             <div className="bg-gradient-to-r from-green-400 to-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
               New

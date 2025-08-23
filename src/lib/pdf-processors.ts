@@ -462,12 +462,7 @@ export function createPDFProcessor(toolId: string, options: any = {}): PDFProces
     case 'pdf-to-images':
       // PDF to images conversion should be handled client-side only
       throw new Error('PDF to images conversion is handled client-side and should not use server-side processing');
-    case 'pdf-annotate':
-    case 'annotate':
-      // Import PDFAnnotator from the index file
-      const { PDFAnnotator } = require('./pdf-processors/index');
-      console.log('Creating PDFAnnotator with options:', JSON.stringify(options, null, 2));
-      return new PDFAnnotator(options);
+
     default:
       return null;
   }

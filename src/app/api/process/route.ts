@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     const file = formData.get('file') as File; // For single file uploads
     const toolId = formData.get('toolId') as string;
     const options = JSON.parse(formData.get('options') as string || '{}') as ProcessingOptions;
-    const annotations = formData.get('annotations') ? JSON.parse(formData.get('annotations') as string) : [];
+
     
     // Use either files array or single file
     const fileList = files.length > 0 ? files : (file ? [file] : []);
@@ -31,8 +31,7 @@ export async function POST(request: NextRequest) {
       } as APIResponse<null>, { status: 400 });
     }
     
-    // Create processor instance with annotations for pdf-annotate tool
-    const processorOptions = toolId === 'pdf-annotate' ? { ...options, annotations } : options;
+    const processorOptions = options;
     
     let processor;
     try {
@@ -56,39 +55,7 @@ export async function POST(request: NextRequest) {
     
     const processedFiles: ProcessedFile[] = [];
     
-    // Handle pdf-annotate tool specially
-    if (toolId === 'pdf-annotate') {
-      try {
-        const pdfFile = fileList[0];
-        if (!pdfFile || pdfFile.size === 0) {
-          throw new Error('Invalid or empty PDF file');
-        }
-        
-        // Process the PDF with annotations using the PDFAnnotator
-        const result = await processor.process(pdfFile);
-        
-        // Convert the result to the expected format
-        const pdfBytes = await result.blob!.arrayBuffer();
-        
-        processedFiles.push({
-          id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          name: result.name,
-          originalName: pdfFile.name,
-          size: result.size,
-          type: result.type,
-          data: Array.from(new Uint8Array(pdfBytes)),
-          processedAt: new Date().toISOString(),
-          toolUsed: toolId
-        });
-      } catch (error) {
-        console.error('Error processing PDF annotations:', error);
-        return NextResponse.json({
-          success: false,
-          error: 'Failed to process PDF annotations',
-          details: error instanceof Error ? error.message : 'Unknown error'
-        } as APIResponse<null>, { status: 500 });
-      }
-    } else if (toolId === 'images-to-pdf') {
+    if (toolId === 'images-to-pdf') {
       try {
         const imageFiles = [];
         

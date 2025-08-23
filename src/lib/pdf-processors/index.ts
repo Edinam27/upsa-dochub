@@ -819,6 +819,121 @@ class PDFToWordConverter extends PDFProcessor {
 }
 
 // PDF to Images Converter
+class PDFSignatureProcessor extends PDFProcessor {
+  private signatureData: any;
+  private position: { x: number; y: number };
+
+  constructor(options: ProcessingOptions & { signature: any; position: { x: number; y: number } }) {
+    super(options);
+    this.signatureData = options.signature;
+    this.position = options.position || { x: 50, y: 80 };
+  }
+
+  async process(file: File): Promise<ProcessedFile> {
+    try {
+      const pdfDoc = await this.loadPDF(file);
+      const pages = pdfDoc.getPages();
+      const firstPage = pages[0];
+      const { width, height } = firstPage.getSize();
+
+      // Convert percentage position to actual coordinates
+      const x = (this.position.x / 100) * width;
+      const y = height - (this.position.y / 100) * height; // PDF coordinates are bottom-up
+
+      if (this.signatureData.type === 'draw') {
+        // Handle canvas signature
+        if (this.signatureData.canvas) {
+          // Extract base64 data from canvas data URL
+          const base64Data = this.signatureData.canvas.split(',')[1];
+          const imageBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+          
+          try {
+            const image = await pdfDoc.embedPng(imageBytes);
+            const scaledDims = image.scale(0.5); // Scale down the signature
+            firstPage.drawImage(image, {
+              x: x - scaledDims.width / 2,
+              y: y - scaledDims.height / 2,
+              width: scaledDims.width,
+              height: scaledDims.height,
+            });
+          } catch (pngError) {
+            // Try as JPEG if PNG fails
+            try {
+              const image = await pdfDoc.embedJpg(imageBytes);
+              const scaledDims = image.scale(0.5);
+              firstPage.drawImage(image, {
+                x: x - scaledDims.width / 2,
+                y: y - scaledDims.height / 2,
+                width: scaledDims.width,
+                height: scaledDims.height,
+              });
+            } catch (jpgError) {
+              console.error('Failed to embed signature image:', jpgError);
+              throw new Error('Failed to process signature image');
+            }
+          }
+        }
+      } else if (this.signatureData.type === 'type') {
+        // Handle text signature
+        const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+        const fontSize = this.signatureData.size || 24;
+        const color = this.parseColor(this.signatureData.color || '#000000');
+        
+        firstPage.drawText(this.signatureData.text, {
+          x: x,
+          y: y,
+          size: fontSize,
+          font: font,
+          color: color,
+        });
+      } else if (this.signatureData.type === 'upload') {
+        // Handle uploaded image signature
+        if (this.signatureData.image) {
+          const imageBytes = await this.signatureData.image.arrayBuffer();
+          const uint8Array = new Uint8Array(imageBytes);
+          
+          try {
+            let image;
+            if (this.signatureData.image.type.includes('png')) {
+              image = await pdfDoc.embedPng(uint8Array);
+            } else {
+              image = await pdfDoc.embedJpg(uint8Array);
+            }
+            
+            const scaledDims = image.scale(0.3); // Scale down uploaded images
+            firstPage.drawImage(image, {
+              x: x - scaledDims.width / 2,
+              y: y - scaledDims.height / 2,
+              width: scaledDims.width,
+              height: scaledDims.height,
+            });
+          } catch (imageError) {
+            console.error('Failed to embed uploaded signature:', imageError);
+            throw new Error('Failed to process uploaded signature image');
+          }
+        }
+      }
+
+      return await this.savePDF(pdfDoc, this.getOutputFilename(file.name, 'signed'));
+    } catch (error) {
+      throw errorUtils.createError(
+        'PROCESSING_FAILED',
+        'Failed to add signature to PDF.',
+        error
+      );
+    }
+  }
+
+  private parseColor(colorString: string) {
+    // Convert hex color to RGB values for pdf-lib
+    const hex = colorString.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16) / 255;
+    const g = parseInt(hex.substr(2, 2), 16) / 255;
+    const b = parseInt(hex.substr(4, 2), 16) / 255;
+    return rgb(r, g, b);
+  }
+}
+
 class PDFToImagesConverter extends PDFProcessor {
   async process(file: File): Promise<ProcessedFile> {
     try {
@@ -1001,122 +1116,8 @@ class PDFInfoExtractor {
   }
 }
 
-// PDF Annotator
-class PDFAnnotator extends PDFProcessor {
-  private annotations: any[];
-  
-  constructor(options: ProcessingOptions & { annotations: any[] }) {
-    super(options);
-    this.annotations = options.annotations || [];
-  }
 
-  async process(file: File): Promise<ProcessedFile> {
-    try {
-      console.log('PDFAnnotator.process called with file:', file.name);
-      console.log('Annotations received:', JSON.stringify(this.annotations, null, 2));
-      console.log('Number of annotations:', this.annotations.length);
-      
-      const pdf = await this.loadPDF(file);
-      const font = await pdf.embedFont(StandardFonts.Helvetica);
-      
-      // Group annotations by page
-      const annotationsByPage = this.annotations.reduce((acc, annotation) => {
-        if (!acc[annotation.page]) {
-          acc[annotation.page] = [];
-        }
-        acc[annotation.page].push(annotation);
-        return acc;
-      }, {} as Record<number, any[]>);
-      
-      console.log('Annotations grouped by page:', JSON.stringify(annotationsByPage, null, 2));
-      
-      // Apply annotations to each page
-      for (const [pageNum, pageAnnotations] of Object.entries(annotationsByPage)) {
-        const pageIndex = parseInt(pageNum) - 1;
-        if (pageIndex >= 0 && pageIndex < pdf.getPageCount()) {
-          const page = pdf.getPage(pageIndex);
-          
-          for (const annotation of pageAnnotations) {
-            await this.applyAnnotation(page, annotation, font);
-          }
-        }
-      }
-      
-      const filename = this.getOutputFilename(file.name, 'annotated');
-      return await this.savePDF(pdf, filename);
-    } catch (error) {
-      if (error.code) throw error;
-      throw errorUtils.createError(
-        'PROCESSING_FAILED',
-        'Failed to apply annotations to PDF.',
-        error
-      );
-    }
-  }
-  
-  private async applyAnnotation(page: any, annotation: any, font: any) {
-    const { width, height } = page.getSize();
-    console.log('Applying annotation:', JSON.stringify(annotation, null, 2));
-    console.log('Page size:', { width, height });
-    
-    switch (annotation.type) {
-      case 'highlight':
-        // Draw a semi-transparent rectangle for highlight
-        page.drawRectangle({
-          x: annotation.x,
-          y: height - annotation.y - annotation.height, // PDF coordinates are bottom-up
-          width: annotation.width,
-          height: annotation.height,
-          color: this.hexToRgb(annotation.color),
-          opacity: annotation.opacity || 0.3
-        });
-        break;
-        
-      case 'text':
-        // Add text annotation
-        const fontSize = annotation.fontSize || 12;
-        page.drawText(annotation.text, {
-          x: annotation.x,
-          y: height - annotation.y - fontSize, // PDF coordinates are bottom-up
-          size: fontSize,
-          font,
-          color: this.hexToRgb(annotation.color),
-          opacity: annotation.opacity || 1.0
-        });
-        break;
-        
-      case 'draw':
-        // For draw annotations, we'll draw lines connecting the points
-        if (annotation.points && annotation.points.length > 1) {
-          for (let i = 0; i < annotation.points.length - 1; i++) {
-            const point1 = annotation.points[i];
-            const point2 = annotation.points[i + 1];
-            
-            page.drawLine({
-              start: { x: point1.x, y: height - point1.y },
-              end: { x: point2.x, y: height - point2.y },
-              thickness: annotation.strokeWidth || 2,
-              color: this.hexToRgb(annotation.color),
-              opacity: annotation.opacity || 1.0
-            });
-          }
-        }
-        break;
-    }
-  }
-  
-  private hexToRgb(hex: string) {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    if (result) {
-      return rgb(
-        parseInt(result[1], 16) / 255,
-        parseInt(result[2], 16) / 255,
-        parseInt(result[3], 16) / 255
-      );
-    }
-    return rgb(0, 0, 0); // Default to black
-  }
-}
+
 
 // Export all processors
 export {
@@ -1129,8 +1130,8 @@ export {
   PDFPasswordProtector,
   PDFToWordConverter,
   PDFToImagesConverter,
-  PDFInfoExtractor,
-  PDFAnnotator
+  PDFSignatureProcessor,
+  PDFInfoExtractor
 };
 
 // Factory function to create processors
@@ -1197,30 +1198,7 @@ export function createPDFProcessor(
           );
         }
         return new PDFToImagesConverter(options);
-      case 'pdf-annotate':
-      case 'annotate':
-        console.log('Creating PDFAnnotator with options:', options);
-        console.log('Options type:', typeof options);
-        console.log('Options keys:', Object.keys(options || {}));
-        console.log('Annotations in options:', options?.annotations);
-        
-        // Ensure annotations exist in options
-        const annotatorOptions = {
-          ...options,
-          annotations: options?.annotations || []
-        };
-        console.log('Final annotator options:', annotatorOptions);
-        
-        try {
-          const annotator = new PDFAnnotator(annotatorOptions as ProcessingOptions & { annotations: any[] });
-          console.log('PDFAnnotator created successfully:', !!annotator);
-          console.log('Annotator instance:', annotator);
-          return annotator;
-        } catch (constructorError) {
-          console.error('Error in PDFAnnotator constructor:', constructorError);
-          console.error('Constructor error stack:', constructorError.stack);
-          throw constructorError;
-        }
+
       case 'pdf-to-word':
         console.log('Creating CloudConvert PDF to Word converter with options:', options);
         try {
@@ -1238,6 +1216,9 @@ export function createPDFProcessor(
           'PROCESSING_FAILED',
           'OCR text extraction is handled client-side and should not use server-side processing. Please use the client-side OCR tool.'
         );
+      case 'add-signature':
+        console.log('Creating PDFSignatureProcessor with options:', options);
+        return new PDFSignatureProcessor(options as any);
       default:
         throw errorUtils.createError(
           'INVALID_PROCESSOR',

@@ -31,12 +31,14 @@ import OCRScannerTool from '@/components/tools/OCRScannerTool';
 import ImagesToPDFTool from '@/components/tools/ImagesToPDFTool';
 import ExtractPagesTool from '@/components/tools/ExtractPagesTool';
 import PDFToImagesTool from '@/components/tools/PDFToImagesTool';
-import AnnotatePDFTool from '@/components/tools/AnnotatePDFTool';
+
 import RotatePDFTool from '@/components/tools/RotatePDFTool';
 import RepairPDFTool from '@/components/tools/RepairPDFTool';
 import PDFToWordTool from '@/components/tools/PDFToWordTool';
 import WordToPDFTool from '@/components/tools/WordToPDFTool';
 import WatermarkRemovalTool from '@/components/tools/WatermarkRemovalTool';
+import ImageCompressionTool from '@/components/tools/ImageCompressionTool';
+import AddSignatureTool from '@/components/tools/AddSignatureTool';
 
 export default function ToolPage() {
   const params = useParams();
@@ -135,8 +137,7 @@ export default function ToolPage() {
         return <PDFToImagesTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
       case 'pdf-extract':
         return <ExtractPagesTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
-      case 'pdf-annotate':
-        return <AnnotatePDFTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
+
       case 'pdf-rotate':
         return <RotatePDFTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
       case 'pdf-repair':
@@ -147,6 +148,10 @@ export default function ToolPage() {
         return <WordToPDFTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
       case 'watermark-removal':
         return <WatermarkRemovalTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
+      case 'image-compress':
+        return <ImageCompressionTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
+      case 'add-signature':
+        return <AddSignatureTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
       default:
         return (
           <div className="p-6">

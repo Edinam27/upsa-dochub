@@ -161,7 +161,7 @@ export default function HelpPage() {
               <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
                 <li>Add, edit, and delete text</li>
                 <li>Insert images and shapes</li>
-                <li>Annotate with comments and highlights</li>
+
                 <li>Merge and split PDF pages</li>
                 <li>Add digital signatures</li>
               </ul>

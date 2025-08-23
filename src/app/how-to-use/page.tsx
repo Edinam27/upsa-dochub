@@ -128,39 +128,6 @@ export default function HowToUsePage() {
         }
       ]
     },
-    {
-      id: 'pdf-annotate',
-      title: 'Annotate PDF',
-      icon: <Edit className="h-6 w-6" />,
-      description: 'Add highlights, notes, and annotations to PDFs',
-      category: 'Academic Tools',
-      steps: [
-        {
-          title: 'Open PDF in Annotator',
-          description: 'Upload your PDF to open in the annotation interface',
-          details: 'The annotator provides a full-featured interface with various annotation tools.',
-          tips: ['Wait for complete loading', 'Use zoom for precise annotations']
-        },
-        {
-          title: 'Select Annotation Tool',
-          description: 'Choose from highlight, note, drawing, or text tools',
-          details: 'Each tool offers different annotation capabilities for various use cases.',
-          tips: ['Highlight for important text', 'Notes for detailed comments', 'Drawing for diagrams']
-        },
-        {
-          title: 'Add Annotations',
-          description: 'Click and drag to create annotations on the document',
-          details: 'Annotations can be moved, resized, and edited after creation.',
-          tips: ['Use consistent colors for organization', 'Add descriptive text to annotations']
-        },
-        {
-          title: 'Save Annotated PDF',
-          description: 'Download your PDF with all annotations embedded',
-          details: 'Annotations are permanently embedded and viewable in any PDF reader.',
-          tips: ['Test annotations in different PDF viewers', 'Keep original file as backup']
-        }
-      ]
-    },
     
     // Conversion Tools
     {
@@ -488,9 +455,9 @@ export default function HowToUsePage() {
         },
         {
           title: 'Select Editing Tool',
-          description: 'Choose from text, image, annotation, or shape tools',
+          description: 'Choose from text, image, or shape tools',
           details: 'Each tool offers specific editing capabilities for different content types.',
-          tips: ['Text tool for adding/editing text', 'Annotation tool for comments and highlights']
+          tips: ['Text tool for adding/editing text', 'Image tool for adding pictures and graphics']
         },
         {
           title: 'Make Your Edits',

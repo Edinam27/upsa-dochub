@@ -135,22 +135,7 @@ export interface BoundingBox {
   y1: number;
 }
 
-// Annotation types
-export interface Annotation {
-  id: string;
-  type: 'highlight' | 'note' | 'drawing' | 'text';
-  page: number;
-  position: {
-    x: number;
-    y: number;
-    width?: number;
-    height?: number;
-  };
-  content: string;
-  color: string;
-  author?: string;
-  timestamp: Date;
-}
+
 
 // Watermark types
 export interface WatermarkConfig {

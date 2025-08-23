@@ -117,7 +117,7 @@ export default function AboutPage() {
               </div>
               <h3 className="font-semibold mb-2">PDF Editor</h3>
               <p className="text-sm text-gray-600">
-                Edit, annotate, and modify PDF documents directly in your browser.
+                Edit and modify PDF documents directly in your browser.
               </p>
             </div>
         </div>

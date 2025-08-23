@@ -10,11 +10,12 @@ import {
   Presentation,
   FileImage,
   ScanLine,
-  PenTool,
   RotateCcw,
   Lock,
   Image,
-  Zap
+  Zap,
+  Minimize2,
+  Edit3
 } from 'lucide-react';
 import ToolCard from './ToolCard';
 
@@ -108,13 +109,22 @@ const ToolsGrid = () => {
 
     // Study Tools Category
     {
-      id: 'pdf-annotate',
-      name: 'Annotate PDF',
-      description: 'Add highlights, notes, and annotations to PDFs',
-      icon: <PenTool className="h-6 w-6" />,
+      id: 'image-compress',
+      name: 'Image Compression',
+      description: 'Compress images to reduce file size while maintaining quality',
+      icon: <Minimize2 className="h-6 w-6" />,
       category: 'Study Tools',
       color: 'from-yellow-500 to-orange-500',
-      features: ['Highlights', 'Text Notes', 'Drawing Tools']
+      features: ['Quality Control', 'Batch Processing', 'Multiple Formats']
+    },
+    {
+      id: 'add-signature',
+      name: 'Add Signature',
+      description: 'Add digital signatures to PDF documents',
+      icon: <Edit3 className="h-6 w-6" />,
+      category: 'Study Tools',
+      color: 'from-indigo-500 to-purple-500',
+      features: ['Digital Signature', 'Custom Position', 'Secure Signing']
     },
     {
       id: 'pdf-protect',

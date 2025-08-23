@@ -18,7 +18,9 @@ import {
   Lock,
   Unlock,
   Layers,
-  ScanLine
+  ScanLine,
+  Minimize2,
+  Edit3
 } from 'lucide-react';
 import { Tool, ToolConfig } from './types';
 
@@ -92,18 +94,41 @@ export const TOOLS: Record<string, Tool & ToolConfig> = {
     }
   },
   
-  'pdf-annotate': {
-    id: 'pdf-annotate',
-    name: 'Annotate PDF',
-    description: 'Add highlights, notes, and annotations to PDFs',
-    icon: <Highlighter className="w-6 h-6" />,
-    category: 'Academic Tools',
-    color: 'from-yellow-500 to-orange-500',
+  'image-compress': {
+    id: 'image-compress',
+    name: 'Image Compression',
+    description: 'Compress images to reduce file size while maintaining quality',
+    icon: <Minimize2 className="w-6 h-6" />,
+    category: 'Conversion Tools',
+    color: 'from-green-500 to-green-600',
     features: [
-      'Highlight text',
-      'Add sticky notes',
-      'Draw annotations',
-      'Text comments'
+      'Smart compression',
+      'Quality preservation',
+      'Multiple formats',
+      'Batch processing'
+    ],
+    acceptedTypes: ['.jpg', '.jpeg', '.png', '.webp', '.bmp', '.tiff', 'image/*'],
+    maxFileSize: 50 * 1024 * 1024,
+    maxFiles: 10,
+    supportsBatch: true,
+    options: {
+      quality: 'high',
+      compression: 0.8
+    }
+  },
+
+  'add-signature': {
+    id: 'add-signature',
+    name: 'Add Signature',
+    description: 'Add digital signatures to PDF documents',
+    icon: <Edit3 className="w-6 h-6" />,
+    category: 'Academic Tools',
+    color: 'from-blue-500 to-blue-600',
+    features: [
+      'Digital signatures',
+      'Custom signature styles',
+      'Multiple positions',
+      'Secure signing'
     ],
     acceptedTypes: ['.pdf', 'application/pdf'],
     maxFileSize: 50 * 1024 * 1024,
