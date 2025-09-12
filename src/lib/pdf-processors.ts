@@ -268,14 +268,11 @@ class PDFWatermarkProcessor implements PDFProcessor {
 
 class PDFPasswordProtectProcessor implements PDFProcessor {
   async process(fileData: Uint8Array, options: ProcessingOptions): Promise<Uint8Array> {
-    const pdfDoc = await PDFDocument.load(fileData);
-    
     // Note: pdf-lib doesn't support password protection directly
-    // This is a placeholder - in production, you'd use a library like pdf2pic + pdf-lib
-    // or integrate with a service that supports encryption
-    // For now, we'll just return the original PDF
+    // This would require a server-side solution with qpdf or similar
+    // For now, we'll provide a clear error message to the user
     
-    return await pdfDoc.save();
+    throw new Error('PDF password protection requires server-side processing with specialized tools. This feature is currently not available in the browser environment. Please use a desktop PDF editor for password protection.');
   }
 }
 
@@ -437,6 +434,37 @@ class WatermarkRemovalProcessor implements PDFProcessor {
   }
 }
 
+class PDFUnlockProcessor implements PDFProcessor {
+  async process(fileData: Uint8Array, options: ProcessingOptions): Promise<Uint8Array> {
+    try {
+      // First try to load without password to check if it's actually password-protected
+      try {
+        const testDoc = await PDFDocument.load(fileData);
+        // If this succeeds, the PDF is not password-protected
+        return await testDoc.save();
+      } catch (testError) {
+        // PDF is likely password-protected, try with provided password
+        const password = options.password;
+        if (!password) {
+          throw new Error('This PDF is password-protected. Please provide the correct password.');
+        }
+        
+        const pdfDoc = await PDFDocument.load(fileData, { password });
+        // Save the PDF without password protection
+        return await pdfDoc.save();
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.message.includes('password')) {
+          throw new Error('Failed to unlock PDF. The password provided is incorrect.');
+        }
+        throw new Error(`Failed to process PDF: ${error.message}`);
+      }
+      throw new Error('Failed to unlock PDF. Please check if the password is correct.');
+    }
+  }
+}
+
 // Factory function to create processors
 export function createPDFProcessor(toolId: string, options: any = {}): PDFProcessor | null {
   switch (toolId) {
@@ -452,6 +480,7 @@ export function createPDFProcessor(toolId: string, options: any = {}): PDFProces
     case 'pdf-protect':
       return new PDFPasswordProtectProcessor();
     case 'pdf-ocr':
+    case 'ocr-text-extraction':
       return new PDFOCRProcessor();
     case 'pdf-rotate':
       return new PDFRotateProcessor();
@@ -459,6 +488,12 @@ export function createPDFProcessor(toolId: string, options: any = {}): PDFProces
       return new ImageToPDFProcessor();
     case 'watermark-removal':
       return new WatermarkRemovalProcessor();
+    case 'pdf-unlock':
+      return new PDFUnlockProcessor();
+    case 'pdf-to-word':
+      // For now, return a basic processor that throws an informative error
+      // This can be enhanced later with actual PDF to Word conversion
+      throw new Error('PDF to Word conversion requires additional setup. Please contact support for this feature.');
     case 'pdf-to-images':
       // PDF to images conversion should be handled client-side only
       throw new Error('PDF to images conversion is handled client-side and should not use server-side processing');
@@ -479,4 +514,5 @@ export {
   PDFRotateProcessor,
   ImageToPDFProcessor,
   WatermarkRemovalProcessor,
+  PDFUnlockProcessor,
 };

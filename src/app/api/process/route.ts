@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PDFDocument } from 'pdf-lib';
 import sharp from 'sharp';
-import { createPDFProcessor } from '@/lib/pdf-processors/index';
+import { createPDFProcessor } from '@/lib/pdf-processors';
 import { ProcessingOptions, APIResponse, ProcessedFile } from '@/lib/types';
 import { fileUtils } from '@/lib/utils';
 
@@ -32,6 +32,16 @@ export async function POST(request: NextRequest) {
     }
     
     const processorOptions = options;
+    
+    // Handle image compression separately (client-side processing)
+    if (toolId === 'image-compress') {
+      // For image compression, the processing is done client-side
+      // This endpoint should not be called for image compression
+      return NextResponse.json({
+        success: false,
+        error: 'Image compression is handled client-side'
+      } as APIResponse<null>, { status: 400 });
+    }
     
     let processor;
     try {
@@ -168,43 +178,88 @@ export async function POST(request: NextRequest) {
           const uint8Array = new Uint8Array(arrayBuffer)
           
           // Process the file based on tool type
-          const result = await processor.process(file, options);
+          const result = await processor.process(uint8Array, options);
           
           // Handle both single and multiple file outputs
           if (Array.isArray(result)) {
             // Multiple files returned (e.g., PDF split)
             for (let index = 0; index < result.length; index++) {
               const processedFile = result[index];
-              const fileData = await processedFile.blob.arrayBuffer();
               
-              processedFiles.push({
-                id: `processed_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 9)}`,
-                name: processedFile.name,
-                originalName: file.name,
-                size: processedFile.size,
-                type: processedFile.type,
-                data: Array.from(new Uint8Array(fileData)),
-                processedAt: new Date().toISOString(),
-                toolUsed: toolId
-              });
+              // Check if it's a raw Uint8Array or ProcessedFile object
+              if (processedFile instanceof Uint8Array) {
+                processedFiles.push({
+                  id: `processed_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 9)}`,
+                  name: `${file.name.replace(/\.[^/.]+$/, '')}_${index + 1}.pdf`,
+                  originalName: file.name,
+                  size: processedFile.byteLength,
+                  type: getOutputMimeType(toolId),
+                  data: Array.from(processedFile),
+                  processedAt: new Date().toISOString(),
+                  toolUsed: toolId
+                });
+              } else {
+                // Handle ProcessedFile object format
+                const fileData = processedFile.blob ? 
+                  await processedFile.blob.arrayBuffer() : 
+                  processedFile.buffer;
+                
+                processedFiles.push({
+                    id: `processed_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 9)}`,
+                    name: processedFile.filename || processedFile.name,
+                    originalName: file.name,
+                    size: processedFile.size || fileData.byteLength,
+                    type: processedFile.mimeType || processedFile.type,
+                    data: Array.from(new Uint8Array(fileData)),
+                    processedAt: new Date().toISOString(),
+                    toolUsed: toolId
+                  });
+              }
             }
           } else {
             // Single file returned
-            const fileData = await result.blob.arrayBuffer();
-            
-            processedFiles.push({
-              id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-              name: result.name,
-              originalName: file.name,
-              size: result.size,
-              type: result.type,
-              data: Array.from(new Uint8Array(fileData)),
-              processedAt: new Date().toISOString(),
-              toolUsed: toolId
-            });
+            // Check if it's a raw Uint8Array or ProcessedFile object
+            if (result instanceof Uint8Array) {
+              processedFiles.push({
+                id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                name: generateOutputFileName(file.name, toolId),
+                originalName: file.name,
+                size: result.byteLength,
+                type: getOutputMimeType(toolId),
+                data: Array.from(result),
+                processedAt: new Date().toISOString(),
+                toolUsed: toolId
+              });
+            } else {
+              // Handle ProcessedFile object format
+              const fileData = result.blob ? 
+                await result.blob.arrayBuffer() : 
+                result.buffer;
+              
+              processedFiles.push({
+                  id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+                  name: result.filename || result.name,
+                  originalName: file.name,
+                  size: result.size || fileData.byteLength,
+                  type: result.mimeType || result.type,
+                  data: Array.from(new Uint8Array(fileData)),
+                  processedAt: new Date().toISOString(),
+                  toolUsed: toolId
+                });
+            }
           }
         } catch (error) {
           console.error(`Error processing file ${file.name}:`, error);
+          
+          // Handle specific PDF protection error (feature not supported)
+          if (error instanceof Error && error.message.includes('PDF password protection requires server-side processing')) {
+            return NextResponse.json({
+              success: false,
+              error: 'Feature not available',
+              details: 'PDF password protection is not supported in the browser environment. This feature requires server-side processing with specialized tools. Please use a desktop PDF editor for password protection.'
+            } as APIResponse<null>, { status: 400 });
+          }
+          
           return NextResponse.json({
             success: false,
             error: `Failed to process file: ${file.name}`,
@@ -232,23 +287,61 @@ export async function POST(request: NextRequest) {
 
 // Helper function to determine output MIME type based on tool
 function getOutputMimeType(toolId: string): string {
-  if (toolId.includes('to-images') || toolId.includes('pdf-to-jpg') || toolId.includes('pdf-to-png')) {
-    return 'image/jpeg';
+  switch (toolId) {
+    case 'pdf-merge':
+    case 'pdf-split':
+    case 'pdf-extract':
+    case 'pdf-compress':
+    case 'pdf-watermark':
+    case 'pdf-protect':
+    case 'pdf-rotate':
+    case 'pdf-ocr':
+    case 'pdf-unlock':
+    case 'watermark-removal':
+      return 'application/pdf';
+    case 'images-to-pdf':
+      return 'application/pdf';
+    default:
+      if (toolId.includes('to-images') || toolId.includes('pdf-to-jpg') || toolId.includes('pdf-to-png')) {
+        return 'image/jpeg';
+      }
+      if (toolId.includes('to-word') || toolId.includes('pdf-to-docx')) {
+        return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+      }
+      if (toolId.includes('to-excel') || toolId.includes('pdf-to-xlsx')) {
+        return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+      }
+      if (toolId.includes('to-powerpoint') || toolId.includes('pdf-to-pptx')) {
+        return 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
+      }
+      if (toolId.includes('to-text') || toolId.includes('ocr')) {
+        return 'text/plain';
+      }
+      // Default to PDF
+      return 'application/pdf';
   }
-  if (toolId.includes('to-word') || toolId.includes('pdf-to-docx')) {
-    return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+}
+
+function generateOutputFileName(originalName: string, toolId: string): string {
+  const baseName = originalName.replace(/\.[^/.]+$/, '');
+  const extension = '.pdf';
+  
+  switch (toolId) {
+    case 'pdf-unlock':
+      return `${baseName}_unlocked${extension}`;
+    case 'pdf-compress':
+      return `${baseName}_compressed${extension}`;
+    case 'pdf-watermark':
+      return `${baseName}_watermarked${extension}`;
+    case 'pdf-protect':
+      return `${baseName}_protected${extension}`;
+    case 'pdf-rotate':
+      return `${baseName}_rotated${extension}`;
+    case 'watermark-removal':
+      return `${baseName}_watermark_removed${extension}`;
+    default:
+      return `${baseName}_processed${extension}`;
   }
-  if (toolId.includes('to-excel') || toolId.includes('pdf-to-xlsx')) {
-    return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-  }
-  if (toolId.includes('to-powerpoint') || toolId.includes('pdf-to-pptx')) {
-    return 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
-  }
-  if (toolId.includes('to-text') || toolId.includes('ocr')) {
-    return 'text/plain';
-  }
-  // Default to PDF
-  return 'application/pdf';
 }
 
 export async function GET() {

@@ -183,10 +183,8 @@ export default function ImageCompressionTool({ onProcess, isProcessing }: ImageC
 
       setCompressedImages(compressed);
       
-      // Call the parent onProcess function if needed
-      if (compressed.length > 0) {
-        await onProcess(files, { ...options, results: compressed });
-      }
+      // Image compression is handled entirely client-side
+      // No need to call server-side processing
       
     } catch (err) {
       console.error('Compression error:', err);

@@ -12,7 +12,6 @@ import {
   TrendingUp,
   ChevronDown
 } from 'lucide-react';
-import Link from 'next/link';
 import { 
   TOOLS, 
   TOOL_CATEGORIES, 
@@ -37,20 +36,6 @@ export default function ToolsPage() {
   
   const { preferences } = useUserPreferencesStore();
   const favoriteTools = preferences.favoriteTools || [];
-  
-  // Helper function to get the correct route for each tool
-  const getToolRoute = (toolId: string) => {
-    switch (toolId) {
-      case 'pdf-to-word':
-        return '/processing/pdf-to-word';
-      case 'pdf-to-images':
-        return '/processing/pdf-to-images';
-      case 'pdf-ocr':
-        return '/processing/ocr-text-extraction';
-      default:
-        return `/tools/${toolId}`;
-    }
-  };
   
   // Filter and sort tools
   const filteredTools = useMemo(() => {
@@ -314,9 +299,7 @@ export default function ToolsPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.05 * index }}
                       >
-                        <Link href={getToolRoute(tool.id)}>
-                          <ToolCard tool={tool} />
-                        </Link>
+                        <ToolCard tool={tool} />
                       </motion.div>
                     ))}
                   </div>
@@ -330,48 +313,7 @@ export default function ToolsPage() {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.05 * index }}
                       >
-                        <Link href={getToolRoute(tool.id)}>
-                          <div className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:border-upsa-gold">
-                            <div className="flex items-center space-x-4">
-                              <div className={`p-3 rounded-xl bg-gradient-to-r ${tool.color} text-white`}>
-                                {tool.icon}
-                              </div>
-                              <div className="flex-1">
-                                <div className="flex items-center space-x-2 mb-1">
-                                  <h3 className="text-lg font-semibold text-gray-900">
-                                    {tool.name}
-                                  </h3>
-                                  {favoriteTools.includes(tool.id) && (
-                                    <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                                  )}
-                                </div>
-                                <p className="text-gray-600 mb-2">
-                                  {tool.description}
-                                </p>
-                                <div className="flex flex-wrap gap-2">
-                                  {tool.features.slice(0, 3).map((feature, idx) => (
-                                    <span
-                                      key={idx}
-                                      className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full"
-                                    >
-                                      {feature}
-                                    </span>
-                                  ))}
-                                  {tool.features.length > 3 && (
-                                    <span className="text-xs text-gray-500">
-                                      +{tool.features.length - 3} more
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                              <div className="text-right">
-                                <span className="text-sm text-gray-500">
-                                  {tool.category}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </Link>
+                        <ToolCard tool={tool} />
                       </motion.div>
                     ))}
                   </div>

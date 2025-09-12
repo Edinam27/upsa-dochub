@@ -22,9 +22,9 @@ interface ToolCardProps {
 const ToolCard = ({ tool }: ToolCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
 
-  const getToolRoute = () => {
-    // Route to dedicated processing pages for specific tools
-    switch (tool.id) {
+  // Helper function to get the correct route for each tool
+  const getToolRoute = (toolId: string) => {
+    switch (toolId) {
       case 'pdf-to-word':
         return '/processing/pdf-to-word';
       case 'pdf-to-images':
@@ -32,12 +32,12 @@ const ToolCard = ({ tool }: ToolCardProps) => {
       case 'pdf-ocr':
         return '/processing/ocr-text-extraction';
       default:
-        return `/tools/${tool.id}`;
+        return `/tools/${toolId}`;
     }
   };
 
   return (
-    <Link href={getToolRoute()} prefetch={false}>
+    <Link href={getToolRoute(tool.id)} className="block">
       <motion.div
         className="relative group cursor-pointer"
         onHoverStart={() => setIsHovered(true)}
@@ -131,12 +131,12 @@ const ToolCard = ({ tool }: ToolCardProps) => {
         )}
       </div>
 
-      {/* Glow Effect */}
-      <motion.div
-        className={`absolute inset-0 bg-gradient-to-r ${tool.color} rounded-2xl blur-xl opacity-0 group-hover:opacity-20 transition-opacity duration-300 -z-10`}
-        animate={{ opacity: isHovered ? 0.2 : 0 }}
-      />
-    </motion.div>
+        {/* Glow Effect */}
+        <motion.div
+          className={`absolute inset-0 bg-gradient-to-r ${tool.color} rounded-2xl blur-xl opacity-0 group-hover:opacity-20 transition-opacity duration-300 -z-10`}
+          animate={{ opacity: isHovered ? 0.2 : 0 }}
+        />
+      </motion.div>
     </Link>
   );
 };

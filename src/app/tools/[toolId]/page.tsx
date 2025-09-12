@@ -39,6 +39,7 @@ import WordToPDFTool from '@/components/tools/WordToPDFTool';
 import WatermarkRemovalTool from '@/components/tools/WatermarkRemovalTool';
 import ImageCompressionTool from '@/components/tools/ImageCompressionTool';
 import AddSignatureTool from '@/components/tools/AddSignatureTool';
+import UnlockPDFTool from '@/components/tools/UnlockPDFTool';
 
 export default function ToolPage() {
   const params = useParams();
@@ -129,6 +130,8 @@ export default function ToolPage() {
         return <WatermarkPDFTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
       case 'pdf-protect':
         return <PasswordProtectPDFTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
+      case 'pdf-unlock':
+        return <UnlockPDFTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
       case 'pdf-ocr':
         return <OCRScannerTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
       case 'images-to-pdf':
