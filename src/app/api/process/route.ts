@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PDFDocument } from 'pdf-lib';
 import sharp from 'sharp';
-import { createPDFProcessor } from '@/lib/pdf-processors.ts';
+import { createPDFProcessor } from '@/lib/pdf-processors';
 import { ProcessingOptions, APIResponse, ProcessedFile } from '@/lib/types';
 import { fileUtils, errorUtils } from '@/lib/utils';
 
