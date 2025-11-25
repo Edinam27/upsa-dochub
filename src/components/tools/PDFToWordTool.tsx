@@ -309,11 +309,7 @@ const PDFToWordTool: React.FC<PDFToWordToolProps> = ({ onProcess, isProcessing }
 
       {/* Processing Progress */}
       {isProcessing && (
-        <ProcessingProgress
-          progress={65}
-          currentFile={files[0]?.name}
-          message="Converting to Word using CloudConvert..."
-        />
+        <ProcessingProgress />
       )}
 
       {/* Convert Button */}

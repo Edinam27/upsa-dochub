@@ -199,11 +199,7 @@ const RotatePDFTool: React.FC<RotatePDFToolProps> = ({ onProcess, isProcessing }
 
       {/* Processing Progress */}
       {isProcessing && (
-        <ProcessingProgress
-          progress={60}
-          currentFile={files[0]?.name}
-          message="Rotating pages..."
-        />
+        <ProcessingProgress />
       )}
 
       {/* Rotate Button */}

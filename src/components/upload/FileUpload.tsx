@@ -97,10 +97,10 @@ export default function FileUpload({
   });
 
   const getFileIcon = (file: FileInfo) => {
-    if (fileUtils.isPDF(file.file)) {
+    if (file.file && fileUtils.isPDF(file.file)) {
       return <FileText className="w-8 h-8 text-red-500" />;
     }
-    if (fileUtils.isImage(file.file)) {
+    if (file.file && fileUtils.isImage(file.file)) {
       return <ImageIcon className="w-8 h-8 text-blue-500" />;
     }
     return <File className="w-8 h-8 text-gray-500" />;
@@ -136,7 +136,7 @@ export default function FileUpload({
   return (
     <div className={cn('w-full space-y-4', className)}>
       {/* Upload Area */}
-      <motion.div
+      <div
         {...getRootProps()}
         className={cn(
           'relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-300',
@@ -147,8 +147,6 @@ export default function FileUpload({
           disabled && 'opacity-50 cursor-not-allowed',
           error && 'border-red-300 bg-red-50'
         )}
-        whileHover={{ scale: disabled ? 1 : 1.01 }}
-        whileTap={{ scale: disabled ? 1 : 0.99 }}
       >
         <input {...getInputProps()} />
         
@@ -193,7 +191,7 @@ export default function FileUpload({
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.div>
+      </div>
 
       {/* Error Message */}
       <AnimatePresence>

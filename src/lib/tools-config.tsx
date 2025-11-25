@@ -372,7 +372,7 @@ export const TOOL_CATEGORIES = {
 };
 
 // Get tools by category
-export function getToolsByCategory(category: string): Tool[] {
+export function getToolsByCategory(category: string): (Tool & ToolConfig)[] {
   return Object.values(TOOLS).filter(tool => tool.category === category);
 }
 
@@ -387,18 +387,18 @@ export function getToolById(id: string): (Tool & ToolConfig) | undefined {
 }
 
 // Get popular tools (based on usage or featured)
-export function getPopularTools(): Tool[] {
+export function getPopularTools(): (Tool & ToolConfig)[] {
   const popularIds = ['pdf-merge', 'pdf-split', 'pdf-compress', 'pdf-to-images', 'pdf-watermark', 'pdf-protect'];
   return popularIds.map(id => TOOLS[id]).filter(Boolean);
 }
 
 // Get recently used tools (this would typically come from user preferences)
-export function getRecentTools(recentIds: string[] = []): Tool[] {
+export function getRecentTools(recentIds: string[] = []): (Tool & ToolConfig)[] {
   return recentIds.map(id => TOOLS[id]).filter(Boolean);
 }
 
 // Search tools
-export function searchTools(query: string): Tool[] {
+export function searchTools(query: string): (Tool & ToolConfig)[] {
   const lowercaseQuery = query.toLowerCase();
   return Object.values(TOOLS).filter(tool => 
     tool.name.toLowerCase().includes(lowercaseQuery) ||
@@ -409,7 +409,7 @@ export function searchTools(query: string): Tool[] {
 }
 
 // Get tool recommendations based on file type
-export function getRecommendedTools(fileType: string): Tool[] {
+export function getRecommendedTools(fileType: string): (Tool & ToolConfig)[] {
   if (fileType === 'application/pdf' || fileType.endsWith('.pdf')) {
     return [
       TOOLS['pdf-split'],

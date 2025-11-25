@@ -36,14 +36,19 @@ export class CloudConvertPDFProcessor extends PDFProcessor {
       const outputFilename = file.name.replace(/\.pdf$/i, '.docx');
       
       // Create blob from buffer
-      const blob = new Blob([convertedBuffer], {
+      const blob = new Blob([new Uint8Array(convertedBuffer)], {
         type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
       });
       
       return {
+        id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         name: outputFilename,
+        originalName: file.name,
         size: convertedBuffer.length,
         type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        data: Array.from(new Uint8Array(convertedBuffer)),
+        processedAt: new Date().toISOString(),
+        toolUsed: 'pdf-to-word',
         blob: blob
       };
     } catch (error) {
@@ -54,7 +59,7 @@ export class CloudConvertPDFProcessor extends PDFProcessor {
 
   private async convertPDFToWord(fileBuffer: Buffer, originalFileName: string): Promise<Buffer> {
     const maxRetries = 3;
-    let lastError: Error;
+    let lastError: Error = new Error('Unknown error');
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
@@ -97,7 +102,7 @@ export class CloudConvertPDFProcessor extends PDFProcessor {
         Object.entries(uploadTask.result.form.parameters).forEach(([key, value]) => {
           formData.append(key, value as string);
         });
-        formData.append('file', new Blob([fileBuffer]), originalFileName);
+        formData.append('file', new Blob([new Uint8Array(fileBuffer)]), originalFileName);
 
         const uploadController = new AbortController();
         const uploadTimeoutId = setTimeout(() => uploadController.abort(), 120000); // 2 minute timeout
@@ -135,7 +140,7 @@ export class CloudConvertPDFProcessor extends PDFProcessor {
         console.log('CloudConvert job completed successfully');
 
         // Get the export task to download the converted file
-        const exportTask = completedJob.tasks.filter(task => task.name === 'export-word')[0];
+        const exportTask = completedJob.tasks.filter((task: any) => task.name === 'export-word')[0];
         if (!exportTask || !exportTask.result?.files?.[0]?.url) {
           throw new Error('Failed to get download URL from CloudConvert');
         }

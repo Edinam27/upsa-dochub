@@ -62,7 +62,6 @@ export default function AddSignatureTool({ onProcess, isProcessing }: AddSignatu
     };
 
     const options: ProcessingOptions = {
-      tool: 'add-signature',
       signature: signatureData,
       position
     };

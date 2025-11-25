@@ -107,9 +107,14 @@ export default function ToolPage() {
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
         });
+        if (typeof window !== 'undefined') {
+          const detail = { toolId, data: result.data };
+          window.dispatchEvent(new CustomEvent('processing:result', { detail }));
+        }
       } else {
         throw new Error('No processed files received');
       }
+      return result.data;
     } catch (error) {
       console.error('Processing error:', error);
       alert(`Processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -360,7 +365,7 @@ export default function ToolPage() {
               
               <div className="space-y-4">
                 <p className="text-gray-600">
-                  {tool.longDescription || tool.description}
+                  {tool.description}
                 </p>
                 
                 {/* Features */}
@@ -380,7 +385,7 @@ export default function ToolPage() {
                 <div>
                   <h4 className="font-medium text-gray-900 mb-2">Supported Formats</h4>
                   <div className="flex flex-wrap gap-2">
-                    {tool.supportedFormats?.map((format, index) => (
+                    {tool.acceptedTypes?.map((format, index) => (
                       <span
                         key={index}
                         className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full"

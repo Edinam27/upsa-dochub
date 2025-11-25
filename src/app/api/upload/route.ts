@@ -3,7 +3,7 @@ import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
 import { APIResponse, FileInfo } from '@/lib/types';
-import { fileUtils } from '@/lib/utils';
+import { fileUtils, errorUtils } from '@/lib/utils';
 
 // Maximum file size (50MB)
 const MAX_FILE_SIZE = 50 * 1024 * 1024;
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     if (!files || files.length === 0) {
       return NextResponse.json({
         success: false,
-        error: 'No files provided'
+        error: errorUtils.createError('INVALID_INPUT', 'No files provided')
       } as APIResponse<null>, { status: 400 });
     }
     
@@ -91,8 +91,7 @@ export async function POST(request: NextRequest) {
     if (uploadedFiles.length === 0 && errors.length > 0) {
       return NextResponse.json({
         success: false,
-        error: 'No files were uploaded successfully',
-        details: errors.join(', ')
+        error: errorUtils.createError('PROCESSING_FAILED', 'No files were uploaded successfully')
       } as APIResponse<null>, { status: 400 });
     }
     
@@ -107,8 +106,7 @@ export async function POST(request: NextRequest) {
     console.error('Upload error:', error);
     return NextResponse.json({
       success: false,
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      error: errorUtils.createError('INTERNAL_ERROR', error instanceof Error ? error.message : 'Unknown error')
     } as APIResponse<null>, { status: 500 });
   }
 }

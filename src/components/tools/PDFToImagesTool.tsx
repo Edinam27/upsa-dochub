@@ -47,7 +47,7 @@ const PDFToImagesTool: React.FC<PDFToImagesToolProps> = ({ onProcess, isProcessi
 
   const handleFilesAdded = (fileInfos: FileInfo[]) => {
     setError('');
-    const selectedFiles = fileInfos.map(fileInfo => fileInfo.file);
+    const selectedFiles = fileInfos.map(fileInfo => fileInfo.file).filter((file): file is File => file !== undefined);
     setFiles(prev => [...prev, ...selectedFiles]);
   };
 
@@ -195,7 +195,8 @@ const PDFToImagesTool: React.FC<PDFToImagesToolProps> = ({ onProcess, isProcessi
         // Render page to canvas
         await page.render({
           canvasContext: context,
-          viewport: viewport
+          viewport: viewport,
+          canvas: canvas
         }).promise;
         
         // Convert canvas to blob
@@ -270,10 +271,9 @@ const PDFToImagesTool: React.FC<PDFToImagesToolProps> = ({ onProcess, isProcessi
       <div className="bg-white rounded-xl border border-gray-200 p-6">
         <FileUpload
           onFilesAdded={handleFilesAdded}
-          acceptedTypes={['.pdf']}
+          acceptedTypes={['application/pdf']}
           maxFiles={5}
           maxFileSize={100 * 1024 * 1024}
-          multiple={true}
         />
         
         {/* Uploaded Files */}
@@ -537,11 +537,7 @@ const PDFToImagesTool: React.FC<PDFToImagesToolProps> = ({ onProcess, isProcessi
 
       {/* Processing Progress */}
       {isProcessing && (
-        <ProcessingProgress
-          progress={70}
-          currentFile={files[0]?.name}
-          message="Converting PDF to images..."
-        />
+        <ProcessingProgress />
       )}
 
       {/* Convert Button */}

@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PDFDocument } from 'pdf-lib';
 import sharp from 'sharp';
-import { createPDFProcessor } from '@/lib/pdf-processors';
+import { createPDFProcessor } from '@/lib/pdf-processors.ts';
 import { ProcessingOptions, APIResponse, ProcessedFile } from '@/lib/types';
-import { fileUtils } from '@/lib/utils';
+import { fileUtils, errorUtils } from '@/lib/utils';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,7 +11,14 @@ export async function POST(request: NextRequest) {
     const files = formData.getAll('files') as File[];
     const file = formData.get('file') as File; // For single file uploads
     const toolId = formData.get('toolId') as string;
-    const options = JSON.parse(formData.get('options') as string || '{}') as ProcessingOptions;
+    const rawOptions = formData.get('options');
+    let options: ProcessingOptions = {};
+    if (typeof rawOptions === 'string') {
+      options = JSON.parse(rawOptions || '{}');
+    } else if (rawOptions && typeof (rawOptions as any).text === 'function') {
+      const txt = await (rawOptions as Blob).text();
+      options = JSON.parse(txt || '{}');
+    }
 
     
     // Use either files array or single file
@@ -20,14 +27,14 @@ export async function POST(request: NextRequest) {
     if (!fileList || fileList.length === 0) {
       return NextResponse.json({
         success: false,
-        error: 'No files provided'
+        error: errorUtils.createError('INVALID_INPUT', 'No files provided')
       } as APIResponse<null>, { status: 400 });
     }
     
     if (!toolId) {
       return NextResponse.json({
         success: false,
-        error: 'Tool ID is required'
+        error: errorUtils.createError('INVALID_INPUT', 'Tool ID is required')
       } as APIResponse<null>, { status: 400 });
     }
     
@@ -39,7 +46,7 @@ export async function POST(request: NextRequest) {
       // This endpoint should not be called for image compression
       return NextResponse.json({
         success: false,
-        error: 'Image compression is handled client-side'
+        error: errorUtils.createError('INVALID_OPERATION', 'Image compression is handled client-side')
       } as APIResponse<null>, { status: 400 });
     }
     
@@ -51,7 +58,7 @@ export async function POST(request: NextRequest) {
       console.error('Error details:', JSON.stringify(error, null, 2));
       return NextResponse.json({
         success: false,
-        error: `Invalid tool ID: ${toolId}. Error: ${error.message}`
+        error: errorUtils.createError('INVALID_INPUT', `Invalid tool ID: ${toolId}. Error: ${error instanceof Error ? error.message : 'Unknown error'}`)
       } as APIResponse<null>, { status: 400 });
     }
     
@@ -59,7 +66,7 @@ export async function POST(request: NextRequest) {
       console.error('Processor is null after creation');
       return NextResponse.json({
         success: false,
-        error: 'Failed to create processor'
+        error: errorUtils.createError('PROCESSING_FAILED', 'Failed to create processor')
       } as APIResponse<null>, { status: 500 });
     }
     
@@ -89,13 +96,16 @@ export async function POST(request: NextRequest) {
         // Process all images into a single PDF
         const result = await processor.process(new Uint8Array(), { ...options, imageFiles });
         
+        // Ensure result is a Uint8Array
+        const resultArray = Array.isArray(result) ? result[0] : result;
+        
         processedFiles.push({
           id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           name: `images_to_pdf_${Date.now()}.pdf`,
           originalName: `${files.length}_images_combined.pdf`,
-          size: result.byteLength,
+          size: resultArray.length,
           type: getOutputMimeType(toolId),
-          data: Array.from(result),
+          data: Array.from(resultArray),
           processedAt: new Date().toISOString(),
           toolUsed: toolId
         });
@@ -103,8 +113,7 @@ export async function POST(request: NextRequest) {
         console.error('Error processing images to PDF:', error);
         return NextResponse.json({
           success: false,
-          error: 'Failed to process images to PDF',
-          details: error instanceof Error ? error.message : 'Unknown error'
+          error: errorUtils.createError('PROCESSING_FAILED', 'Failed to process images to PDF', error instanceof Error ? error.message : 'Unknown error')
         } as APIResponse<null>, { status: 500 });
       }
     } else if (toolId === 'pdf-merge') {
@@ -143,13 +152,16 @@ export async function POST(request: NextRequest) {
           additionalFiles
         });
         
+        // Ensure result is a Uint8Array
+        const resultArray = Array.isArray(result) ? result[0] : result;
+        
         processedFiles.push({
           id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           name: `merged_${Date.now()}.pdf`,
           originalName: `merged_${fileList.length}_files.pdf`,
-          size: result.byteLength,
+          size: resultArray.length,
           type: getOutputMimeType(toolId),
-          data: Array.from(result),
+          data: Array.from(resultArray),
           processedAt: new Date().toISOString(),
           toolUsed: toolId
         });
@@ -157,8 +169,7 @@ export async function POST(request: NextRequest) {
         console.error('Error merging PDF files:', error);
         return NextResponse.json({
           success: false,
-          error: 'Failed to merge PDF files',
-          details: error instanceof Error ? error.message : 'Unknown error'
+          error: errorUtils.createError('PROCESSING_FAILED', 'Failed to merge PDF files', error instanceof Error ? error.message : 'Unknown error')
         } as APIResponse<null>, { status: 500 });
       }
     } else {
@@ -188,31 +199,42 @@ export async function POST(request: NextRequest) {
               
               // Check if it's a raw Uint8Array or ProcessedFile object
               if (processedFile instanceof Uint8Array) {
+                const originalSize = uint8Array.byteLength;
+                const newSize = processedFile.length;
                 processedFiles.push({
                   id: `processed_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 9)}`,
                   name: `${file.name.replace(/\.[^/.]+$/, '')}_${index + 1}.pdf`,
                   originalName: file.name,
-                  size: processedFile.byteLength,
+                  size: newSize,
                   type: getOutputMimeType(toolId),
                   data: Array.from(processedFile),
                   processedAt: new Date().toISOString(),
-                  toolUsed: toolId
+                  toolUsed: toolId,
+                  originalSize,
+                  reductionPercent: originalSize > 0 ? Math.max(0, Math.round((1 - newSize / originalSize) * 100)) : 0,
+                  engineUsed: (processor as any)?.lastEngineUsed || undefined
                 });
               } else {
                 // Handle ProcessedFile object format
-                const fileData = processedFile.blob ? 
-                  await processedFile.blob.arrayBuffer() : 
-                  processedFile.buffer;
+                const processedFileObj = processedFile as any;
+                const fileData = processedFileObj.blob ? 
+                  await processedFileObj.blob.arrayBuffer() : 
+                  processedFileObj.buffer;
+                const originalSize = uint8Array.byteLength;
+                const newSize = processedFileObj.size || fileData.byteLength;
                 
                 processedFiles.push({
                     id: `processed_${Date.now()}_${index}_${Math.random().toString(36).substr(2, 9)}`,
-                    name: processedFile.filename || processedFile.name,
+                    name: processedFileObj.filename || processedFileObj.name,
                     originalName: file.name,
-                    size: processedFile.size || fileData.byteLength,
-                    type: processedFile.mimeType || processedFile.type,
+                    size: newSize,
+                    type: processedFileObj.mimeType || processedFileObj.type,
                     data: Array.from(new Uint8Array(fileData)),
                     processedAt: new Date().toISOString(),
-                    toolUsed: toolId
+                    toolUsed: toolId,
+                    originalSize,
+                    reductionPercent: originalSize > 0 ? Math.max(0, Math.round((1 - newSize / originalSize) * 100)) : 0,
+                    engineUsed: (processor as any)?.lastEngineUsed || undefined
                   });
               }
             }
@@ -220,31 +242,42 @@ export async function POST(request: NextRequest) {
             // Single file returned
             // Check if it's a raw Uint8Array or ProcessedFile object
             if (result instanceof Uint8Array) {
+              const originalSize = uint8Array.byteLength;
+              const newSize = result.length;
               processedFiles.push({
                 id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
                 name: generateOutputFileName(file.name, toolId),
                 originalName: file.name,
-                size: result.byteLength,
+                size: newSize,
                 type: getOutputMimeType(toolId),
                 data: Array.from(result),
                 processedAt: new Date().toISOString(),
-                toolUsed: toolId
+                toolUsed: toolId,
+                originalSize,
+                reductionPercent: originalSize > 0 ? Math.max(0, Math.round((1 - newSize / originalSize) * 100)) : 0,
+                engineUsed: (processor as any)?.lastEngineUsed || undefined
               });
             } else {
               // Handle ProcessedFile object format
-              const fileData = result.blob ? 
-                await result.blob.arrayBuffer() : 
-                result.buffer;
+              const resultObj = result as any;
+              const fileData = resultObj.blob ? 
+                await resultObj.blob.arrayBuffer() : 
+                resultObj.buffer;
+              const originalSize = uint8Array.byteLength;
+              const newSize = resultObj.size || fileData.byteLength;
               
               processedFiles.push({
                   id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-                  name: result.filename || result.name,
+                  name: resultObj.filename || resultObj.name,
                   originalName: file.name,
-                  size: result.size || fileData.byteLength,
-                  type: result.mimeType || result.type,
+                  size: newSize,
+                  type: resultObj.mimeType || resultObj.type,
                   data: Array.from(new Uint8Array(fileData)),
                   processedAt: new Date().toISOString(),
-                  toolUsed: toolId
+                  toolUsed: toolId,
+                  originalSize,
+                  reductionPercent: originalSize > 0 ? Math.max(0, Math.round((1 - newSize / originalSize) * 100)) : 0,
+                  engineUsed: (processor as any)?.lastEngineUsed || undefined
                 });
             }
           }
@@ -255,15 +288,13 @@ export async function POST(request: NextRequest) {
           if (error instanceof Error && error.message.includes('PDF password protection requires server-side processing')) {
             return NextResponse.json({
               success: false,
-              error: 'Feature not available',
-              details: 'PDF password protection is not supported in the browser environment. This feature requires server-side processing with specialized tools. Please use a desktop PDF editor for password protection.'
+              error: errorUtils.createError('FEATURE_NOT_AVAILABLE', 'Feature not available', 'PDF password protection is not supported in the browser environment. This feature requires server-side processing with specialized tools. Please use a desktop PDF editor for password protection.')
             } as APIResponse<null>, { status: 400 });
           }
           
           return NextResponse.json({
             success: false,
-            error: `Failed to process file: ${file.name}`,
-            details: error instanceof Error ? error.message : 'Unknown error'
+            error: errorUtils.createError('PROCESSING_FAILED', `Failed to process file: ${file.name}`, error instanceof Error ? error.message : 'Unknown error')
           } as APIResponse<null>, { status: 500 });
         }
       }
@@ -279,8 +310,7 @@ export async function POST(request: NextRequest) {
     console.error('Processing error:', error);
     return NextResponse.json({
       success: false,
-      error: 'Internal server error',
-      details: error instanceof Error ? error.message : 'Unknown error'
+      error: errorUtils.createError('INTERNAL_ERROR', 'Internal server error', error instanceof Error ? error.message : 'Unknown error')
     } as APIResponse<null>, { status: 500 });
   }
 }
@@ -324,7 +354,8 @@ function getOutputMimeType(toolId: string): string {
 
 function generateOutputFileName(originalName: string, toolId: string): string {
   const baseName = originalName.replace(/\.[^/.]+$/, '');
-  const extension = '.pdf';
+  const isDocx = toolId.includes('to-word') || toolId.includes('pdf-to-docx') || toolId === 'pdf-to-word';
+  const extension = isDocx ? '.docx' : '.pdf';
   
   switch (toolId) {
     case 'pdf-unlock':
@@ -339,6 +370,8 @@ function generateOutputFileName(originalName: string, toolId: string): string {
       return `${baseName}_rotated${extension}`;
     case 'watermark-removal':
       return `${baseName}_watermark_removed${extension}`;
+    case 'pdf-to-word':
+      return `${baseName}_converted${extension}`;
     default:
       return `${baseName}_processed${extension}`;
   }

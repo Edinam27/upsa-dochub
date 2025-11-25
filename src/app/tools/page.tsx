@@ -276,14 +276,14 @@ export default function ToolsPage() {
                 {Object.keys(groupedTools).length > 1 && (
                   <div className="mb-6">
                     <div className="flex items-center space-x-3 mb-2">
-                      {TOOL_CATEGORIES[categoryName]?.icon}
+                      {TOOL_CATEGORIES[categoryName as keyof typeof TOOL_CATEGORIES]?.icon}
                       <h2 className="text-2xl font-bold text-gray-900">
                         {categoryName}
                       </h2>
                     </div>
-                    {TOOL_CATEGORIES[categoryName]?.description && (
+                    {TOOL_CATEGORIES[categoryName as keyof typeof TOOL_CATEGORIES]?.description && (
                       <p className="text-gray-600">
-                        {TOOL_CATEGORIES[categoryName].description}
+                        {TOOL_CATEGORIES[categoryName as keyof typeof TOOL_CATEGORIES].description}
                       </p>
                     )}
                   </div>

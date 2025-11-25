@@ -1,4 +1,4 @@
-import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import { PDFDocument, rgb, StandardFonts, degrees } from 'pdf-lib';
 import { jsPDF } from 'jspdf';
 import { ProcessingOptions, ProcessedFile, PDFPageInfo } from '../types';
 import { fileUtils, errorUtils } from '../utils';
@@ -15,7 +15,7 @@ abstract class PDFProcessor {
     };
   }
 
-  abstract process(file: File): Promise<ProcessedFile>;
+  abstract process(file: File): Promise<ProcessedFile | ProcessedFile[]>;
   
   protected async loadPDF(file: File): Promise<PDFDocument> {
     try {
@@ -33,12 +33,17 @@ abstract class PDFProcessor {
   protected async savePDF(pdfDoc: PDFDocument, filename: string): Promise<ProcessedFile> {
     try {
       const pdfBytes = await pdfDoc.save();
-      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const blob = new Blob([new Uint8Array(pdfBytes)], { type: 'application/pdf' });
       
       return {
+        id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         name: filename,
+        originalName: filename,
         size: blob.size,
         type: 'application/pdf',
+        data: Array.from(new Uint8Array(pdfBytes)),
+        processedAt: new Date().toISOString(),
+        toolUsed: 'pdf-processor',
         blob,
         downloadUrl: URL.createObjectURL(blob)
       };
@@ -58,8 +63,8 @@ abstract class PDFProcessor {
 }
 
 // PDF Merger
-class PDFMerger extends PDFProcessor {
-  async process(files: File[]): Promise<ProcessedFile> {
+class PDFMerger {
+  async process(files: File[]): Promise<ProcessedFile[]> {
     if (files.length < 2) {
       throw errorUtils.createError(
         'INVALID_INPUT',
@@ -71,13 +76,28 @@ class PDFMerger extends PDFProcessor {
       const mergedPdf = await PDFDocument.create();
       
       for (const file of files) {
-        const pdf = await this.loadPDF(file);
+        const fileBuffer = await file.arrayBuffer();
+        const pdf = await PDFDocument.load(fileBuffer);
         const pages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
         pages.forEach((page) => mergedPdf.addPage(page));
       }
       
-      return await this.savePDF(mergedPdf, 'merged_document.pdf');
-    } catch (error) {
+      const pdfBytes = await mergedPdf.save();
+      const blob = new Blob([new Uint8Array(pdfBytes)], { type: 'application/pdf' });
+      
+      return [{
+        id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        name: 'merged_document.pdf',
+        originalName: files.map(f => f.name).join(', '),
+        size: blob.size,
+        type: 'application/pdf',
+        data: Array.from(new Uint8Array(pdfBytes)),
+        processedAt: new Date().toISOString(),
+        toolUsed: 'pdf-merger',
+        blob,
+        downloadUrl: URL.createObjectURL(blob)
+      }];
+    } catch (error: any) {
       if (error.code) throw error;
       throw errorUtils.createError(
         'PROCESSING_FAILED',
@@ -87,16 +107,20 @@ class PDFMerger extends PDFProcessor {
     }
   }
 
-  async process(file: File): Promise<ProcessedFile> {
-    throw new Error('PDFMerger requires multiple files. Use the process method with File[] instead.');
-  }
+
 }
 
 // PDF Splitter
-class PDFSplitter extends PDFProcessor {
+class PDFSplitter {
+  private getOutputFilename(originalName: string, suffix: string): string {
+    const nameWithoutExt = originalName.replace(/\.[^/.]+$/, '');
+    return `${nameWithoutExt}_${suffix}.pdf`;
+  }
+
   async process(file: File): Promise<ProcessedFile[]> {
     try {
-      const pdf = await this.loadPDF(file);
+      const fileBuffer = await file.arrayBuffer();
+      const pdf = await PDFDocument.load(fileBuffer);
       const pageCount = pdf.getPageCount();
       const results: ProcessedFile[] = [];
       
@@ -105,13 +129,27 @@ class PDFSplitter extends PDFProcessor {
         const [page] = await newPdf.copyPages(pdf, [i]);
         newPdf.addPage(page);
         
+        const pdfBytes = await newPdf.save();
+        const blob = new Blob([new Uint8Array(pdfBytes)], { type: 'application/pdf' });
         const filename = this.getOutputFilename(file.name, `page_${i + 1}`);
-        const result = await this.savePDF(newPdf, filename);
+        
+        const result: ProcessedFile = {
+          id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          name: filename,
+          originalName: file.name,
+          size: blob.size,
+          type: 'application/pdf',
+          data: Array.from(new Uint8Array(pdfBytes)),
+          processedAt: new Date().toISOString(),
+          toolUsed: 'pdf-splitter',
+          blob,
+          downloadUrl: URL.createObjectURL(blob)
+        };
         results.push(result);
       }
       
       return results;
-    } catch (error) {
+    } catch (error: any) {
       if (error.code) throw error;
       throw errorUtils.createError(
         'PROCESSING_FAILED',
@@ -141,7 +179,7 @@ class PDFPageExtractor extends PDFProcessor {
     }
   }
 
-  async process(file: File): Promise<ProcessedFile> {
+  async process(file: File): Promise<ProcessedFile[]> {
     try {
       const pdf = await this.loadPDF(file);
       const pageCount = pdf.getPageCount();
@@ -154,7 +192,7 @@ class PDFPageExtractor extends PDFProcessor {
       } else if (this.extractMode === 'ranges' && this.pageRanges.length > 0) {
         // Parse page ranges
         for (const range of this.pageRanges) {
-          const rangeIndices = this.parsePageRangeObject(range, pageCount);
+          const rangeIndices = this.parsePageRange(range, pageCount);
           pageIndices.push(...rangeIndices);
         }
         // Remove duplicates and sort
@@ -173,8 +211,8 @@ class PDFPageExtractor extends PDFProcessor {
       pages.forEach((page) => newPdf.addPage(page));
       
       const filename = this.getOutputFilename(file.name, 'extracted');
-      return await this.savePDF(newPdf, filename);
-    } catch (error) {
+      return [await this.savePDF(newPdf, filename)];
+    } catch (error: any) {
       if (error.code) throw error;
       throw errorUtils.createError(
         'PROCESSING_FAILED',
@@ -229,7 +267,7 @@ class PDFPageExtractor extends PDFProcessor {
 
 // PDF Compressor
 class PDFCompressor extends PDFProcessor {
-  async process(file: File): Promise<ProcessedFile> {
+  async process(file: File): Promise<ProcessedFile[]> {
     try {
       const originalSize = file.size;
       const targetSize = this.options.targetSize || originalSize * 0.7; // Default 30% reduction
@@ -259,31 +297,28 @@ class PDFCompressor extends PDFProcessor {
           
           // Keep track of the best result
           if (compressionRatio < bestCompressionRatio) {
-            bestResult = {
-              buffer: result.buffer,
-              filename: this.getOutputFilename(file.name, 'compressed'),
-              mimeType: 'application/pdf',
-              size: result.size,
-              compressionRatio: compressionRatio,
-              strategyUsed: strategy.name,
-              analysis: analysis
-            };
+            bestResult = result;
             bestCompressionRatio = compressionRatio;
           }
           
           // If we achieved the target size, return immediately
           if (result.size <= targetSize) {
-            return {
-              buffer: result.buffer,
-              filename: this.getOutputFilename(file.name, 'compressed'),
-              mimeType: 'application/pdf',
+            const blob = new Blob([new Uint8Array(result.buffer)], { type: 'application/pdf' });
+            const filename = this.getOutputFilename(file.name, 'compressed');
+            return [{
+              id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+              name: filename,
+              originalName: file.name,
               size: result.size,
-              compressionRatio: compressionRatio,
-              strategyUsed: strategy.name,
-              analysis: analysis
-            };
+              type: 'application/pdf',
+              data: Array.from(new Uint8Array(result.buffer)),
+              processedAt: new Date().toISOString(),
+              toolUsed: 'pdf-compressor',
+              blob,
+              downloadUrl: URL.createObjectURL(blob)
+            }];
           }
-        } catch (error) {
+        } catch (error: any) {
           console.warn(`Strategy ${strategy.name} failed:`, error.message);
           // Continue to next strategy
         }
@@ -291,37 +326,59 @@ class PDFCompressor extends PDFProcessor {
       
       // Return the best result if we have one
       if (bestResult) {
-        return bestResult;
+        const blob = new Blob([new Uint8Array(bestResult.buffer)], { type: 'application/pdf' });
+        const filename = this.getOutputFilename(file.name, 'compressed');
+        return [{
+          id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          name: filename,
+          originalName: file.name,
+          size: bestResult.size,
+          type: 'application/pdf',
+          data: Array.from(new Uint8Array(bestResult.buffer)),
+          processedAt: new Date().toISOString(),
+          toolUsed: 'pdf-compressor',
+          blob,
+          downloadUrl: URL.createObjectURL(blob)
+        }];
       }
       
       // Final fallback: try minimal compression as last resort
       try {
         console.warn('All compression strategies failed, attempting minimal compression');
         const fallbackResult = await this.minimalCompression(pdf, {});
-        return {
-          buffer: fallbackResult.buffer,
-          filename: this.getOutputFilename(file.name, 'minimal_compressed'),
-          mimeType: 'application/pdf',
+        const blob = new Blob([new Uint8Array(fallbackResult.buffer)], { type: 'application/pdf' });
+        const filename = this.getOutputFilename(file.name, 'minimal_compressed');
+        return [{
+          id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          name: filename,
+          originalName: file.name,
           size: fallbackResult.size,
-          compressionRatio: fallbackResult.size / originalSize,
-          strategyUsed: 'minimal-fallback',
-          analysis: analysis
-        };
+          type: 'application/pdf',
+          data: Array.from(new Uint8Array(fallbackResult.buffer)),
+          processedAt: new Date().toISOString(),
+          toolUsed: 'pdf-compressor',
+          blob,
+          downloadUrl: URL.createObjectURL(blob)
+        }];
       } catch (fallbackError) {
         console.error('Even minimal compression failed, returning original file');
         // Absolute last resort - return the original file
         const originalBuffer = Buffer.from(await file.arrayBuffer());
-        return {
-          buffer: originalBuffer,
-          filename: file.name,
-          mimeType: 'application/pdf',
+        const blob = new Blob([originalBuffer], { type: 'application/pdf' });
+        return [{
+          id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          name: file.name,
+          originalName: file.name,
           size: originalBuffer.length,
-          compressionRatio: 1,
-          strategyUsed: 'no-compression',
-          analysis: analysis
-        };
+          type: 'application/pdf',
+          data: Array.from(originalBuffer),
+          processedAt: new Date().toISOString(),
+          toolUsed: 'pdf-compressor',
+          blob,
+          downloadUrl: URL.createObjectURL(blob)
+        }];
       }
-    } catch (error) {
+    } catch (error: any) {
       if (error.code) throw error;
       throw errorUtils.createError(
         'PROCESSING_FAILED',
@@ -339,7 +396,7 @@ class PDFCompressor extends PDFProcessor {
       hasImages: false,
       hasMetadata: false,
       complexity: 'low',
-      recommendedStrategies: []
+      recommendedStrategies: [] as string[]
     };
     
     try {
@@ -451,7 +508,7 @@ class PDFCompressor extends PDFProcessor {
     
     // Sort by priority and return
     return selectedStrategies
-      .map(name => allStrategies[name])
+      .map(name => (allStrategies as any)[name])
       .sort((a, b) => a.priority - b.priority);
   }
   
@@ -755,12 +812,17 @@ class PDFCompressor extends PDFProcessor {
         updateFieldAppearances: settings.updateFieldAppearances
       });
       
-      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const blob = new Blob([new Uint8Array(pdfBytes)], { type: 'application/pdf' });
       
       return {
+        id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
         name: filename,
+        originalName: filename,
         size: blob.size,
         type: 'application/pdf',
+        data: Array.from(new Uint8Array(pdfBytes)),
+        processedAt: new Date().toISOString(),
+        toolUsed: 'pdf-compressor',
         blob,
         downloadUrl: URL.createObjectURL(blob)
       };
@@ -811,23 +873,8 @@ class PDFCompressor extends PDFProcessor {
       pdfDoc.setProducer('');
       pdfDoc.setCreator('');
       
-      // Remove custom metadata if present
-      try {
-        const infoDict = pdfDoc.getInfoDict();
-        if (infoDict) {
-          // Clear additional metadata fields
-          const metadataKeys = ['Trapped', 'Custom', 'ModDate', 'CreationDate'];
-          metadataKeys.forEach(key => {
-            try {
-              infoDict.delete(key);
-            } catch (e) {
-              // Ignore deletion errors
-            }
-          });
-        }
-      } catch (e) {
-        // Ignore if info dict is not accessible
-      }
+      // Note: Advanced metadata removal would require access to private methods
+      // For now, we rely on the basic metadata removal provided by pdf-lib
       
     } catch (error) {
       console.warn('Resource optimization failed:', error);
@@ -907,7 +954,7 @@ class PDFWatermark extends PDFProcessor {
     this.position = options.watermarkPosition || 'center';
   }
 
-  async process(file: File): Promise<ProcessedFile> {
+  async process(file: File): Promise<ProcessedFile[]> {
     try {
       const pdf = await this.loadPDF(file);
       const pages = pdf.getPages();
@@ -951,13 +998,13 @@ class PDFWatermark extends PDFProcessor {
           font,
           color: rgb(0.7, 0.7, 0.7),
           opacity: 0.5,
-          rotate: { angle: Math.PI / 6, origin: { x, y } }
+          rotate: degrees(30)
         });
       }
       
       const filename = this.getOutputFilename(file.name, 'watermarked');
-      return await this.savePDF(pdf, filename);
-    } catch (error) {
+      return [await this.savePDF(pdf, filename)];
+    } catch (error: any) {
       if (error.code) throw error;
       throw errorUtils.createError(
         'PROCESSING_FAILED',
@@ -977,7 +1024,7 @@ class PDFPasswordProtector extends PDFProcessor {
     this.password = options.password;
   }
 
-  async process(file: File): Promise<ProcessedFile> {
+  async process(file: File): Promise<ProcessedFile[]> {
     try {
       const pdf = await this.loadPDF(file);
       
@@ -986,8 +1033,8 @@ class PDFPasswordProtector extends PDFProcessor {
       // In a real implementation, you might use a different library
       
       const filename = this.getOutputFilename(file.name, 'protected');
-      return await this.savePDF(pdf, filename);
-    } catch (error) {
+      return [await this.savePDF(pdf, filename)];
+    } catch (error: any) {
       if (error.code) throw error;
       throw errorUtils.createError(
         'PROCESSING_FAILED',
@@ -1402,7 +1449,7 @@ class PDFToWordConverter extends PDFProcessor {
       console.log(`Document buffer generated: ${buffer.length} bytes`);
       
       // Create blob from buffer
-      const blob = new Blob([buffer], { 
+      const blob = new Blob([new Uint8Array(buffer)], { 
         type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
       });
       
@@ -1411,11 +1458,16 @@ class PDFToWordConverter extends PDFProcessor {
       const outputFilename = `${originalName}_converted.docx`;
       
       return {
+        id: Date.now().toString(),
+        originalName: file.name,
         name: outputFilename,
         size: blob.size,
         type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        data: Array.from(new Uint8Array(buffer)),
         blob,
-        downloadUrl: URL.createObjectURL(blob)
+        downloadUrl: URL.createObjectURL(blob),
+        processedAt: new Date().toISOString(),
+        toolUsed: 'pdf-to-word-converter'
       };
     } catch (error) {
       console.error('Error in PDFToWordConverter:', error);
@@ -1439,7 +1491,7 @@ class PDFSignatureProcessor extends PDFProcessor {
     this.position = options.position || { x: 50, y: 80 };
   }
 
-  async process(file: File): Promise<ProcessedFile> {
+  async process(file: File): Promise<ProcessedFile[]> {
     try {
       const pdfDoc = await this.loadPDF(file);
       const pages = pdfDoc.getPages();
@@ -1524,7 +1576,7 @@ class PDFSignatureProcessor extends PDFProcessor {
         }
       }
 
-      return await this.savePDF(pdfDoc, this.getOutputFilename(file.name, 'signed'));
+      return [await this.savePDF(pdfDoc, this.getOutputFilename(file.name, 'signed'))];
     } catch (error) {
       throw errorUtils.createError(
         'PROCESSING_FAILED',
@@ -1545,7 +1597,7 @@ class PDFSignatureProcessor extends PDFProcessor {
 }
 
 class PDFToImagesConverter extends PDFProcessor {
-  async process(file: File): Promise<ProcessedFile> {
+  async process(file: File): Promise<ProcessedFile[]> {
     try {
       // Import PDF.js dynamically
       const pdfjsLib = await import('pdfjs-dist');
@@ -1563,12 +1615,13 @@ class PDFToImagesConverter extends PDFProcessor {
       const {
         outputFormat = 'png',
         quality = 'high',
-        resolution = 300,
         pageRange = 'all',
         startPage,
         endPage,
         specificPages
       } = this.options;
+      
+      const resolution = 300; // Default resolution for image conversion
       
       // Determine which pages to convert
       let pagesToConvert: number[] = [];
@@ -1580,21 +1633,8 @@ class PDFToImagesConverter extends PDFProcessor {
           pagesToConvert.push(i);
         }
       } else if (pageRange === 'specific' && specificPages) {
-        // Parse specific pages (e.g., "1, 3, 5-7, 10")
-        const pageRanges = specificPages.split(',').map(s => s.trim());
-        for (const range of pageRanges) {
-          if (range.includes('-')) {
-            const [start, end] = range.split('-').map(n => parseInt(n.trim()));
-            for (let i = start; i <= Math.min(end, pdf.numPages); i++) {
-              if (i > 0) pagesToConvert.push(i);
-            }
-          } else {
-            const pageNum = parseInt(range);
-            if (pageNum > 0 && pageNum <= pdf.numPages) {
-              pagesToConvert.push(pageNum);
-            }
-          }
-        }
+        // Use specific pages array directly
+        pagesToConvert = specificPages.filter(page => page > 0 && page <= pdf.numPages);
         // Remove duplicates and sort
         pagesToConvert = [...new Set(pagesToConvert)].sort((a, b) => a - b);
       }
@@ -1634,12 +1674,12 @@ class PDFToImagesConverter extends PDFProcessor {
         if (context) {
           await page.render({
             canvasContext: context,
-            viewport: viewport
+            viewport: viewport,
+            canvas: canvas
           }).promise;
           
           // Convert canvas to blob
-          const mimeType = outputFormat === 'jpg' ? 'image/jpeg' : 
-                          outputFormat === 'webp' ? 'image/webp' : 'image/png';
+          const mimeType = outputFormat === 'jpg' ? 'image/jpeg' : 'image/png';
           const qualityValue = quality === 'high' ? 0.95 : quality === 'medium' ? 0.8 : 0.6;
           
           const blob = await new Promise<Blob>((resolve) => {
@@ -1647,21 +1687,26 @@ class PDFToImagesConverter extends PDFProcessor {
           });
           
           const baseFilename = file.name.replace(/\.pdf$/i, '');
-          const extension = outputFormat === 'jpg' ? 'jpg' : outputFormat === 'webp' ? 'webp' : 'png';
+          const extension = outputFormat === 'jpg' ? 'jpg' : 'png';
           const filename = `${baseFilename}_page_${pageNum.toString().padStart(3, '0')}.${extension}`;
           
           results.push({
+            id: `${Date.now()}-${pageNum}`,
+            originalName: file.name,
             name: filename,
             size: blob.size,
             type: mimeType,
             blob,
-            downloadUrl: URL.createObjectURL(blob)
+            downloadUrl: URL.createObjectURL(blob),
+            data: Array.from(new Uint8Array(await blob.arrayBuffer())),
+            processedAt: new Date().toISOString(),
+            toolUsed: 'pdf'
           });
         }
       }
       
       return results;
-    } catch (error) {
+    } catch (error: any) {
       if (error.code) throw error;
       throw errorUtils.createError(
         'PROCESSING_FAILED',
@@ -1748,7 +1793,7 @@ export {
 export function createPDFProcessor(
   type: string,
   options: ProcessingOptions = {}
-): PDFProcessor | null {
+): PDFProcessor | PDFMerger | PDFSplitter | null {
   // IMMEDIATE ENTRY LOGGING
   console.log('🚀🚀🚀 IMMEDIATE ENTRY: createPDFProcessor function started with type:', type);
   console.error('🚀🚀🚀 IMMEDIATE ENTRY: createPDFProcessor function started with type:', type);
@@ -1776,7 +1821,7 @@ export function createPDFProcessor(
     switch (type) {
       case 'merge':
       case 'pdf-merge':
-        return new PDFMerger(options);
+        return new PDFMerger();
       case 'split':
       case 'pdf-split':
         return new PDFSplitter(options);

@@ -244,7 +244,7 @@ export default function ProcessingProgress({
                       </div>
                       
                       <button
-                        onClick={() => fileUtils.downloadFile(result.blob, result.name)}
+                        onClick={() => result.blob && fileUtils.downloadFile(result.blob, result.name)}
                         className="flex items-center space-x-2 text-upsa-blue hover:text-upsa-blue/80 font-medium transition-colors"
                       >
                         <Download className="w-4 h-4" />

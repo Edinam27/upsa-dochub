@@ -264,11 +264,7 @@ const RepairPDFTool: React.FC<RepairPDFToolProps> = ({ onProcess, isProcessing }
 
       {/* Processing Progress */}
       {isProcessing && (
-        <ProcessingProgress
-          progress={45}
-          currentFile={files[0]?.name}
-          message="Repairing PDF..."
-        />
+        <ProcessingProgress />
       )}
 
       {/* Repair Button */}

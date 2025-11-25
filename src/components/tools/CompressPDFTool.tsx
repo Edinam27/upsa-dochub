@@ -26,6 +26,9 @@ const CompressPDFTool: React.FC<CompressPDFToolProps> = ({ onProcess, isProcessi
   const [compressionLevel, setCompressionLevel] = useState<CompressionLevel>('medium');
   const [error, setError] = useState<string>('');
   const [estimatedReduction, setEstimatedReduction] = useState<number>(0);
+  const [actualReduction, setActualReduction] = useState<number>(0);
+  const [actualNewSize, setActualNewSize] = useState<number>(0);
+  const [engineUsed, setEngineUsed] = useState<string>('');
 
   const compressionOptions = {
     low: {
@@ -58,15 +61,33 @@ const CompressPDFTool: React.FC<CompressPDFToolProps> = ({ onProcess, isProcessi
     }
   };
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
     setError('');
     if (acceptedFiles.length > 0) {
       const selectedFile = acceptedFiles[0];
       setFile(selectedFile);
       
-      // Calculate estimated reduction
-      const reduction = compressionOptions[compressionLevel].estimatedPercent;
+      let reduction = compressionOptions[compressionLevel].estimatedPercent;
+      try {
+        const buf = await selectedFile.arrayBuffer();
+        const text = new TextDecoder('latin1').decode(buf);
+        const imagesCount = (text.match(/\/Subtype\s*\/Image/g) || []).length;
+        const fileSizeMB = selectedFile.size / (1024 * 1024);
+        const baseMap: Record<CompressionLevel, number> = {
+          low: 12,
+          medium: 28,
+          high: 45,
+          maximum: 60
+        };
+        reduction = baseMap[compressionLevel];
+        if (fileSizeMB > 10) reduction += 5;
+        if (imagesCount > 0) reduction += Math.min(15, imagesCount * 2);
+        reduction = Math.max(5, Math.min(85, Math.round(reduction)));
+      } catch {}
       setEstimatedReduction(reduction);
+      setActualReduction(0);
+      setActualNewSize(0);
+      setEngineUsed('');
     }
   }, [compressionLevel]);
 
@@ -101,8 +122,30 @@ const CompressPDFTool: React.FC<CompressPDFToolProps> = ({ onProcess, isProcessi
   const handleCompressionChange = (level: CompressionLevel) => {
     setCompressionLevel(level);
     if (file) {
-      const reduction = compressionOptions[level].estimatedPercent;
-      setEstimatedReduction(reduction);
+      const recalc = async () => {
+        let reduction = compressionOptions[level].estimatedPercent;
+        try {
+          const buf = await file.arrayBuffer();
+          const text = new TextDecoder('latin1').decode(buf);
+          const imagesCount = (text.match(/\/Subtype\s*\/Image/g) || []).length;
+          const fileSizeMB = file.size / (1024 * 1024);
+          const baseMap: Record<CompressionLevel, number> = {
+            low: 12,
+            medium: 28,
+            high: 45,
+            maximum: 60
+          };
+          reduction = baseMap[level];
+          if (fileSizeMB > 10) reduction += 5;
+          if (imagesCount > 0) reduction += Math.min(15, imagesCount * 2);
+          reduction = Math.max(5, Math.min(85, Math.round(reduction)));
+        } catch {}
+        setEstimatedReduction(reduction);
+      };
+      recalc();
+      setActualReduction(0);
+      setActualNewSize(0);
+      setEngineUsed('');
     }
   };
 
@@ -118,6 +161,23 @@ const CompressPDFTool: React.FC<CompressPDFToolProps> = ({ onProcess, isProcessi
     if (!file) return 0;
     return file.size * (1 - estimatedReduction / 100);
   };
+
+  React.useEffect(() => {
+    const handler = (e: any) => {
+      const detail = e?.detail;
+      if (!detail || detail.toolId !== 'pdf-compress' || !file) return;
+      const item = (detail.data || []).find((d: any) => d.originalName === file.name);
+      if (!item) return;
+      const originalSize = item.originalSize || file.size;
+      const newSize = item.size || 0;
+      const pct = originalSize > 0 ? Math.max(0, Math.round((1 - newSize / originalSize) * 100)) : 0;
+      setActualReduction(pct);
+      setActualNewSize(newSize);
+      setEngineUsed(item.engineUsed || '');
+    };
+    window.addEventListener('processing:result', handler);
+    return () => window.removeEventListener('processing:result', handler);
+  }, [file]);
 
   return (
     <div className="space-y-6">
@@ -291,6 +351,28 @@ const CompressPDFTool: React.FC<CompressPDFToolProps> = ({ onProcess, isProcessi
                   />
                 </div>
               </div>
+              {actualReduction > 0 && (
+                <div className="mt-4 space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Actual New Size:</span>
+                    <span className="text-sm font-medium text-upsa-blue">
+                      {formatFileSize(actualNewSize)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Actual Reduction:</span>
+                    <span className="text-sm font-medium text-green-600 dark:text-green-400">
+                      {actualReduction}%
+                    </span>
+                  </div>
+                </div>
+              )}
+              {engineUsed && (
+                <div className="mt-2 flex justify-between items-center">
+                  <span className="text-sm text-gray-600 dark:text-gray-400">Engine Used:</span>
+                  <span className="text-sm font-medium text-gray-900 dark:text-white">{engineUsed}</span>
+                </div>
+              )}
             </div>
           </div>
 

@@ -27,6 +27,19 @@ export interface ProcessingOptions {
   startPage?: number;
   endPage?: number;
   additionalFiles?: Uint8Array[];
+  signature?: any;
+  position?: 'center' | 'top-left' | 'top-center' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right' | { x: number; y: number };
+  extractMode?: 'ranges' | 'selected' | 'individual';
+  pageRanges?: Array<{ start: number; end: number }>;
+  selectedPages?: number[];
+  splitMode?: 'range' | 'pages' | 'size' | 'every';
+  specificPages?: number[];
+  everyNPages?: number;
+  color?: string;
+  method?: string;
+  target?: string;
+  sensitivity?: string;
+  targetSize?: number;
 }
 
 export interface FileInfo {
@@ -34,13 +47,16 @@ export interface FileInfo {
   name: string;
   size: number;
   type: string;
-  file: File;
+  file?: File;
   preview?: string;
   pages?: number;
-  status: 'pending' | 'processing' | 'completed' | 'error';
+  status?: 'pending' | 'processing' | 'completed' | 'error';
   progress?: number;
   result?: ProcessedFile;
   error?: string;
+  uploadedAt?: string;
+  path?: string;
+  url?: string;
 }
 
 export interface ProcessedFile {
@@ -54,6 +70,9 @@ export interface ProcessedFile {
   toolUsed: string;
   blob?: Blob;
   downloadUrl?: string;
+  originalSize?: number;
+  reductionPercent?: number;
+  engineUsed?: string;
 }
 
 export interface UploadState {

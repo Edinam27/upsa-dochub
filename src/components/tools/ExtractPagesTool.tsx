@@ -247,11 +247,7 @@ const ExtractPagesTool: React.FC<ExtractPagesToolProps> = ({ onProcess, isProces
 
       {/* Processing Progress */}
       {isProcessing && (
-        <ProcessingProgress
-          progress={75}
-          currentFile={files[0]?.name}
-          message="Extracting pages..."
-        />
+        <ProcessingProgress />
       )}
 
       {/* Extract Button */}

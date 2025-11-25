@@ -63,7 +63,7 @@ export async function GET(
       const isPreview = url.searchParams.get('preview') === 'true';
       
       // Create response with file
-      const response = new NextResponse(fileBuffer);
+      const response = new NextResponse(fileBuffer as BodyInit);
       
       // Set headers
       response.headers.set('Content-Type', contentType);

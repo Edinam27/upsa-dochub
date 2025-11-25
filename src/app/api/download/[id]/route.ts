@@ -52,7 +52,7 @@ export async function GET(
       const originalName = url.searchParams.get('name') || filename;
       
       // Create response with file
-      const response = new NextResponse(fileBuffer);
+      const response = new NextResponse(fileBuffer as BodyInit);
       
       // Set headers
       response.headers.set('Content-Type', contentType);
