@@ -79,7 +79,7 @@ const ContactSection = () => {
               Available during academic hours
             </p>
             <Link
-              href="https://portal.upsa.edu.gh"
+              href="https://upsasip.com/student-portal"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center space-x-2 text-upsa-gold hover:text-upsa-gold/80 transition-colors"
@@ -146,7 +146,7 @@ const ContactSection = () => {
             </Link>
             
             <Link
-              href="https://portal.upsa.edu.gh"
+              href="https://upsasip.com/student-portal"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center space-x-3 p-4 bg-upsa-gold/5 rounded-lg hover:bg-upsa-gold/10 transition-colors group"

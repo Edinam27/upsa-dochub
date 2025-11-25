@@ -4,7 +4,7 @@ import { GraduationCap, ExternalLink, Heart, Shield, Clock } from 'lucide-react'
 const Footer = () => {
   const universityLinks = [
     { name: 'UPSA Website', href: 'https://upsa.edu.gh', external: true },
-    { name: 'Student Portal', href: 'https://portal.upsa.edu.gh', external: true },
+    { name: 'Student Portal', href: 'https://upsasip.com/student-portal', external: true },
     { name: 'Library', href: 'https://library.upsa.edu.gh', external: true },
     { name: 'Academic Calendar', href: 'https://upsa.edu.gh/academic-calendar', external: true },
   ];

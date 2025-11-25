@@ -100,7 +100,7 @@ const HeroSection = () => {
           </button>
           
           <Link
-            href="https://portal.upsa.edu.gh"
+            href="https://upsasip.com/student-portal"
             target="_blank"
             rel="noopener noreferrer"
             className="bg-white border border-gray-300 hover:border-gray-400 text-gray-700 font-semibold py-3 px-8 rounded-lg transition-colors duration-200 flex items-center space-x-2"

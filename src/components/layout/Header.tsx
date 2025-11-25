@@ -49,7 +49,7 @@ const Header = () => {
           {/* Student Portal Button */}
           <div className="hidden md:flex items-center space-x-4">
             <Link
-              href="https://portal.upsa.edu.gh"
+              href="https://upsasip.com/student-portal"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-4 py-2 rounded-lg transition-all duration-300 hover:shadow-lg"
@@ -91,7 +91,7 @@ const Header = () => {
                 </Link>
               ))}
               <Link
-                href="https://portal.upsa.edu.gh"
+                href="https://upsasip.com/student-portal"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 py-2 rounded-lg transition-all duration-300 w-fit"
