@@ -1824,7 +1824,7 @@ export function createPDFProcessor(
         return new PDFMerger();
       case 'split':
       case 'pdf-split':
-        return new PDFSplitter(options);
+        return new PDFSplitter();
       case 'extract':
       case 'pdf-extract':
         console.log('Creating PDFPageExtractor with options:', options);
@@ -1836,7 +1836,8 @@ export function createPDFProcessor(
           return extractor;
         } catch (extractorError) {
           console.error('Error in PDFPageExtractor constructor:', extractorError);
-          console.error('Constructor error stack:', extractorError.stack);
+          const err = extractorError instanceof Error ? extractorError : new Error(String(extractorError));
+          console.error('Constructor error stack:', err.stack);
           throw extractorError;
         }
       case 'compress':
