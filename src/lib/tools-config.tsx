@@ -306,7 +306,7 @@ export const TOOLS: Record<string, Tool & ToolConfig> = {
   // Verification Tools
   'verified-signature': {
     id: 'verified-signature',
-    name: 'Verified Signature',
+    name: 'Enhanced Signature Receipt',
     description: 'Add a secure, trackable signature with QR code verification',
     icon: <QrCode className="w-6 h-6" />,
     category: 'Verification Tools',

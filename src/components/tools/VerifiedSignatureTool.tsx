@@ -208,7 +208,7 @@ const VerifiedSignatureTool: React.FC<VerifiedSignatureToolProps> = () => {
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Header */}
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Verified Signature</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Enhanced Signature Receipt</h2>
         <p className="text-gray-600">Add a secure, trackable signature with QR code verification</p>
       </div>
 
