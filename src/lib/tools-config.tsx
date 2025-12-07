@@ -20,7 +20,9 @@ import {
   Layers,
   ScanLine,
   Minimize2,
-  Edit3
+  Edit3,
+  QrCode,
+  CheckCircle
 } from 'lucide-react';
 import { Tool, ToolConfig } from './types';
 
@@ -300,6 +302,52 @@ export const TOOLS: Record<string, Tool & ToolConfig> = {
       password: ''
     }
   },
+
+  // Verification Tools
+  'verified-signature': {
+    id: 'verified-signature',
+    name: 'Verified Signature',
+    description: 'Add a secure, trackable signature with QR code verification',
+    icon: <QrCode className="w-6 h-6" />,
+    category: 'Verification Tools',
+    color: 'from-violet-500 to-violet-600',
+    features: [
+      'Unique QR code generation',
+      'Blockchain-like verification',
+      'Tamper-proof tracking',
+      'Identity verification'
+    ],
+    acceptedTypes: ['.pdf', 'application/pdf'],
+    maxFileSize: 50 * 1024 * 1024,
+    maxFiles: 1,
+    supportsBatch: false,
+    options: {
+      quality: 'high'
+    }
+  },
+
+  'verify-document': {
+    id: 'verify-document',
+    name: 'Verify Document',
+    description: 'Verify the authenticity of a signed document via QR code',
+    icon: <CheckCircle className="w-6 h-6" />,
+    category: 'Verification Tools',
+    color: 'from-emerald-500 to-emerald-600',
+    features: [
+      'Instant QR scanning',
+      'Database verification',
+      'Signer identity check',
+      'Timestamp validation'
+    ],
+    acceptedTypes: ['.pdf', 'application/pdf', '.png', '.jpg', '.jpeg'],
+    maxFileSize: 50 * 1024 * 1024,
+    maxFiles: 1,
+    supportsBatch: false,
+    options: {
+      quality: 'high'
+    }
+  }
+  },
   
   'pdf-unlock': {
     id: 'pdf-unlock',
@@ -368,6 +416,12 @@ export const TOOL_CATEGORIES = {
     description: 'Enhance your study materials and documents',
     color: 'from-orange-500 to-red-600',
     icon: <Layers className="w-6 h-6" />
+  },
+  'Verification Tools': {
+    name: 'Verification Tools',
+    description: 'Verify document authenticity and signatures',
+    color: 'from-violet-500 to-emerald-600',
+    icon: <Shield className="w-6 h-6" />
   }
 };
 

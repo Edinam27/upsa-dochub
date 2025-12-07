@@ -1,0 +1,17 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model SignatureVerification {
+  id            String   @id @default(uuid())
+  hash          String   @unique
+  signerName    String
+  documentName  String
+  createdAt     DateTime @default(now())
+  status        String   @default("VALID") // VALID, REVOKED
+}

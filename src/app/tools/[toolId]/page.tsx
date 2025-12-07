@@ -40,6 +40,8 @@ import WatermarkRemovalTool from '@/components/tools/WatermarkRemovalTool';
 import ImageCompressionTool from '@/components/tools/ImageCompressionTool';
 import AddSignatureTool from '@/components/tools/AddSignatureTool';
 import UnlockPDFTool from '@/components/tools/UnlockPDFTool';
+import VerifiedSignatureTool from '@/components/tools/VerifiedSignatureTool';
+import VerifyDocumentTool from '@/components/tools/VerifyDocumentTool';
 
 export default function ToolPage() {
   const params = useParams();
@@ -160,6 +162,10 @@ export default function ToolPage() {
         return <ImageCompressionTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
       case 'add-signature':
         return <AddSignatureTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
+      case 'verified-signature':
+        return <VerifiedSignatureTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
+      case 'verify-document':
+        return <VerifyDocumentTool />;
       default:
         return (
           <div className="p-6">
