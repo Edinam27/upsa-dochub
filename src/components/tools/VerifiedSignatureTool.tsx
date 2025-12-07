@@ -44,8 +44,8 @@ const VerifiedSignatureTool: React.FC<VerifiedSignatureToolProps> = () => {
       
       // Ensure worker is set up correctly
       if (typeof window !== 'undefined') {
-        // Force worker URL to be set
-        pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
+        // Use CDN worker to ensure version match
+        pdfjsLib.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
       }
 
       const arrayBuffer = await file.arrayBuffer();
