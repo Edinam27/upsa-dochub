@@ -41,8 +41,13 @@ const VerifiedSignatureTool: React.FC<VerifiedSignatureToolProps> = () => {
   const generatePreview = async (file: File) => {
     try {
       const pdfjsLib = await import('pdfjs-dist');
-      if (typeof window !== 'undefined' && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
+      
+      // Ensure worker is set up correctly
+      if (typeof window !== 'undefined') {
+        // Use the same worker path strategy as PDFToImagesTool
+        if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
+           pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
+        }
       }
 
       const arrayBuffer = await file.arrayBuffer();
@@ -66,6 +71,8 @@ const VerifiedSignatureTool: React.FC<VerifiedSignatureToolProps> = () => {
       }
     } catch (error) {
       console.error('Error generating preview:', error);
+      // Fallback or user notification could be added here
+      alert('Failed to generate PDF preview. Please try another file.');
     }
   };
 
