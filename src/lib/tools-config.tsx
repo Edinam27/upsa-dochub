@@ -346,7 +346,6 @@ export const TOOLS: Record<string, Tool & ToolConfig> = {
     options: {
       quality: 'high'
     }
-  }
   },
   
   'pdf-unlock': {
