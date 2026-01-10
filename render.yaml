@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: upsa-dochub
+    env: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: node start.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+    healthCheckPath: /

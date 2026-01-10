@@ -1,0 +1,150 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+/* Force white background and dark text globally */
+* {
+  color-scheme: light !important;
+}
+
+html, body {
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+}
+
+/* Override any dark backgrounds */
+.bg-gray-900, .bg-gray-800, .bg-gray-700, .bg-black {
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+}
+
+/* Ensure headers and navigation have proper contrast */
+header {
+  background-color: #f8fafc !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+/* Override glass effects for light theme */
+.glass-effect {
+  background: rgba(248, 250, 252, 0.8) !important;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(226, 232, 240, 0.5) !important;
+}
+
+/* Ensure text is always dark and readable */
+.text-white, .text-gray-100, .text-gray-200, .text-gray-300 {
+  color: #1f2937 !important;
+}
+
+/* Update button and link colors for better contrast */
+.text-yellow-400, .text-yellow-300 {
+  color: #d97706 !important;
+}
+
+/* Footer styling */
+footer {
+  background-color: #f1f5f9 !important;
+  color: #1f2937 !important;
+}
+
+footer .text-gray-400 {
+  color: #64748b !important;
+}
+
+footer .text-yellow-400 {
+  color: #d97706 !important;
+}
+
+@theme {
+  --font-family-sans: Inter, system-ui, sans-serif;
+  
+  --color-upsa-blue: #1e3a8a;
+  --color-upsa-gold: #f59e0b;
+  --color-upsa-light-blue: #3b82f6;
+  --color-upsa-dark-blue: #1e40af;
+  --color-primary-purple: #4f46e5;
+  --color-primary-purple-dark: #7c3aed;
+  --color-primary-gold: #f59e0b;
+  --color-primary-gold-dark: #d97706;
+  --color-text-primary: #1f2937;
+  --color-text-secondary: #6b7280;
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f9fafb;
+  --color-border-color: #e5e7eb;
+  
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-spin: spin 1s linear infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Custom Utility Classes */
+@layer utilities {
+  .gradient-text {
+    background: linear-gradient(135deg, theme(colors.upsa-blue), theme(colors.upsa-gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+  
+  .animate-float {
+    animation: theme(animate.float);
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .file-upload-area {
+    border: 2px dashed theme(colors.gray.300);
+    transition: all 0.3s ease;
+  }
+  
+  .file-upload-area.drag-over {
+    border-color: theme(colors.upsa-gold);
+    background-color: rgba(245, 158, 11, 0.05);
+  }
+  
+  .progress-bar {
+    background: linear-gradient(90deg, theme(colors.upsa-blue), theme(colors.upsa-gold));
+    transition: width 0.3s ease;
+  }
+  
+  .spinner {
+    border: 3px solid theme(colors.gray.100);
+    border-top: 3px solid theme(colors.upsa-blue);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    animation: theme(animate.spin);
+  }
+}
