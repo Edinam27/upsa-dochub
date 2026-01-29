@@ -18,21 +18,27 @@ interface ProcessingProgressProps {
   className?: string;
   onDownloadAll?: () => void;
   onReset?: () => void;
+  isProcessing?: boolean;
+  progress?: number;
+  currentFile?: string;
+  error?: string | null;
+  results?: any[];
 }
 
 export default function ProcessingProgress({
   className,
   onDownloadAll,
-  onReset
+  onReset,
+  ...props
 }: ProcessingProgressProps) {
-  const {
-    isProcessing,
-    progress,
-    currentFile,
-    error,
-    results,
-    resetProcessing
-  } = useProcessingStore();
+  const store = useProcessingStore();
+
+  const isProcessing = props.isProcessing ?? store.isProcessing;
+  const progress = props.progress ?? store.progress;
+  const currentFile = props.currentFile ?? store.currentFile;
+  const error = props.error ?? store.error;
+  const results = props.results ?? store.results;
+  const resetProcessing = store.resetProcessing;
 
   const [startTime, setStartTime] = React.useState<Date | null>(null);
   const [elapsedTime, setElapsedTime] = React.useState(0);
