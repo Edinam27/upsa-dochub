@@ -1,57 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
-/* Force white background and dark text globally */
+/* Force light theme globally */
 * {
-  color-scheme: light !important;
+  color-scheme: light;
 }
 
 html, body {
-  background-color: #ffffff !important;
-  color: #1f2937 !important;
-}
-
-/* Override any dark backgrounds */
-.bg-gray-900, .bg-gray-800, .bg-gray-700, .bg-black {
-  background-color: #ffffff !important;
-  color: #1f2937 !important;
-}
-
-/* Ensure headers and navigation have proper contrast */
-header {
-  background-color: #f8fafc !important;
-  border-bottom: 1px solid #e2e8f0 !important;
-}
-
-/* Override glass effects for light theme */
-.glass-effect {
-  background: rgba(248, 250, 252, 0.8) !important;
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(226, 232, 240, 0.5) !important;
-}
-
-/* Ensure text is always dark and readable */
-.text-white, .text-gray-100, .text-gray-200, .text-gray-300 {
-  color: #1f2937 !important;
-}
-
-/* Update button and link colors for better contrast */
-.text-yellow-400, .text-yellow-300 {
-  color: #d97706 !important;
-}
-
-/* Footer styling */
-footer {
-  background-color: #f1f5f9 !important;
-  color: #1f2937 !important;
-}
-
-footer .text-gray-400 {
-  color: #64748b !important;
-}
-
-footer .text-yellow-400 {
-  color: #d97706 !important;
+  background-color: #f8fafc;
+  color: #1f2937;
 }
 
 @theme {

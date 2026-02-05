@@ -133,17 +133,17 @@ const ImagesToPDFTool: React.FC<ImagesToPDFToolProps> = ({ onProcess, isProcessi
           border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 cursor-pointer
           ${
             isDragActive
-              ? 'border-pink-400 bg-pink-50 dark:bg-pink-900/20'
-              : 'border-gray-300 dark:border-gray-600 hover:border-pink-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+              ? 'border-pink-400 bg-pink-50'
+              : 'border-gray-300 hover:border-pink-400 hover:bg-gray-50'
           }
         `}
       >
         <input {...getInputProps()} />
         <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
           {isDragActive ? 'Drop image files here' : 'Upload Image Files'}
         </h3>
-        <p className="text-gray-600 dark:text-gray-300 mb-4">
+        <p className="text-gray-600 mb-4">
           Drag and drop your image files here, or click to browse
         </p>
         <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
@@ -160,10 +160,10 @@ const ImagesToPDFTool: React.FC<ImagesToPDFToolProps> = ({ onProcess, isProcessi
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center space-x-2 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
+          className="flex items-center space-x-2 p-4 bg-red-50 border border-red-200 rounded-lg"
         >
           <AlertCircle className="h-5 w-5 text-red-500" />
-          <span className="text-red-700 dark:text-red-300">{error}</span>
+          <span className="text-red-700">{error}</span>
         </motion.div>
       )}
 
@@ -171,10 +171,10 @@ const ImagesToPDFTool: React.FC<ImagesToPDFToolProps> = ({ onProcess, isProcessi
       {files.length > 0 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+            <h4 className="text-lg font-semibold text-gray-900">
               Images ({files.length})
             </h4>
-            <p className="text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-sm text-gray-600">
               Drag to reorder
             </p>
           </div>
@@ -188,7 +188,7 @@ const ImagesToPDFTool: React.FC<ImagesToPDFToolProps> = ({ onProcess, isProcessi
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                   className={`
-                    flex items-center space-x-4 p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg
+                    flex items-center space-x-4 p-4 bg-white border border-gray-200 rounded-lg
                     ${draggedIndex === index ? 'opacity-50' : ''}
                   `}
                   draggable
@@ -200,7 +200,7 @@ const ImagesToPDFTool: React.FC<ImagesToPDFToolProps> = ({ onProcess, isProcessi
                   
                   {/* Image Preview */}
                   <div className="flex-shrink-0">
-                    <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden">
+                    <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden">
                       <img 
                         src={file.preview} 
                         alt={file.name}
@@ -210,16 +210,16 @@ const ImagesToPDFTool: React.FC<ImagesToPDFToolProps> = ({ onProcess, isProcessi
                   </div>
                   
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                    <p className="text-sm font-medium text-gray-900 truncate">
                       {file.name}
                     </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <p className="text-sm text-gray-500">
                       {formatFileSize(file.size)}
                     </p>
                   </div>
                   
                   <div className="flex items-center space-x-2">
-                    <span className="text-sm text-gray-500 dark:text-gray-400">
+                    <span className="text-sm text-gray-500">
                       #{index + 1}
                     </span>
                     <button
@@ -237,8 +237,8 @@ const ImagesToPDFTool: React.FC<ImagesToPDFToolProps> = ({ onProcess, isProcessi
       )}
 
       {/* Action Buttons */}
-      <div className="flex items-center justify-between pt-6 border-t border-gray-200 dark:border-gray-700">
-        <div className="text-sm text-gray-600 dark:text-gray-400">
+      <div className="flex items-center justify-between pt-6 border-t border-gray-200">
+        <div className="text-sm text-gray-600">
           {files.length > 0 && (
             <span>
               Total: {formatFileSize(files.reduce((acc, file) => acc + file.size, 0))}
@@ -257,7 +257,7 @@ const ImagesToPDFTool: React.FC<ImagesToPDFToolProps> = ({ onProcess, isProcessi
                 });
                 setFiles([]);
               }}
-              className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 transition-colors"
+              className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
             >
               Clear All
             </button>
@@ -271,7 +271,7 @@ const ImagesToPDFTool: React.FC<ImagesToPDFToolProps> = ({ onProcess, isProcessi
               ${
                 files.length > 0 && !isProcessing
                   ? 'bg-pink-600 hover:bg-pink-700 text-white shadow-lg hover:shadow-xl'
-                  : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }
             `}
           >

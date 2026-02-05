@@ -20,7 +20,12 @@ import {
   Clock,
   Droplets,
   Unlock,
-  Crop
+  Crop,
+  Pen,
+  ShieldCheck,
+  ScanLine,
+  Wrench,
+  RotateCw
 } from 'lucide-react';
 
 export default function HowToUsePage() {
@@ -128,6 +133,72 @@ export default function HowToUsePage() {
         }
       ]
     },
+    {
+      id: 'rotate-pdf',
+      title: 'Rotate PDF',
+      icon: <RotateCw className="h-6 w-6" />,
+      description: 'Rotate PDF pages permanently',
+      category: 'Academic Tools',
+      steps: [
+        {
+          title: 'Upload PDF',
+          description: 'Select the PDF file to rotate',
+          details: 'Supports files up to 50MB.',
+          tips: ['Check the current orientation', 'Upload multiple files if needed']
+        },
+        {
+          title: 'Choose Rotation',
+          description: 'Select rotation angle (90°, 180°, 270°)',
+          details: 'You can apply rotation to all pages or specific page ranges.',
+          tips: ['Use 90° Clockwise for sideways pages', '180° for upside down pages']
+        },
+        {
+          title: 'Apply Rotation',
+          description: 'Process the rotation',
+          details: 'The tool saves the new orientation permanently.',
+          tips: ['Preview before downloading', 'Verify page numbers']
+        },
+        {
+          title: 'Download',
+          description: 'Get your rotated PDF',
+          details: 'The file retains all original quality and content.',
+          tips: ['Save with a new name to keep original', 'Check all pages']
+        }
+      ]
+    },
+    {
+      id: 'repair-pdf',
+      title: 'Repair PDF',
+      icon: <Wrench className="h-6 w-6" />,
+      description: 'Recover data from corrupted PDF files',
+      category: 'Academic Tools',
+      steps: [
+        {
+          title: 'Upload Corrupted PDF',
+          description: 'Select the damaged PDF file',
+          details: 'Supports partially downloaded or corrupt files.',
+          tips: ['Try "Basic Repair" first', 'Use "Aggressive" for severe damage']
+        },
+        {
+          title: 'Select Repair Mode',
+          description: 'Choose Basic, Advanced, or Aggressive',
+          details: 'Basic fixes header/footer issues. Advanced rebuilds structure. Aggressive recovers text streams.',
+          tips: ['Basic is fastest', 'Aggressive may lose some formatting']
+        },
+        {
+          title: 'Start Repair',
+          description: 'Analyze and fix the document',
+          details: 'The tool attempts to reconstruct the valid PDF structure.',
+          tips: ['Wait for the process to complete', 'Review the repair log if available']
+        },
+        {
+          title: 'Download Fixed PDF',
+          description: 'Get your restored document',
+          details: 'Check the file immediately to ensure content recovery.',
+          tips: ['Open in a PDF viewer to verify', 'Keep original just in case']
+        }
+      ]
+    },
     
     // Conversion Tools
     {
@@ -145,9 +216,9 @@ export default function HowToUsePage() {
         },
         {
           title: 'Choose Conversion Settings',
-          description: 'Select your preferred output format and quality',
-          details: 'Options include maintaining original formatting, extracting text only, or preserving layout.',
-          tips: ['Use "Preserve Layout" for documents with complex formatting', 'Choose "Text Only" for simple documents']
+          description: 'Select output format and options',
+          details: 'Choose DOCX (recommended) or DOC. Enable "Preserve Layout" or "Extract Images" as needed.',
+          tips: ['"Preserve Layout" keeps formatting intact', '"Extract Images" includes images in the Word doc']
         },
         {
           title: 'Start Conversion',
@@ -236,6 +307,39 @@ export default function HowToUsePage() {
       ]
     },
     {
+      id: 'word-to-pdf',
+      title: 'Word to PDF',
+      icon: <FileText className="h-6 w-6" />,
+      description: 'Convert Word documents to PDF format',
+      category: 'Conversion Tools',
+      steps: [
+        {
+          title: 'Upload Word Doc',
+          description: 'Select .doc or .docx file',
+          details: 'Supports Microsoft Word documents up to 50MB.',
+          tips: ['Ensure formatting is correct in Word', 'Remove comments/track changes if unwanted']
+        },
+        {
+          title: 'Conversion Settings',
+          description: 'Set quality and orientation',
+          details: 'Choose High/Medium/Low quality. Select Portrait or Landscape.',
+          tips: ['High quality for printing', 'Low quality for emailing']
+        },
+        {
+          title: 'Convert',
+          description: 'Create the PDF',
+          details: 'Converts document while preserving layout and fonts.',
+          tips: ['Wait for conversion', 'Check page breaks']
+        },
+        {
+          title: 'Download PDF',
+          description: 'Get your professional PDF',
+          details: 'The file is ready for sharing or printing.',
+          tips: ['Verify links work', 'Check images resolution']
+        }
+      ]
+    },
+    {
       id: 'pdf-ocr',
       title: 'OCR Text Extraction',
       icon: <Type className="h-6 w-6" />,
@@ -285,26 +389,59 @@ export default function HowToUsePage() {
         {
           title: 'Upload PDF Files',
           description: 'Select PDF files you want to compress',
-          details: 'Supports files up to 200MB. Batch processing available for multiple files.',
+          details: 'Supports files up to 100MB.',
           tips: ['Larger files benefit more from compression', 'Check original file size before compressing']
         },
         {
-          title: 'Choose Compression Level',
-          description: 'Select compression strength: Low, Medium, or High',
-          details: 'Higher compression reduces file size more but may affect quality slightly.',
-          tips: ['Medium compression balances size and quality', 'High compression for email attachments']
+          title: 'Choose Compression Option',
+          description: 'Select "Convert to Grayscale" or "Extreme Compression"',
+          details: 'Grayscale converts to B&W (~50% reduction). Extreme rasterizes content for max compression (~85% reduction).',
+          tips: ['Use Grayscale for text documents and forms', 'Use Extreme for archiving or when size is critical']
         },
         {
-          title: 'Preview Compression',
-          description: 'Review estimated file size reduction before processing',
-          details: 'Shows original size, compressed size, and percentage reduction.',
-          tips: ['Check compression ratio', 'Ensure quality meets your needs']
+          title: 'Start Compression',
+          description: 'Click the button to begin processing',
+          details: 'The tool will process the file based on your selected option.',
+          tips: ['Wait for the process to complete', 'Do not close the tab']
         },
         {
           title: 'Download Compressed PDF',
           description: 'Get your optimized PDF with reduced file size',
           details: 'Compressed files maintain readability while using less storage space.',
           tips: ['Compare with original for quality', 'Save storage space for large documents']
+        }
+      ]
+    },
+    {
+      id: 'image-compress',
+      title: 'Compress Images',
+      icon: <Image className="h-6 w-6" />,
+      description: 'Reduce image file size without losing quality',
+      category: 'Study Tools',
+      steps: [
+        {
+          title: 'Upload Images',
+          description: 'Select PNG, JPG, or WEBP images',
+          details: 'Batch process multiple images at once.',
+          tips: ['Group similar images', 'Check original sizes']
+        },
+        {
+          title: 'Compression Settings',
+          description: 'Adjust quality and dimensions',
+          details: 'Set quality (0-100), max width/height, and output format.',
+          tips: ['80% quality is usually indistinguishable', 'Resize large images for web']
+        },
+        {
+          title: 'Compress',
+          description: 'Optimize the images',
+          details: 'Reduces file size by removing metadata and optimizing encoding.',
+          tips: ['Compare "Before" and "After" sizes', 'Check visual quality']
+        },
+        {
+          title: 'Download',
+          description: 'Get optimized images',
+          details: 'Download individually or as a ZIP archive.',
+          tips: ['Use optimized images for websites', 'Save storage space']
         }
       ]
     },
@@ -440,36 +577,97 @@ export default function HowToUsePage() {
         }
       ]
     },
+    // Signature Tools
     {
-      id: 'pdf-editor',
-      title: 'PDF Editor',
-      icon: <Edit className="h-6 w-6" />,
-      description: 'Edit and modify PDF documents directly',
-      category: 'Study Tools',
+      id: 'sign-pdf',
+      title: 'Sign PDF',
+      icon: <Pen className="h-6 w-6" />,
+      description: 'Add digital signatures to PDF documents',
+      category: 'Signature Tools',
       steps: [
         {
-          title: 'Open PDF in Editor',
-          description: 'Upload and open your PDF in the editing interface',
-          details: 'The editor loads your PDF with full editing capabilities and tool palette.',
-          tips: ['Wait for complete loading before editing', 'Use zoom controls for precise editing']
+          title: 'Upload PDF',
+          description: 'Select the document to sign',
+          details: 'Opens the PDF in the signing interface.',
+          tips: ['Ensure you have the final version', 'Review content before signing']
         },
         {
-          title: 'Select Editing Tool',
-          description: 'Choose from text, image, or shape tools',
-          details: 'Each tool offers specific editing capabilities for different content types.',
-          tips: ['Text tool for adding/editing text', 'Image tool for adding pictures and graphics']
+          title: 'Create Signature',
+          description: 'Draw, Type, or Upload signature',
+          details: 'Draw with mouse/touch, type your name, or upload a signature image.',
+          tips: ['Use a stylus for drawing', 'Upload a transparent PNG for best look']
         },
         {
-          title: 'Make Your Edits',
-          description: 'Add, modify, or delete content as needed',
-          details: 'Click and drag to select areas, double-click text to edit, use toolbar for formatting.',
-          tips: ['Save frequently while editing', 'Use undo/redo for quick corrections', 'Preview changes before finalizing']
+          title: 'Place Signature',
+          description: 'Position and resize on the page',
+          details: 'Drag to move, use handles to resize. Place on multiple pages if needed.',
+          tips: ['Align with signature line', 'Ensure it is legible']
         },
         {
-          title: 'Save Changes',
-          description: 'Save your edited PDF with all modifications',
-          details: 'Changes are saved to a new PDF file, preserving the original document.',
-          tips: ['Choose a descriptive filename', 'Keep original file as backup', 'Verify all changes before closing']
+          title: 'Download Signed PDF',
+          description: 'Get the legally binding document',
+          details: 'The signature is embedded into the PDF.',
+          tips: ['Save a copy for your records', 'Send to recipients']
+        }
+      ]
+    },
+    {
+      id: 'verified-signature',
+      title: 'Verified Signature',
+      icon: <ShieldCheck className="h-6 w-6" />,
+      description: 'Sign with verifiable QR code security',
+      category: 'Signature Tools',
+      steps: [
+        {
+          title: 'Upload & Identify',
+          description: 'Upload PDF and enter signer details',
+          details: 'Provide your name for the digital certificate.',
+          tips: ['Use your full legal name', 'Check document name']
+        },
+        {
+          title: 'Sign Document',
+          description: 'Add your signature',
+          details: 'Draw or type your signature. A QR code is generated automatically.',
+          tips: ['The QR code contains verification data', 'Do not cover the QR code']
+        },
+        {
+          title: 'Generate Certificate',
+          description: 'Create the verification record',
+          details: 'Links your signature to the specific document version.',
+          tips: ['Wait for secure generation', 'Certificate is embedded']
+        },
+        {
+          title: 'Download',
+          description: 'Get the verifiable PDF',
+          details: 'Contains signature and QR code for future verification.',
+          tips: ['Use "Verify Document" tool to check validity', 'Secure document']
+        }
+      ]
+    },
+    {
+      id: 'verify-document',
+      title: 'Verify Document',
+      icon: <ScanLine className="h-6 w-6" />,
+      description: 'Authenticate signed documents via QR code',
+      category: 'Signature Tools',
+      steps: [
+        {
+          title: 'Select Mode',
+          description: 'Choose Camera or Upload',
+          details: 'Use webcam to scan printed docs, or upload digital file.',
+          tips: ['Ensure good lighting for camera', 'Upload original signed PDF']
+        },
+        {
+          title: 'Scan QR Code',
+          description: 'Point camera or select image area',
+          details: 'The tool reads the secure QR code on the document.',
+          tips: ['Hold steady', 'Ensure entire QR code is visible']
+        },
+        {
+          title: 'View Result',
+          description: 'See verification details',
+          details: 'Displays signer name, date, and document integrity status.',
+          tips: ['Check against physical document', 'Verify timestamp']
         }
       ]
     }

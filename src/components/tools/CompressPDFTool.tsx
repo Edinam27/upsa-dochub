@@ -112,17 +112,17 @@ const CompressPDFTool: React.FC<CompressPDFToolProps> = ({ onProcess, isProcessi
             border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 cursor-pointer
             ${
               isDragActive
-                ? 'border-orange-400 bg-orange-50 dark:bg-orange-900/20'
-                : 'border-gray-300 dark:border-gray-600 hover:border-orange-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+                ? 'border-orange-400 bg-orange-50'
+                : 'border-gray-300 hover:border-orange-400 hover:bg-gray-50'
             }
           `}
         >
           <input {...getInputProps()} />
           <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
             {isDragActive ? 'Drop PDF file here' : 'Upload PDF File'}
           </h3>
-          <p className="text-gray-600 dark:text-gray-300 mb-4">
+          <p className="text-gray-600 mb-4">
             Drag and drop your PDF file here, or click to browse
           </p>
           <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
@@ -135,17 +135,17 @@ const CompressPDFTool: React.FC<CompressPDFToolProps> = ({ onProcess, isProcessi
         </div>
       ) : (
         <div className="space-y-6">
-          <div className="p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+          <div className="p-4 bg-white border border-gray-200 rounded-lg">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <div className="flex-shrink-0">
-                  <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900/20 rounded-lg flex items-center justify-center">
-                    <FileText className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+                  <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <FileText className="h-6 w-6 text-orange-600" />
                   </div>
                 </div>
                 <div>
-                  <h4 className="text-lg font-medium text-gray-900 dark:text-white">{file.name}</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <h4 className="text-lg font-medium text-gray-900">{file.name}</h4>
+                  <p className="text-sm text-gray-600">
                     Size: {formatFileSize(file.size)}
                   </p>
                 </div>
@@ -169,21 +169,21 @@ const CompressPDFTool: React.FC<CompressPDFToolProps> = ({ onProcess, isProcessi
                   p-4 border-2 rounded-lg text-left transition-all duration-200
                   ${
                     compressionLevel === level
-                      ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-orange-300'
+                      ? 'border-orange-500 bg-orange-50'
+                      : 'border-gray-200 hover:border-orange-300'
                   }
                 `}
               >
                 <div className="flex items-start justify-between mb-2">
-                  <h5 className="font-medium text-gray-900 dark:text-white">
+                  <h5 className="font-medium text-gray-900">
                     {option.name}
                   </h5>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                <p className="text-sm text-gray-600 mb-2">
                   {option.description}
                 </p>
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-green-600 dark:text-green-400 font-medium">
+                  <span className="text-green-600 font-medium">
                     ~{option.estimatedPercent}% reduction
                   </span>
                 </div>
@@ -198,14 +198,14 @@ const CompressPDFTool: React.FC<CompressPDFToolProps> = ({ onProcess, isProcessi
             <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="flex items-center space-x-2 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
+              className="flex items-center space-x-2 p-4 bg-red-50 border border-red-200 rounded-lg"
             >
               <AlertCircle className="h-5 w-5 text-red-500" />
-              <span className="text-red-700 dark:text-red-300">{error}</span>
+              <span className="text-red-700">{error}</span>
             </motion.div>
           )}
 
-          <div className="flex justify-end pt-6 border-t border-gray-200 dark:border-gray-700">
+          <div className="flex justify-end pt-6 border-t border-gray-200">
             <button
               onClick={handleCompress}
               disabled={isProcessing}
@@ -214,7 +214,7 @@ const CompressPDFTool: React.FC<CompressPDFToolProps> = ({ onProcess, isProcessi
                 ${
                   !isProcessing
                     ? 'bg-orange-600 hover:bg-orange-700 text-white shadow-lg hover:shadow-xl'
-                    : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }
               `}
             >

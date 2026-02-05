@@ -135,17 +135,17 @@ const WatermarkPDFTool: React.FC<WatermarkPDFToolProps> = ({ onProcess, isProces
           border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 cursor-pointer
           ${
             isDragActive
-              ? 'border-purple-400 bg-purple-50 dark:bg-purple-900/20'
-              : 'border-gray-300 dark:border-gray-600 hover:border-purple-400 hover:bg-gray-50 dark:hover:bg-gray-800'
+              ? 'border-purple-400 bg-purple-50'
+              : 'border-gray-300 hover:border-purple-400 hover:bg-gray-50'
           }
         `}
       >
         <input {...getInputProps()} />
         <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">
           {isDragActive ? 'Drop PDF file here' : 'Upload PDF File'}
         </h3>
-        <p className="text-gray-600 dark:text-gray-300 mb-4">
+        <p className="text-gray-600 mb-4">
           Drag and drop your PDF file here, or click to browse
         </p>
         <div className="flex items-center justify-center space-x-4 text-sm text-gray-500">
@@ -162,25 +162,25 @@ const WatermarkPDFTool: React.FC<WatermarkPDFToolProps> = ({ onProcess, isProces
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center space-x-2 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
+          className="flex items-center space-x-2 p-4 bg-red-50 border border-red-200 rounded-lg"
         >
           <AlertCircle className="h-5 w-5 text-red-500" />
-          <span className="text-red-700 dark:text-red-300">{error}</span>
+          <span className="text-red-700">{error}</span>
         </motion.div>
       )}
 
       {/* File Info */}
       {file && (
-        <div className="p-4 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+        <div className="p-4 bg-white border border-gray-200 rounded-lg">
           <div className="flex items-center space-x-4">
             <div className="flex-shrink-0">
-              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/20 rounded-lg flex items-center justify-center">
-                <FileText className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <FileText className="h-6 w-6 text-purple-600" />
               </div>
             </div>
             <div>
-              <h4 className="text-lg font-medium text-gray-900 dark:text-white">{file.name}</h4>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
+              <h4 className="text-lg font-medium text-gray-900">{file.name}</h4>
+              <p className="text-sm text-gray-600">
                 {formatFileSize(file.size)}
               </p>
             </div>
@@ -191,7 +191,7 @@ const WatermarkPDFTool: React.FC<WatermarkPDFToolProps> = ({ onProcess, isProces
       {/* Watermark Configuration */}
       {file && (
         <div className="space-y-6">
-          <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h4 className="text-lg font-semibold text-gray-900">
             Watermark Settings
           </h4>
 
@@ -203,15 +203,15 @@ const WatermarkPDFTool: React.FC<WatermarkPDFToolProps> = ({ onProcess, isProces
                 p-4 border-2 rounded-lg text-left transition-all duration-200 flex items-center space-x-3
                 ${
                   watermarkType === 'text'
-                    ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
-                    : 'border-gray-200 dark:border-gray-700 hover:border-purple-300'
+                    ? 'border-purple-500 bg-purple-50'
+                    : 'border-gray-200 hover:border-purple-300'
                 }
               `}
             >
-              <Type className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+              <Type className="h-6 w-6 text-purple-600" />
               <div>
-                <h5 className="font-medium text-gray-900 dark:text-white">Text Watermark</h5>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Add custom text</p>
+                <h5 className="font-medium text-gray-900">Text Watermark</h5>
+                <p className="text-sm text-gray-600">Add custom text</p>
               </div>
             </button>
 
@@ -221,24 +221,24 @@ const WatermarkPDFTool: React.FC<WatermarkPDFToolProps> = ({ onProcess, isProces
                 p-4 border-2 rounded-lg text-left transition-all duration-200 flex items-center space-x-3
                 ${
                   watermarkType === 'image'
-                    ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
-                    : 'border-gray-200 dark:border-gray-700 hover:border-purple-300'
+                    ? 'border-purple-500 bg-purple-50'
+                    : 'border-gray-200 hover:border-purple-300'
                 }
               `}
             >
-              <ImageIcon className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+              <ImageIcon className="h-6 w-6 text-purple-600" />
               <div>
-                <h5 className="font-medium text-gray-900 dark:text-white">Image Watermark</h5>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Upload logo/image</p>
+                <h5 className="font-medium text-gray-900">Image Watermark</h5>
+                <p className="text-sm text-gray-600">Upload logo/image</p>
               </div>
             </button>
           </div>
 
           {/* Text Watermark Settings */}
           {watermarkType === 'text' && (
-            <div className="space-y-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+            <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Watermark Text
                 </label>
                 <input
@@ -246,13 +246,13 @@ const WatermarkPDFTool: React.FC<WatermarkPDFToolProps> = ({ onProcess, isProces
                   value={watermarkText}
                   onChange={(e) => setWatermarkText(e.target.value)}
                   placeholder="Enter watermark text"
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Font Size: {fontSize}px
                   </label>
                   <input
@@ -261,12 +261,12 @@ const WatermarkPDFTool: React.FC<WatermarkPDFToolProps> = ({ onProcess, isProces
                     max="100"
                     value={fontSize}
                     onChange={(e) => setFontSize(parseInt(e.target.value))}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Color
                   </label>
                   <div className="flex items-center space-x-2">
@@ -274,13 +274,13 @@ const WatermarkPDFTool: React.FC<WatermarkPDFToolProps> = ({ onProcess, isProces
                       type="color"
                       value={color}
                       onChange={(e) => setColor(e.target.value)}
-                      className="w-12 h-10 border border-gray-300 dark:border-gray-600 rounded cursor-pointer"
+                      className="w-12 h-10 border border-gray-300 rounded cursor-pointer"
                     />
                     <input
                       type="text"
                       value={color}
                       onChange={(e) => setColor(e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     />
                   </div>
                 </div>
@@ -297,14 +297,14 @@ const WatermarkPDFTool: React.FC<WatermarkPDFToolProps> = ({ onProcess, isProces
                   border-2 border-dashed rounded-lg p-6 text-center transition-all duration-300 cursor-pointer
                   ${
                     isImageDragActive
-                      ? 'border-purple-400 bg-purple-50 dark:bg-purple-900/20'
-                      : 'border-gray-300 dark:border-gray-600 hover:border-purple-400'
+                      ? 'border-purple-400 bg-purple-50'
+                      : 'border-gray-300 hover:border-purple-400'
                   }
                 `}
               >
                 <input {...getImageInputProps()} />
                 <ImageIcon className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                <p className="text-sm text-gray-600 dark:text-gray-300">
+                <p className="text-sm text-gray-600">
                   {watermarkImage ? watermarkImage.name : 'Upload watermark image'}
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
@@ -316,7 +316,7 @@ const WatermarkPDFTool: React.FC<WatermarkPDFToolProps> = ({ onProcess, isProces
 
           {/* Position Settings */}
           <div className="space-y-4">
-            <h5 className="font-medium text-gray-900 dark:text-white flex items-center space-x-2">
+            <h5 className="font-medium text-gray-900 flex items-center space-x-2">
               <Move className="h-4 w-4" />
               <span>Position</span>
             </h5>
@@ -330,8 +330,8 @@ const WatermarkPDFTool: React.FC<WatermarkPDFToolProps> = ({ onProcess, isProces
                     p-3 text-sm border rounded-lg transition-all duration-200
                     ${
                       position === pos
-                        ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-purple-300 text-gray-700 dark:text-gray-300'
+                        ? 'border-purple-500 bg-purple-50 text-purple-700'
+                        : 'border-gray-200 hover:border-purple-300 text-gray-700'
                     }
                   `}
                 >
@@ -344,7 +344,7 @@ const WatermarkPDFTool: React.FC<WatermarkPDFToolProps> = ({ onProcess, isProces
           {/* Opacity and Rotation */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center space-x-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center space-x-2">
                 <Palette className="h-4 w-4" />
                 <span>Opacity: {opacity}%</span>
               </label>
@@ -354,12 +354,12 @@ const WatermarkPDFTool: React.FC<WatermarkPDFToolProps> = ({ onProcess, isProces
                 max="80"
                 value={opacity}
                 onChange={(e) => setOpacity(parseInt(e.target.value))}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center space-x-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center space-x-2">
                 <RotateCw className="h-4 w-4" />
                 <span>Rotation: {rotation}°</span>
               </label>
@@ -369,33 +369,33 @@ const WatermarkPDFTool: React.FC<WatermarkPDFToolProps> = ({ onProcess, isProces
                 max="360"
                 value={rotation}
                 onChange={(e) => setRotation(parseInt(e.target.value))}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
               />
             </div>
           </div>
 
           {/* Preview */}
-          <div className="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <h5 className="font-medium text-gray-900 dark:text-white mb-3">Preview Settings</h5>
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <h5 className="font-medium text-gray-900 mb-3">Preview Settings</h5>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Type:</span>
-                  <span className="text-gray-900 dark:text-white capitalize">{watermarkType}</span>
+                  <span className="text-gray-600">Type:</span>
+                  <span className="text-gray-900 capitalize">{watermarkType}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Position:</span>
-                  <span className="text-gray-900 dark:text-white">{positions[position].name}</span>
+                  <span className="text-gray-600">Position:</span>
+                  <span className="text-gray-900">{positions[position].name}</span>
                 </div>
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Opacity:</span>
-                  <span className="text-gray-900 dark:text-white">{opacity}%</span>
+                  <span className="text-gray-600">Opacity:</span>
+                  <span className="text-gray-900">{opacity}%</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Rotation:</span>
-                  <span className="text-gray-900 dark:text-white">{rotation}°</span>
+                  <span className="text-gray-600">Rotation:</span>
+                  <span className="text-gray-900">{rotation}°</span>
                 </div>
               </div>
             </div>
@@ -404,7 +404,7 @@ const WatermarkPDFTool: React.FC<WatermarkPDFToolProps> = ({ onProcess, isProces
       )}
 
       {/* Action Button */}
-      <div className="flex justify-end pt-6 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex justify-end pt-6 border-t border-gray-200">
         <button
           onClick={handleAddWatermark}
           disabled={!file || isProcessing || (watermarkType === 'text' && !watermarkText.trim()) || (watermarkType === 'image' && !watermarkImage)}
@@ -413,7 +413,7 @@ const WatermarkPDFTool: React.FC<WatermarkPDFToolProps> = ({ onProcess, isProces
             ${
               file && !isProcessing && ((watermarkType === 'text' && watermarkText.trim()) || (watermarkType === 'image' && watermarkImage))
                 ? 'bg-purple-600 hover:bg-purple-700 text-white shadow-lg hover:shadow-xl'
-                : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }
           `}
         >

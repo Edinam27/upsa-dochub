@@ -115,13 +115,13 @@ const WatermarkRemovalTool: React.FC<WatermarkRemovalToolProps> = ({ onProcess, 
     <div className="space-y-6">
       {/* Header */}
       <div className="text-center">
-        <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full mb-4">
-          <Eraser className="h-8 w-8 text-red-600 dark:text-red-400" />
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+          <Eraser className="h-8 w-8 text-red-600" />
         </div>
-        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+        <h3 className="text-2xl font-bold text-gray-900 mb-2">
           Watermark Removal Tool
         </h3>
-        <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+        <p className="text-gray-600 max-w-2xl mx-auto">
           Remove watermarks from PDFs and images using advanced processing algorithms. 
           Supports CamScanner, Adobe Scan, and other common watermarks.
         </p>
@@ -131,11 +131,11 @@ const WatermarkRemovalTool: React.FC<WatermarkRemovalToolProps> = ({ onProcess, 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg"
+        className="p-4 bg-amber-50 border border-amber-200 rounded-lg"
       >
         <div className="flex items-start space-x-3">
-          <Info className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 flex-shrink-0" />
-          <div className="text-sm text-amber-800 dark:text-amber-200">
+          <Info className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+          <div className="text-sm text-amber-800">
             <p className="font-medium mb-1">Important Notice:</p>
             <ul className="space-y-1 text-xs">
               <li>• Watermark removal effectiveness depends on how the watermark was applied</li>
@@ -154,25 +154,25 @@ const WatermarkRemovalTool: React.FC<WatermarkRemovalToolProps> = ({ onProcess, 
           border-2 border-dashed rounded-lg p-8 text-center transition-all duration-300 cursor-pointer
           ${
             isDragActive
-              ? 'border-red-400 bg-red-50 dark:bg-red-900/20'
-              : 'border-gray-300 dark:border-gray-600 hover:border-red-400'
+              ? 'border-red-400 bg-red-50'
+              : 'border-gray-300 hover:border-red-400'
           }
         `}
       >
         <input {...getInputProps()} />
         <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-        <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+        <h4 className="text-lg font-medium text-gray-900 mb-2">
           {isDragActive ? 'Drop files here' : 'Upload Files'}
         </h4>
-        <p className="text-gray-600 dark:text-gray-300 mb-4">
+        <p className="text-gray-600 mb-4">
           Drag and drop your files here, or click to browse
         </p>
         <div className="flex flex-wrap justify-center gap-2 text-xs text-gray-500">
-          <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">PDF</span>
-          <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">PNG</span>
-          <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">JPG</span>
-          <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">JPEG</span>
-          <span className="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded">GIF</span>
+          <span className="px-2 py-1 bg-gray-100 rounded">PDF</span>
+          <span className="px-2 py-1 bg-gray-100 rounded">PNG</span>
+          <span className="px-2 py-1 bg-gray-100 rounded">JPG</span>
+          <span className="px-2 py-1 bg-gray-100 rounded">JPEG</span>
+          <span className="px-2 py-1 bg-gray-100 rounded">GIF</span>
         </div>
       </div>
 
@@ -181,34 +181,34 @@ const WatermarkRemovalTool: React.FC<WatermarkRemovalToolProps> = ({ onProcess, 
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="flex items-center space-x-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg"
+          className="flex items-center space-x-2 p-3 bg-red-50 border border-red-200 rounded-lg"
         >
           <AlertCircle className="h-5 w-5 text-red-500" />
-          <span className="text-red-700 dark:text-red-300">{error}</span>
+          <span className="text-red-700">{error}</span>
         </motion.div>
       )}
 
       {/* Uploaded Files */}
       {files.length > 0 && (
         <div className="space-y-3">
-          <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h4 className="text-lg font-semibold text-gray-900">
             Uploaded Files ({files.length})
           </h4>
           <div className="space-y-2">
             {files.map((file, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+              <div key={index} className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg">
                 <div className="flex items-center space-x-3">
                   <div className="flex-shrink-0">
-                    <div className="w-10 h-10 bg-red-100 dark:bg-red-900/20 rounded-lg flex items-center justify-center">
+                    <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
                       {getFileType(file) === 'pdf' ? (
-                        <FileText className="h-5 w-5 text-red-600 dark:text-red-400" />
+                        <FileText className="h-5 w-5 text-red-600" />
                       ) : (
-                        <ImageIcon className="h-5 w-5 text-red-600 dark:text-red-400" />
+                        <ImageIcon className="h-5 w-5 text-red-600" />
                       )}
                     </div>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">{file.name}</p>
+                    <p className="text-sm font-medium text-gray-900">{file.name}</p>
                     <p className="text-xs text-gray-500">
                       {formatFileSize(file.size)} • {getFileType(file).toUpperCase()}
                     </p>
@@ -229,13 +229,13 @@ const WatermarkRemovalTool: React.FC<WatermarkRemovalToolProps> = ({ onProcess, 
       {/* Removal Settings */}
       {files.length > 0 && (
         <div className="space-y-6">
-          <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h4 className="text-lg font-semibold text-gray-900">
             Removal Settings
           </h4>
 
           {/* Removal Method */}
           <div className="space-y-3">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="block text-sm font-medium text-gray-700">
               Removal Method
             </label>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -247,15 +247,15 @@ const WatermarkRemovalTool: React.FC<WatermarkRemovalToolProps> = ({ onProcess, 
                     p-4 border-2 rounded-lg text-left transition-all duration-200 flex items-start space-x-3
                     ${
                       removalMethod === key
-                        ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-red-300'
+                        ? 'border-red-500 bg-red-50'
+                        : 'border-gray-200 hover:border-red-300'
                     }
                   `}
                 >
                   {method.icon}
                   <div>
-                    <h5 className="font-medium text-gray-900 dark:text-white">{method.name}</h5>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{method.description}</p>
+                    <h5 className="font-medium text-gray-900">{method.name}</h5>
+                    <p className="text-sm text-gray-600">{method.description}</p>
                   </div>
                 </button>
               ))}
@@ -264,7 +264,7 @@ const WatermarkRemovalTool: React.FC<WatermarkRemovalToolProps> = ({ onProcess, 
 
           {/* Target Watermark */}
           <div className="space-y-3">
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="block text-sm font-medium text-gray-700">
               Target Watermark Type
             </label>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -276,13 +276,13 @@ const WatermarkRemovalTool: React.FC<WatermarkRemovalToolProps> = ({ onProcess, 
                     p-3 border-2 rounded-lg text-left transition-all duration-200
                     ${
                       targetWatermark === watermark.id
-                        ? 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                        : 'border-gray-200 dark:border-gray-700 hover:border-red-300'
+                        ? 'border-red-500 bg-red-50'
+                        : 'border-gray-200 hover:border-red-300'
                     }
                   `}
                 >
-                  <h5 className="font-medium text-gray-900 dark:text-white text-sm">{watermark.name}</h5>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">{watermark.description}</p>
+                  <h5 className="font-medium text-gray-900 text-sm">{watermark.name}</h5>
+                  <p className="text-xs text-gray-600">{watermark.description}</p>
                 </button>
               ))}
             </div>
@@ -291,7 +291,7 @@ const WatermarkRemovalTool: React.FC<WatermarkRemovalToolProps> = ({ onProcess, 
           {/* Advanced Settings */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Detection Sensitivity: {sensitivity}%
               </label>
               <input
@@ -300,7 +300,7 @@ const WatermarkRemovalTool: React.FC<WatermarkRemovalToolProps> = ({ onProcess, 
                 max="90"
                 value={sensitivity}
                 onChange={(e) => setSensitivity(parseInt(e.target.value))}
-                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700"
+                className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
               />
               <div className="flex justify-between text-xs text-gray-500 mt-1">
                 <span>Conservative</span>
@@ -316,7 +316,7 @@ const WatermarkRemovalTool: React.FC<WatermarkRemovalToolProps> = ({ onProcess, 
                   onChange={(e) => setPreserveQuality(e.target.checked)}
                   className="rounded border-gray-300 text-red-600 focus:ring-red-500"
                 />
-                <span className="text-sm text-gray-700 dark:text-gray-300">Preserve Image Quality</span>
+                <span className="text-sm text-gray-700">Preserve Image Quality</span>
               </label>
             </div>
           </div>
@@ -324,7 +324,7 @@ const WatermarkRemovalTool: React.FC<WatermarkRemovalToolProps> = ({ onProcess, 
       )}
 
       {/* Action Button */}
-      <div className="flex justify-end pt-6 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex justify-end pt-6 border-t border-gray-200">
         <button
           onClick={handleRemoveWatermarks}
           disabled={files.length === 0 || isProcessing}
@@ -333,7 +333,7 @@ const WatermarkRemovalTool: React.FC<WatermarkRemovalToolProps> = ({ onProcess, 
             ${
               files.length > 0 && !isProcessing
                 ? 'bg-red-600 hover:bg-red-700 text-white shadow-lg hover:shadow-xl'
-                : 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }
           `}
         >
@@ -352,10 +352,10 @@ const WatermarkRemovalTool: React.FC<WatermarkRemovalToolProps> = ({ onProcess, 
       </div>
 
       {/* Info Section */}
-      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
+      <div className="bg-gray-50 rounded-lg p-6">
         <div className="flex items-start space-x-3">
-          <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
-          <div className="text-sm text-gray-700 dark:text-gray-300">
+          <Info className="h-5 w-5 text-blue-600 mt-0.5 flex-shrink-0" />
+          <div className="text-sm text-gray-700">
             <p className="font-medium mb-1">How Image-Based Watermark Removal Works:</p>
             <ul className="space-y-1 text-xs">
               <li>• <strong>CamScanner Detection:</strong> Automatically detects and removes CamScanner image watermarks</li>
@@ -365,7 +365,7 @@ const WatermarkRemovalTool: React.FC<WatermarkRemovalToolProps> = ({ onProcess, 
               <li>• <strong>Quality Preservation:</strong> Advanced inpainting to maintain document clarity</li>
               <li>• <strong>Batch Processing:</strong> Process multiple files simultaneously</li>
             </ul>
-            <p className="mt-3 text-xs text-blue-600 dark:text-blue-400">
+            <p className="mt-3 text-xs text-blue-600">
               <strong>Note:</strong> CamScanner watermarks are image-based overlays. Our tool uses computer vision 
               techniques to detect and remove these visual watermarks while preserving the underlying document content.
             </p>
