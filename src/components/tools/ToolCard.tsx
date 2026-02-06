@@ -47,7 +47,7 @@ const ToolCard = ({ tool }: ToolCardProps) => {
       >
       <div className="bg-white rounded-2xl p-6 border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-300 h-full">
         {/* Tool Icon */}
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 relative z-10">
           <div className={`p-3 rounded-xl bg-gradient-to-r ${tool.color} text-white group-hover:scale-110 transition-transform duration-300 shadow-md`}>
             {tool.icon}
           </div>
@@ -62,17 +62,17 @@ const ToolCard = ({ tool }: ToolCardProps) => {
         </div>
 
         {/* Tool Name */}
-        <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+        <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors relative z-10">
           {tool.name}
         </h3>
 
         {/* Tool Description */}
-        <p className="text-gray-600 text-sm mb-4 leading-relaxed">
+        <p className="text-gray-700 text-sm mb-4 leading-relaxed relative z-10">
           {tool.description}
         </p>
 
         {/* Features */}
-        <div className="space-y-2 mb-6">
+        <div className="space-y-2 mb-6 relative z-10">
           {tool.features.map((feature, index) => (
             <motion.div
               key={index}
@@ -82,18 +82,18 @@ const ToolCard = ({ tool }: ToolCardProps) => {
               className="flex items-center space-x-2"
             >
               <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-              <span className="text-gray-500 text-xs">{feature}</span>
+              <span className="text-gray-600 text-xs font-medium">{feature}</span>
             </motion.div>
           ))}
         </div>
 
         {/* Action Button */}
         <motion.div
-          className="flex items-center justify-between"
+          className="flex items-center justify-between relative z-10"
           animate={{ opacity: isHovered ? 1 : 0.8 }}
           transition={{ duration: 0.3 }}
         >
-          <span className="text-xs text-gray-400 uppercase tracking-wide font-medium">
+          <span className="text-xs text-gray-500 uppercase tracking-wide font-medium">
             {tool.category}
           </span>
           <motion.div

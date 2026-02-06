@@ -44,10 +44,10 @@ const HeroSection = () => {
             </div>
           </div>
           
-          <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto mb-4">
+          <p className="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto mb-4">
             Professional PDF tools for students and academics
           </p>
-          <p className="text-gray-500 max-w-xl mx-auto">
+          <p className="text-gray-600 max-w-xl mx-auto">
             Convert, merge, split, and manage your documents with ease
           </p>
         </motion.div>
@@ -64,7 +64,7 @@ const HeroSection = () => {
               <FileText className="h-8 w-8 text-blue-600" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">12+ PDF Tools</h3>
-            <p className="text-gray-600 text-sm">Convert, merge, split, compress and more</p>
+            <p className="text-gray-700 text-sm">Convert, merge, split, compress and more</p>
           </div>
           
           <div className="text-center">
@@ -72,7 +72,7 @@ const HeroSection = () => {
               <Zap className="h-8 w-8 text-green-600" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Fast Processing</h3>
-            <p className="text-gray-600 text-sm">Quick and efficient document handling</p>
+            <p className="text-gray-700 text-sm">Quick and efficient document handling</p>
           </div>
           
           <div className="text-center">
@@ -80,7 +80,7 @@ const HeroSection = () => {
               <Shield className="h-8 w-8 text-purple-600" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Secure & Private</h3>
-            <p className="text-gray-600 text-sm">All processing happens locally in your browser</p>
+            <p className="text-gray-700 text-sm">All processing happens locally in your browser</p>
           </div>
         </motion.div>
 
@@ -119,15 +119,15 @@ const HeroSection = () => {
         >
           <div>
             <div className="text-2xl font-bold text-blue-600">12+</div>
-            <div className="text-sm text-gray-600">Tools</div>
+            <div className="text-sm text-gray-700">Tools</div>
           </div>
           <div>
             <div className="text-2xl font-bold text-green-600">Free</div>
-            <div className="text-sm text-gray-600">Always</div>
+            <div className="text-sm text-gray-700">Always</div>
           </div>
           <div>
             <div className="text-2xl font-bold text-purple-600">Secure</div>
-            <div className="text-sm text-gray-600">Local</div>
+            <div className="text-sm text-gray-700">Local</div>
           </div>
         </motion.div>
 
@@ -144,7 +144,7 @@ const HeroSection = () => {
             className="cursor-pointer"
             onClick={scrollToTools}
           >
-            <ArrowRight className="h-6 w-6 text-gray-400 rotate-90" />
+            <ArrowRight className="h-6 w-6 text-gray-500 rotate-90" />
           </motion.div>
         </motion.div>
       </div>

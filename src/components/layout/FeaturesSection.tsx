@@ -35,7 +35,7 @@ const FeatureCard = ({ icon, title, description, delay }: FeatureProps) => {
         <h3 className="text-xl font-semibold text-gray-900 mb-4">
           {title}
         </h3>
-        <p className="text-gray-600 leading-relaxed">
+        <p className="text-gray-700 leading-relaxed">
           {description}
         </p>
       </div>
@@ -96,7 +96,7 @@ const FeaturesSection = () => {
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
             Why Choose <span className="text-blue-600">UPSA DocHub</span>?
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-700 max-w-3xl mx-auto">
             A complete document management solution designed with UPSA students' academic needs in mind.
           </p>
         </motion.div>
@@ -126,7 +126,7 @@ const FeaturesSection = () => {
             <h3 className="text-3xl font-bold text-gray-900 mb-4">
               Ready to Get Started?
             </h3>
-            <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
+            <p className="text-gray-700 mb-8 max-w-2xl mx-auto">
               Join thousands of UPSA students who streamline their document processing with our free tools.
             </p>
             <button 

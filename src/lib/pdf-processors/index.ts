@@ -1403,197 +1403,240 @@ class PDFToWordConverter extends PDFProcessor {
   async process(file: File, conversionOptions?: any): Promise<ProcessedFile> {
     try {
       // Import required libraries dynamically
-      const { Document, Packer, Paragraph, TextRun, ImageRun, HeadingLevel, Table, TableRow, TableCell, WidthType, AlignmentType, Indent } = await import('docx');
+      const { 
+        Document, Packer, Paragraph, TextRun, ImageRun, HeadingLevel, 
+        Table, TableRow, TableCell, WidthType, AlignmentType, 
+        BorderStyle, Header, Footer, TextWrappingType, TextWrappingSide,
+        VerticalAlign
+      } = await import('docx');
       
       // Import PDF.js dynamically
       const { pdfjs: pdfjsLib } = await import('react-pdf');
       const { PDF_WORKER_URL } = await import('@/lib/pdf-worker');
       
-      // Set worker source to CDN URL
+      // Import Tesseract for OCR if needed
+      let Tesseract: any = null;
+      if (conversionOptions?.ocrEnabled) {
+        Tesseract = (await import('tesseract.js')).default;
+      }
+      
+      // Set worker source
       if (typeof window !== 'undefined') {
           pdfjsLib.GlobalWorkerOptions.workerSrc = PDF_WORKER_URL;
       }
       
-      // Get basic PDF info using pdf-lib
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
       
-      const docChildren: any[] = [];
+      const sections: any[] = [];
       
-      // Add professional document header
-      docChildren.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: `Document Conversion Report`,
-              bold: true,
-              size: 28,
-              color: "2E74B5"
-            })
-          ],
-          heading: HeadingLevel.HEADING_1,
-          alignment: AlignmentType.CENTER
-        }),
-        new Paragraph({ children: [new TextRun({ text: "" })] })
-      );
-
       for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
         const page = await pdf.getPage(pageNum);
-        const viewport = page.getViewport({ scale: 1.0 });
-        const textContent = await page.getTextContent();
+        const viewport = page.getViewport({ scale: 1.5 }); // Higher scale for better precision
+        const { width: pageWidth, height: pageHeight } = viewport;
         
-        // 1. Extract Text Items
-        const textItems = textContent.items.map((item: any) => {
-           const tx = item.transform;
-           const x = tx[4];
-           const y = tx[5]; 
-           const docY = viewport.height - y;
-           
-           return {
-             type: 'text',
-             text: item.str,
-             x: x,
-             y: y,
-             docY: docY,
-             width: item.width,
-             height: item.height,
-             fontName: item.fontName,
-             hasEOL: item.hasEOL
-           };
-        }).filter((item: any) => item.text.trim().length > 0);
-
-        // 2. Extract Image Items
-        const imageItems: any[] = [];
-        try {
-            const operatorList = await page.getOperatorList();
-            const commonObjs = page.commonObjs;
-            const objs = page.objs;
+        // 1. Extract Items (Text and Images)
+        let pageItems: any[] = [];
+        
+        // Check if OCR is needed (explicitly enabled or image-only page)
+        let useOCR = conversionOptions?.ocrEnabled;
+        
+        if (!useOCR) {
+            const textContent = await page.getTextContent();
+            if (textContent.items.length < 10) {
+                 // Heuristic: If fewer than 10 text items, assume it's an image/scan and try OCR
+                 // But only if we can (Tesseract is available)
+                 if (!Tesseract) {
+                    Tesseract = (await import('tesseract.js')).default;
+                 }
+                 useOCR = true;
+            } else {
+                // Native Text Extraction
+                pageItems = textContent.items.map((item: any) => {
+                    const tx = item.transform;
+                    // Transform to viewport coordinates
+                    // pdf.js transform: [scaleX, skewY, skewX, scaleY, tx, ty]
+                    // We need to apply viewport scaling
+                    const x = tx[4] * 1.5; // Apply scale factor
+                    const y = tx[5] * 1.5;
+                    const docY = pageHeight - y; // Word uses Top-Left origin
+                    
+                    return {
+                        type: 'text',
+                        text: item.str,
+                        x: x,
+                        y: docY, // Use Word Y (from top)
+                        width: item.width * 1.5,
+                        height: item.height * 1.5,
+                        fontName: item.fontName,
+                        fontSize: Math.sqrt(tx[0]*tx[0] + tx[1]*tx[1]) * 1.5, // Approx font size
+                        hasEOL: item.hasEOL
+                    };
+                }).filter((item: any) => item.text.trim().length > 0);
+            }
+        }
+        
+        if (useOCR) {
+            // Render to canvas for OCR
+            const canvas = document.createElement('canvas');
+            canvas.width = pageWidth;
+            canvas.height = pageHeight;
+            const context = canvas.getContext('2d');
             
-            let currentMatrix = [1, 0, 0, 1, 0, 0];
-            const transformStack: any[] = [];
-            
-            for (let i = 0; i < operatorList.fnArray.length; i++) {
-                const fn = operatorList.fnArray[i];
-                const args = operatorList.argsArray[i];
+            if (context) {
+                await page.render({
+                    canvasContext: context,
+                    viewport: viewport
+                }).promise;
                 
-                if (fn === pdfjsLib.OPS.save) {
-                    transformStack.push([...currentMatrix]);
-                } else if (fn === pdfjsLib.OPS.restore) {
-                    if (transformStack.length > 0) {
-                        currentMatrix = transformStack.pop();
-                    }
-                } else if (fn === pdfjsLib.OPS.transform) {
-                    const m1 = currentMatrix;
-                    const m2 = args;
-                    currentMatrix = [
-                        m1[0] * m2[0] + m1[1] * m2[2],
-                        m1[0] * m2[1] + m1[1] * m2[3],
-                        m1[2] * m2[0] + m1[3] * m2[2],
-                        m1[2] * m2[1] + m1[3] * m2[3],
-                        m1[4] * m2[0] + m1[5] * m2[2] + m2[4],
-                        m1[4] * m2[1] + m1[5] * m2[3] + m2[5]
-                    ];
-                } else if (fn === pdfjsLib.OPS.paintImageXObject || fn === pdfjsLib.OPS.paintJpegXObject) {
-                    const imgName = args[0];
-                    try {
+                const imageDataUrl = canvas.toDataURL('image/png');
+                
+                const result = await Tesseract.recognize(
+                    imageDataUrl, 
+                    conversionOptions?.language || 'eng'
+                );
+                
+                // Map OCR words to items
+                const ocrItems = result.data.words.map((word: any) => ({
+                    type: 'text',
+                    text: word.text,
+                    x: word.bbox.x0,
+                    y: word.bbox.y0,
+                    width: word.bbox.x1 - word.bbox.x0,
+                    height: word.bbox.y1 - word.bbox.y0,
+                    fontName: 'OCR',
+                    fontSize: word.bbox.y1 - word.bbox.y0, // Height as proxy for font size
+                    confidence: word.confidence
+                }));
+                
+                pageItems = [...pageItems, ...ocrItems];
+            }
+        }
+        
+        // Extract Images (Native)
+        if (conversionOptions?.extractImages !== false) {
+            try {
+                const operatorList = await page.getOperatorList();
+                const commonObjs = page.commonObjs;
+                const objs = page.objs;
+                
+                let currentMatrix = [1, 0, 0, 1, 0, 0];
+                const transformStack: any[] = [];
+                
+                for (let i = 0; i < operatorList.fnArray.length; i++) {
+                    const fn = operatorList.fnArray[i];
+                    const args = operatorList.argsArray[i];
+                    
+                    if (fn === pdfjsLib.OPS.save) {
+                        transformStack.push([...currentMatrix]);
+                    } else if (fn === pdfjsLib.OPS.restore) {
+                        if (transformStack.length > 0) currentMatrix = transformStack.pop();
+                    } else if (fn === pdfjsLib.OPS.transform) {
+                        const m1 = currentMatrix;
+                        const m2 = args;
+                        currentMatrix = [
+                            m1[0] * m2[0] + m1[1] * m2[2],
+                            m1[0] * m2[1] + m1[1] * m2[3],
+                            m1[2] * m2[0] + m1[3] * m2[2],
+                            m1[2] * m2[1] + m1[3] * m2[3],
+                            m1[4] * m2[0] + m1[5] * m2[2] + m2[4],
+                            m1[4] * m2[1] + m1[5] * m2[3] + m2[5]
+                        ];
+                    } else if (fn === pdfjsLib.OPS.paintImageXObject || fn === pdfjsLib.OPS.paintJpegXObject) {
+                        const imgName = args[0];
                         const imgData = await (objs.get(imgName) || commonObjs.get(imgName));
                         if (imgData) {
-                            const x = currentMatrix[4];
-                            const y = currentMatrix[5];
-                            const w = Math.sqrt(currentMatrix[0] * currentMatrix[0] + currentMatrix[1] * currentMatrix[1]);
-                            const h = Math.sqrt(currentMatrix[2] * currentMatrix[2] + currentMatrix[3] * currentMatrix[3]);
-                            
-                            const docY = viewport.height - y - h;
+                            // Apply current transform + viewport scale
+                            const scale = 1.5;
+                            const x = currentMatrix[4] * scale;
+                            const y = currentMatrix[5] * scale;
+                            const w = Math.sqrt(currentMatrix[0] * currentMatrix[0] + currentMatrix[1] * currentMatrix[1]) * scale;
+                            const h = Math.sqrt(currentMatrix[2] * currentMatrix[2] + currentMatrix[3] * currentMatrix[3]) * scale;
+                            const docY = pageHeight - y - h; // Top-Left origin
                             
                             const imageBuffer = await this.convertImageToBuffer(imgData);
-                            
                             if (imageBuffer) {
-                                imageItems.push({
+                                pageItems.push({
                                     type: 'image',
-                                    x: x,
-                                    docY: docY,
-                                    width: w,
-                                    height: h,
-                                    data: imageBuffer,
-                                    isImage: true
+                                    x, y: docY, width: w, height: h,
+                                    data: imageBuffer
                                 });
                             }
                         }
-                    } catch (e) {
-                        console.warn('Failed to load image:', imgName, e);
                     }
                 }
+            } catch (e) {
+                console.warn('Image extraction warning:', e);
             }
-        } catch (e) {
-            console.error('Error extracting images:', e);
         }
-
-        // 3. Merge and Sort
-        const allItems = [...textItems, ...imageItems];
         
-        allItems.sort((a, b) => {
-           if (Math.abs(a.docY - b.docY) < 10) {
-              return a.x - b.x;
-           }
-           return a.docY - b.docY;
+        // 2. Layout Analysis
+        
+        // Sort items by Y, then X
+        pageItems.sort((a, b) => {
+            if (Math.abs(a.y - b.y) < 5) return a.x - b.x;
+            return a.y - b.y;
         });
-
-        // 4. Generate Paragraphs
-        let currentLineY = -1;
-        let currentLineItems: any[] = [];
         
-        for (const item of allItems) {
-           if (currentLineY === -1) {
-              currentLineY = item.docY;
-              currentLineItems.push(item);
-           } else if (Math.abs(item.docY - currentLineY) < 10) {
-              currentLineItems.push(item);
-           } else {
-              docChildren.push(this.createLineParagraph(currentLineItems, Paragraph, TextRun, ImageRun));
-              currentLineY = item.docY;
-              currentLineItems = [item];
-           }
-        }
-        if (currentLineItems.length > 0) {
-           docChildren.push(this.createLineParagraph(currentLineItems, Paragraph, TextRun, ImageRun));
-        }
-
-        if (pageNum < pdf.numPages) {
-           docChildren.push(new Paragraph({ children: [new TextRun({ text: "", break: 1 })] }));
-        }
+        // Identify Headers and Footers
+        const headerThreshold = pageHeight * 0.1; // Top 10%
+        const footerThreshold = pageHeight * 0.9; // Bottom 10%
+        
+        const headerItems = pageItems.filter(item => item.y < headerThreshold);
+        const footerItems = pageItems.filter(item => item.y > footerThreshold);
+        const bodyItems = pageItems.filter(item => item.y >= headerThreshold && item.y <= footerThreshold);
+        
+        // Generate content for each section using the same structure logic
+        const headerChildren = this.generateSectionContent(
+            headerItems, 
+            Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, 
+            conversionOptions
+        );
+        
+        const footerChildren = this.generateSectionContent(
+            footerItems, 
+            Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, 
+            conversionOptions
+        );
+        
+        const bodyChildren = this.generateSectionContent(
+            bodyItems, 
+            Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, 
+            conversionOptions
+        );
+        
+        // Add Page Section
+        sections.push({
+            properties: {
+                page: {
+                    margin: { top: 720, right: 720, bottom: 720, left: 720 }, // 0.5 inch
+                    size: { width: pageWidth * 15, height: pageHeight * 15 }
+                }
+            },
+            headers: {
+                default: new Header({
+                    children: headerChildren
+                })
+            },
+            footers: {
+                default: new Footer({
+                    children: footerChildren
+                })
+            },
+            children: bodyChildren
+        });
       }
       
-      // Create Word document with enhanced properties for file type conversion
       const doc = new Document({
-        creator: "UPSA DocHub - PDF to Word Converter",
-        title: `Converted: ${file?.name || 'document.pdf'}`,
-        description: "File type conversion from PDF to Word document format",
-        sections: [{
-          properties: {
-            page: {
-              margin: {
-                top: 720,    // 0.5 inch
-                right: 720,  // 0.5 inch
-                bottom: 720, // 0.5 inch
-                left: 720    // 0.5 inch
-              }
-            }
-          },
-          children: docChildren
-        }]
+        creator: "UPSA DocHub",
+        title: file.name,
+        sections: sections
       });
       
-      // Generate the Word document buffer
       const buffer = await Packer.toBuffer(doc);
+      const blob = new Blob([new Uint8Array(buffer)], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
       
-      // Create blob from buffer
-      const blob = new Blob([new Uint8Array(buffer)], { 
-        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
-      });
-      
-      // Create output filename with conversion indicator
-      const originalName = file?.name?.replace(/\.pdf$/i, '') || 'converted-document';
-      const outputFilename = `${originalName}_converted.docx`;
+      const outputFilename = `${file.name.replace(/\.pdf$/i, '')}_converted.docx`;
       
       return {
         id: Date.now().toString(),
@@ -1605,21 +1648,199 @@ class PDFToWordConverter extends PDFProcessor {
         blob,
         downloadUrl: URL.createObjectURL(blob),
         processedAt: new Date().toISOString(),
-        toolUsed: 'pdf-to-word-converter'
+        toolUsed: 'pdf-to-word-converter-pro'
       };
+      
     } catch (error) {
       console.error('Error in PDFToWordConverter:', error);
-      throw errorUtils.createError(
-        'PROCESSING_FAILED',
-        'Failed to convert PDF to Word.',
-        error
-      );
+      throw errorUtils.createError('PROCESSING_FAILED', 'Failed to convert PDF to Word.', error);
     }
+  }
+
+  private generateSectionContent(
+    items: any[], 
+    Paragraph: any, TextRun: any, ImageRun: any, Table: any, TableRow: any, TableCell: any,
+    options: any
+  ): any[] {
+    // Group Items into Lines/Blocks
+    const blocks: any[] = [];
+    let currentBlock: any[] = [];
+    let currentY = -1;
+    
+    // Ensure items are sorted
+    items.sort((a, b) => {
+        if (Math.abs(a.y - b.y) < 5) return a.x - b.x;
+        return a.y - b.y;
+    });
+    
+    for (const item of items) {
+        if (currentY === -1) {
+            currentY = item.y;
+            currentBlock.push(item);
+        } else if (Math.abs(item.y - currentY) < (item.height || 12) / 2) { // Tolerance relative to height
+            currentBlock.push(item);
+        } else {
+            blocks.push({ type: 'line', items: currentBlock, y: currentY });
+            currentBlock = [item];
+            currentY = item.y;
+        }
+    }
+    if (currentBlock.length > 0) blocks.push({ type: 'line', items: currentBlock, y: currentY });
+    
+    // Detect Tables only if preserveLayout is not explicitly false
+    // Default to true if undefined
+    const preserveLayout = options?.preserveLayout !== false;
+    
+    let structure = blocks;
+    if (preserveLayout) {
+        structure = this.detectStructure(blocks);
+    }
+    
+    // Generate Children
+    const children = [];
+    
+    for (const element of structure) {
+        if (element.type === 'table') {
+            children.push(this.createTable(element, Table, TableRow, TableCell, Paragraph, TextRun, options));
+        } else {
+            children.push(this.createParagraph(element, Paragraph, TextRun, ImageRun, options));
+        }
+    }
+    
+    return children;
+  }
+
+  private detectStructure(lines: any[]): any[] {
+    const structure: any[] = [];
+    let currentTableRows: any[] = [];
+    
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        
+        // Simple heuristic: If line has > 1 items separated by gaps, it might be a table row
+        // Check alignment with next line
+        const nextLine = lines[i+1];
+        
+        // A line is a table candidate if it has multiple items
+        const isTableCandidate = (l: any) => l.items.length > 1;
+        
+        const alignWithNext = nextLine && this.checkAlignment(line, nextLine);
+        const alignWithPrev = currentTableRows.length > 0 && this.checkAlignment(currentTableRows[currentTableRows.length-1], line);
+        
+        if (alignWithNext || alignWithPrev) {
+            currentTableRows.push(line);
+        } else {
+            if (currentTableRows.length > 0) {
+                // End of table
+                structure.push({ type: 'table', rows: currentTableRows });
+                currentTableRows = [];
+            }
+            structure.push(line);
+        }
+    }
+    if (currentTableRows.length > 0) structure.push({ type: 'table', rows: currentTableRows });
+    
+    return structure;
+  }
+  
+  private checkAlignment(line1: any, line2: any): boolean {
+      // Check if items align vertically (similar X coords)
+      // This is a loose check
+      if (!line1 || !line2) return false;
+      const x1s = line1.items.map((i: any) => i.x);
+      const x2s = line2.items.map((i: any) => i.x);
+      
+      let matches = 0;
+      for (const x1 of x1s) {
+          if (x2s.some((x2: number) => Math.abs(x1 - x2) < 20)) matches++;
+      }
+      
+      return matches >= 2; // At least 2 columns align
+  }
+
+  private createTable(element: any, Table: any, TableRow: any, TableCell: any, Paragraph: any, TextRun: any, options: any): any {
+      const rows = element.rows.map((row: any) => {
+          // Sort items by X
+          row.items.sort((a: any, b: any) => a.x - b.x);
+          
+          const cells = row.items.map((item: any) => {
+              return new TableCell({
+                  children: [
+                      new Paragraph({
+                          children: [new TextRun({ 
+                              text: item.text, 
+                              size: options?.maintainFormatting !== false ? Math.round(item.fontSize || 24) : 24,
+                              font: options?.maintainFormatting !== false && item.fontName ? this.mapFont(item.fontName) : 'Calibri'
+                          })]
+                      })
+                  ]
+              });
+          });
+          return new TableRow({ children: cells });
+      });
+      
+      return new Table({
+          rows: rows,
+          width: { size: 100, type: "pct" } // Auto width
+      });
+  }
+
+  private createParagraph(element: any, Paragraph: any, TextRun: any, ImageRun: any, options: any): any {
+      element.items.sort((a: any, b: any) => a.x - b.x);
+      
+      const children = [];
+      let lastX = 0; 
+      
+      const preserveLayout = options?.preserveLayout !== false;
+
+      // Calculate indent only if preserving layout
+      const firstItem = element.items[0];
+      const indent = preserveLayout ? Math.round(firstItem.x * 10) : 0; 
+      
+      for (const item of element.items) {
+          if (item.type === 'image') {
+              children.push(new ImageRun({
+                  data: item.data,
+                  transformation: { width: item.width, height: item.height }
+              }));
+          } else {
+             // Add tabs/spaces for gaps if we are trying to preserve layout
+             if (preserveLayout && lastX > 0 && item.x - lastX > 20) {
+                 children.push(new TextRun({ text: "\t" }));
+             }
+             
+             children.push(new TextRun({ 
+                 text: item.text,
+                 size: options?.maintainFormatting !== false ? Math.round((item.fontSize || 12) * 2) : 24, // Half-points
+                 font: options?.maintainFormatting !== false && item.fontName ? this.mapFont(item.fontName) : 'Calibri'
+             }));
+          }
+          lastX = item.x + item.width;
+      }
+      
+      return new Paragraph({
+          children: children,
+          indent: { left: indent },
+          spacing: { after: 120 }
+      });
+  }
+  
+  private createSimpleParagraph(items: any[], Paragraph: any, TextRun: any): any {
+      return new Paragraph({
+          children: items.map((item: any) => new TextRun({ text: item.text + " " }))
+      });
+  }
+  
+  private mapFont(fontName: string): string {
+      const lower = fontName.toLowerCase();
+      if (lower.includes('times')) return 'Times New Roman';
+      if (lower.includes('courier')) return 'Courier New';
+      if (lower.includes('arial')) return 'Arial';
+      return 'Calibri';
   }
 
   private async convertImageToBuffer(imgData: any): Promise<ArrayBuffer | null> {
     if (!imgData) return null;
-
     try {
         const canvas = document.createElement('canvas');
         canvas.width = imgData.width;
@@ -1668,53 +1889,6 @@ class PDFToWordConverter extends PDFProcessor {
         console.error('Error converting image to buffer:', e);
         return null;
     }
-  }
-
-  private createLineParagraph(items: any[], Paragraph: any, TextRun: any, ImageRun: any): any {
-     items.sort((a, b) => a.x - b.x);
-     
-     const runs = [];
-     const firstItem = items[0];
-     const leftIndent = Math.max(0, Math.round(firstItem.x * 20));
-     
-     let lastX = firstItem.x + (firstItem.width || 0);
-     
-     for (let i = 0; i < items.length; i++) {
-        const item = items[i];
-        
-        if (i > 0) {
-            const gap = item.x - lastX;
-            if (gap > 20) runs.push(new TextRun({ text: "\t" }));
-            else if (gap > 3) runs.push(new TextRun({ text: " " }));
-        }
-
-        if (item.type === 'image') {
-            runs.push(new ImageRun({
-                data: item.data,
-                transformation: {
-                    width: item.width,
-                    height: item.height
-                }
-            }));
-        } else {
-            const isBold = item.fontName?.toLowerCase().includes('bold');
-            const isItalic = item.fontName?.toLowerCase().includes('italic');
-            runs.push(new TextRun({
-               text: item.text,
-               size: Math.max(16, Math.round(item.height * 1.5)),
-               bold: isBold,
-               italics: isItalic
-            }));
-        }
-        
-        lastX = item.x + (item.width || 0);
-     }
-     
-     return new Paragraph({
-        indent: { left: leftIndent },
-        children: runs,
-        spacing: { after: 120 }
-     });
   }
 }
 

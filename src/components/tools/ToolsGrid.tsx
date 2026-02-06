@@ -184,10 +184,10 @@ const ToolsGrid = () => {
   };
 
   return (
-    <section id="tools" className="py-20 relative">
+    <section id="tools" className="py-20 relative bg-slate-900">
       {/* Background */}
       <div className="absolute inset-0 bg-white/5">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-900/10 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-purple-900/20 to-transparent"></div>
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
