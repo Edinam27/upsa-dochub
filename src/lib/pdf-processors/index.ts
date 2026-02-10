@@ -394,6 +394,44 @@ class PDFCompressor extends PDFProcessor {
          const quality = typeof this.options.quality === 'number' ? this.options.quality : 0.5;
          const result = await this.applyRasterization(file, quality, this.options.grayscale || false);
          
+         // For compression, check if the result is actually smaller (unless it's just a grayscale conversion where size might not be the only goal, 
+         // but if the user intent is "Compress", size matters).
+         // The user specifically complained about "compressed file size is larger... yet no comment popped up".
+         // So we must check size.
+         if (result.size >= file.size) {
+            console.log('File already highly compressed (Rasterization did not reduce size)');
+            // If it didn't help, we should probably warn or return original?
+            // But if the user WANTED grayscale, we should maybe still return it?
+            // The tool is "Compress PDF", so size reduction is the primary goal.
+            // If it's larger, it failed the "Compress" goal.
+            
+            // However, "Extreme Compression" is a specific mode. 
+            // If I return the original, the user sees "File already highly compressed" in logs (which they wanted).
+            // Let's assume we return the original if it failed to compress, matching the behavior of other strategies.
+             
+             // BUT, wait. If I select "Grayscale", I might want grayscale even if it's larger (rare, but possible).
+             // But the tool is COMPRESS PDF. 
+             // Let's stick to the user's complaint: "compressed file size is larger".
+             
+             // We will return the original file if the "compressed" one is larger, 
+             // AND log the message the user expects.
+             
+             const originalBuffer = new Uint8Array(await file.arrayBuffer());
+             const blob = new Blob([originalBuffer], { type: 'application/pdf' });
+             return [{
+              id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+              name: file.name,
+              originalName: file.name,
+              size: originalBuffer.byteLength,
+              type: 'application/pdf',
+              data: Array.from(originalBuffer),
+              processedAt: new Date().toISOString(),
+              toolUsed: 'pdf-compressor',
+              blob,
+              downloadUrl: URL.createObjectURL(blob)
+            }];
+         }
+
          const blob = new Blob([new Uint8Array(result.buffer)], { type: 'application/pdf' });
          const filename = this.getOutputFilename(file.name, this.options.grayscale ? 'grayscale' : 'rasterized');
          
@@ -441,6 +479,8 @@ class PDFCompressor extends PDFProcessor {
           if (compressionRatio < bestCompressionRatio) {
             bestResult = result;
             bestCompressionRatio = compressionRatio;
+          } else {
+            console.log('File already highly compressed');
           }
           
           // If we achieved the target size, return immediately
@@ -488,30 +528,37 @@ class PDFCompressor extends PDFProcessor {
       try {
         console.warn('All compression strategies failed, attempting minimal compression');
         const fallbackResult = await this.minimalCompression(pdf, {});
-        const blob = new Blob([new Uint8Array(fallbackResult.buffer)], { type: 'application/pdf' });
-        const filename = this.getOutputFilename(file.name, 'minimal_compressed');
-        return [{
-          id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-          name: filename,
-          originalName: file.name,
-          size: fallbackResult.size,
-          type: 'application/pdf',
-          data: Array.from(new Uint8Array(fallbackResult.buffer)),
-          processedAt: new Date().toISOString(),
-          toolUsed: 'pdf-compressor',
-          blob,
-          downloadUrl: URL.createObjectURL(blob)
-        }];
+        
+        // Only return if it actually reduced size
+        if (fallbackResult.size < originalSize) {
+          const blob = new Blob([new Uint8Array(fallbackResult.buffer)], { type: 'application/pdf' });
+          const filename = this.getOutputFilename(file.name, 'minimal_compressed');
+          return [{
+            id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            name: filename,
+            originalName: file.name,
+            size: fallbackResult.size,
+            type: 'application/pdf',
+            data: Array.from(new Uint8Array(fallbackResult.buffer)),
+            processedAt: new Date().toISOString(),
+            toolUsed: 'pdf-compressor',
+            blob,
+            downloadUrl: URL.createObjectURL(blob)
+          }];
+        } else {
+            console.log('File already highly compressed');
+            throw new Error('Minimal compression ineffective');
+        }
       } catch (fallbackError) {
         console.error('Even minimal compression failed, returning original file');
         // Absolute last resort - return the original file
-        const originalBuffer = Buffer.from(await file.arrayBuffer());
+        const originalBuffer = new Uint8Array(await file.arrayBuffer());
         const blob = new Blob([originalBuffer], { type: 'application/pdf' });
         return [{
           id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           name: file.name,
           originalName: file.name,
-          size: originalBuffer.length,
+          size: originalBuffer.byteLength,
           type: 'application/pdf',
           data: Array.from(originalBuffer),
           processedAt: new Date().toISOString(),
@@ -736,7 +783,7 @@ class PDFCompressor extends PDFProcessor {
     return settings[level as keyof typeof settings] || settings.medium;
   }
   
-  private async applyCompressionStrategy(file: File, strategy: any): Promise<{ buffer: Buffer; size: number }> {
+  private async applyCompressionStrategy(file: File, strategy: any): Promise<{ buffer: Uint8Array; size: number }> {
     const pdf = await this.loadPDF(file);
     
     switch (strategy.name) {
@@ -763,7 +810,7 @@ class PDFCompressor extends PDFProcessor {
     }
   }
   
-  private async applyMetadataRemoval(pdf: PDFDocument, settings: any): Promise<{ buffer: Buffer; size: number }> {
+  private async applyMetadataRemoval(pdf: PDFDocument, settings: any): Promise<{ buffer: Uint8Array; size: number }> {
     // Remove all metadata
     pdf.setTitle('');
     pdf.setAuthor('');
@@ -776,10 +823,10 @@ class PDFCompressor extends PDFProcessor {
     await this.removeDuplicateResources(pdf);
     
     const pdfBytes = await pdf.save(settings);
-    return { buffer: Buffer.from(pdfBytes), size: pdfBytes.length };
+    return { buffer: pdfBytes, size: pdfBytes.length };
   }
   
-  private async applyContentOptimization(pdf: PDFDocument, settings: any): Promise<{ buffer: Buffer; size: number }> {
+  private async applyContentOptimization(pdf: PDFDocument, settings: any): Promise<{ buffer: Uint8Array; size: number }> {
     try {
       // Apply metadata removal first
       await this.applyMetadataRemoval(pdf, settings);
@@ -788,14 +835,14 @@ class PDFCompressor extends PDFProcessor {
       await this.optimizePDFContent(pdf, settings);
       
       const pdfBytes = await pdf.save(settings);
-      return { buffer: Buffer.from(pdfBytes), size: pdfBytes.length };
+      return { buffer: pdfBytes, size: pdfBytes.length };
     } catch (error) {
       console.warn('Content optimization failed, falling back to metadata removal only');
       return await this.applyMetadataRemoval(pdf, settings);
     }
   }
   
-  private async applyAggressiveRewrite(pdf: PDFDocument, settings: any): Promise<{ buffer: Buffer; size: number }> {
+  private async applyAggressiveRewrite(pdf: PDFDocument, settings: any): Promise<{ buffer: Uint8Array; size: number }> {
     try {
       // Create a completely new PDF document
       const newPdf = await PDFDocument.create();
@@ -821,14 +868,14 @@ class PDFCompressor extends PDFProcessor {
       await this.optimizePDFContent(newPdf, settings);
       
       const pdfBytes = await newPdf.save(settings);
-      return { buffer: Buffer.from(pdfBytes), size: pdfBytes.length };
+      return { buffer: pdfBytes, size: pdfBytes.length };
     } catch (error) {
       console.warn('Aggressive rewrite failed, falling back to simple page copy');
       return await this.fallbackPageCopy(pdf, settings);
     }
   }
 
-  private async applyImageQualityReduction(pdf: PDFDocument, settings: any): Promise<{ buffer: Buffer; size: number }> {
+  private async applyImageQualityReduction(pdf: PDFDocument, settings: any): Promise<{ buffer: Uint8Array; size: number }> {
     try {
       // Start with aggressive rewrite
       const result = await this.applyAggressiveRewrite(pdf, settings);
@@ -844,7 +891,7 @@ class PDFCompressor extends PDFProcessor {
     }
   }
   
-  private async applyFontOptimization(pdf: PDFDocument, settings: any): Promise<{ buffer: Buffer; size: number }> {
+  private async applyFontOptimization(pdf: PDFDocument, settings: any): Promise<{ buffer: Uint8Array; size: number }> {
     try {
       // Apply content optimization first
       const result = await this.applyContentOptimization(pdf, settings);
@@ -859,7 +906,7 @@ class PDFCompressor extends PDFProcessor {
     }
   }
   
-  private async applyContentStripping(pdf: PDFDocument, settings: any): Promise<{ buffer: Buffer; size: number }> {
+  private async applyContentStripping(pdf: PDFDocument, settings: any): Promise<{ buffer: Uint8Array; size: number }> {
     try {
       // Apply aggressive rewrite first
       const rewriteResult = await this.applyAggressiveRewrite(pdf, settings);
@@ -896,7 +943,7 @@ class PDFCompressor extends PDFProcessor {
       });
       
       const pdfBytes = await rewrittenPdf.save(settings);
-      return { buffer: Buffer.from(pdfBytes), size: pdfBytes.length };
+      return { buffer: pdfBytes, size: pdfBytes.length };
     } catch (error) {
       console.warn('Content stripping failed, falling back to aggressive rewrite');
       return await this.applyAggressiveRewrite(pdf, settings);
@@ -904,7 +951,7 @@ class PDFCompressor extends PDFProcessor {
   }
 
   // Fallback methods for error recovery
-  private async fallbackPageCopy(pdf: PDFDocument, settings: any): Promise<{ buffer: Buffer; size: number }> {
+  private async fallbackPageCopy(pdf: PDFDocument, settings: any): Promise<{ buffer: Uint8Array; size: number }> {
     try {
       // Simple page copy without optimization
       const newPdf = await PDFDocument.create();
@@ -916,14 +963,14 @@ class PDFCompressor extends PDFProcessor {
       });
       
       const pdfBytes = await newPdf.save(settings);
-      return { buffer: Buffer.from(pdfBytes), size: pdfBytes.length };
+      return { buffer: pdfBytes, size: pdfBytes.length };
     } catch (error) {
       console.warn('Fallback page copy failed, using minimal compression');
       return await this.minimalCompression(pdf, settings);
     }
   }
 
-  private async minimalCompression(pdf: PDFDocument, settings: any): Promise<{ buffer: Buffer; size: number }> {
+  private async minimalCompression(pdf: PDFDocument, settings: any): Promise<{ buffer: Uint8Array; size: number }> {
     try {
       // Absolute minimal compression - just save with basic settings
       const basicSettings = {
@@ -932,12 +979,12 @@ class PDFCompressor extends PDFProcessor {
       };
       
       const pdfBytes = await pdf.save(basicSettings);
-      return { buffer: Buffer.from(pdfBytes), size: pdfBytes.length };
+      return { buffer: pdfBytes, size: pdfBytes.length };
     } catch (error) {
       console.error('All compression methods failed, returning original PDF');
       // Last resort - return the original PDF as-is
       const pdfBytes = await pdf.save();
-      return { buffer: Buffer.from(pdfBytes), size: pdfBytes.length };
+      return { buffer: pdfBytes, size: pdfBytes.length };
     }
   }
   
@@ -1084,7 +1131,7 @@ class PDFCompressor extends PDFProcessor {
     }
   }
 
-  private async applyRasterization(file: File, quality: number = 0.5, grayscale: boolean = false): Promise<{ buffer: Buffer; size: number }> {
+  private async applyRasterization(file: File, quality: number = 0.5, grayscale: boolean = false): Promise<{ buffer: Uint8Array; size: number }> {
     try {
       console.log(`Starting rasterization compression (grayscale: ${grayscale})...`);
       const arrayBuffer = await file.arrayBuffer();
@@ -1175,10 +1222,8 @@ class PDFCompressor extends PDFProcessor {
       }
       
       const pdfBytes = await newPdfDoc.save();
-      // Ensure Buffer compatibility
-      const buffer = typeof Buffer !== 'undefined' ? Buffer.from(pdfBytes) : (pdfBytes as unknown as Buffer);
       
-      return { buffer, size: pdfBytes.length };
+      return { buffer: pdfBytes, size: pdfBytes.length };
       
     } catch (error) {
       console.error('Rasterization failed:', error);
@@ -1186,7 +1231,7 @@ class PDFCompressor extends PDFProcessor {
     }
   }
 
-  private async applyGrayscale(result: { buffer: Buffer; size: number }): Promise<{ buffer: Buffer; size: number }> {
+  private async applyGrayscale(result: { buffer: Uint8Array; size: number }): Promise<{ buffer: Uint8Array; size: number }> {
     try {
         console.warn('Deprecated applyGrayscale called. Should use applyRasterization with grayscale=true instead.');
         // This method is now legacy as the overlay approach causes blank pages.

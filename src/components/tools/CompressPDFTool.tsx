@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useDropzone } from 'react-dropzone';
 import { saveFileToStore } from '@/lib/file-store';
+import { PDFDocument } from 'pdf-lib';
 
 interface CompressPDFToolProps {
   onProcess: (files: File[], options: any) => Promise<void>;
@@ -45,7 +46,7 @@ const CompressPDFTool: React.FC<CompressPDFToolProps> = ({ onProcess, isProcessi
     }
   };
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
     setError('');
     
     if (acceptedFiles.length > 0) {
@@ -54,7 +55,22 @@ const CompressPDFTool: React.FC<CompressPDFToolProps> = ({ onProcess, isProcessi
         setError('Please upload a valid PDF file.');
         return;
       }
-      setFile(selectedFile);
+
+      try {
+        const arrayBuffer = await selectedFile.arrayBuffer();
+        const pdfDoc = await PDFDocument.load(arrayBuffer);
+        const pageCount = pdfDoc.getPageCount();
+
+        if (pageCount > 35) {
+          setError(`File exceeds the 35-page limit. This file has ${pageCount} pages.`);
+          return;
+        }
+
+        setFile(selectedFile);
+      } catch (err) {
+        console.error('Error reading PDF:', err);
+        setError('Failed to read PDF file. Please ensure it is a valid PDF.');
+      }
     }
   }, []);
 
@@ -104,6 +120,18 @@ const CompressPDFTool: React.FC<CompressPDFToolProps> = ({ onProcess, isProcessi
 
   return (
     <div className="space-y-6">
+      {/* Error Message */}
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center space-x-2 p-4 bg-red-50 border border-red-200 rounded-lg"
+        >
+          <AlertCircle className="h-5 w-5 text-red-500" />
+          <span className="text-red-700">{error}</span>
+        </motion.div>
+      )}
+
       {/* Upload Area */}
       {!file ? (
         <div
@@ -131,6 +159,7 @@ const CompressPDFTool: React.FC<CompressPDFToolProps> = ({ onProcess, isProcessi
               PDF files only
             </span>
             <span>Max 100MB</span>
+            <span>Max 35 Pages</span>
           </div>
         </div>
       ) : (
@@ -190,20 +219,6 @@ const CompressPDFTool: React.FC<CompressPDFToolProps> = ({ onProcess, isProcessi
               </button>
             ))}
           </div>
-
-
-
-          {/* Error Message */}
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="flex items-center space-x-2 p-4 bg-red-50 border border-red-200 rounded-lg"
-            >
-              <AlertCircle className="h-5 w-5 text-red-500" />
-              <span className="text-red-700">{error}</span>
-            </motion.div>
-          )}
 
           <div className="flex justify-end pt-6 border-t border-gray-200">
             <button

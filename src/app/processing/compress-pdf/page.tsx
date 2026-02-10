@@ -167,23 +167,40 @@ function CompressPDFContent() {
           {/* Success State */}
           {status === 'success' && (
             <div className="text-center py-8">
-              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <CheckCircle className="w-10 h-10 text-green-600" />
-              </div>
-              
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">Compression Complete!</h2>
-              <p className="text-gray-600 mb-8">Your PDF has been successfully optimized.</p>
+              {stats.newSize >= stats.originalSize ? (
+                <>
+                  <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <AlertCircle className="w-10 h-10 text-orange-600" />
+                  </div>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-4">Already Optimized</h2>
+                  <p className="text-gray-600 mb-8">
+                    This file is already compressed and cannot be further reduced without quality loss.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <CheckCircle className="w-10 h-10 text-green-600" />
+                  </div>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-4">Compression Complete!</h2>
+                  <p className="text-gray-600 mb-8">Your PDF has been successfully optimized.</p>
+                </>
+              )}
 
               <div className="grid grid-cols-2 gap-6 max-w-md mx-auto mb-10">
                 <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
                   <p className="text-sm text-gray-500 mb-1">Original Size</p>
                   <p className="text-lg font-semibold text-gray-900">{formatFileSize(stats.originalSize)}</p>
                 </div>
-                <div className="bg-green-50 p-4 rounded-xl border border-green-200">
-                  <p className="text-sm text-green-600 mb-1">Compressed Size</p>
-                  <p className="text-lg font-bold text-green-700">{formatFileSize(stats.newSize)}</p>
-                  <span className="text-xs font-medium text-green-600 bg-green-100 px-2 py-1 rounded-full mt-2 inline-block">
-                    {Math.round((1 - stats.newSize / stats.originalSize) * 100)}% Reduction
+                <div className={`${stats.newSize >= stats.originalSize ? 'bg-orange-50 border-orange-200' : 'bg-green-50 border-green-200'} p-4 rounded-xl border`}>
+                  <p className={`text-sm ${stats.newSize >= stats.originalSize ? 'text-orange-600' : 'text-green-600'} mb-1`}>
+                    {stats.newSize >= stats.originalSize ? 'Final Size' : 'Compressed Size'}
+                  </p>
+                  <p className={`text-lg font-bold ${stats.newSize >= stats.originalSize ? 'text-orange-700' : 'text-green-700'}`}>
+                    {formatFileSize(stats.newSize)}
+                  </p>
+                  <span className={`text-xs font-medium ${stats.newSize >= stats.originalSize ? 'text-orange-600 bg-orange-100' : 'text-green-600 bg-green-100'} px-2 py-1 rounded-full mt-2 inline-block`}>
+                    {Math.max(0, Math.round((1 - stats.newSize / stats.originalSize) * 100))}% Reduction
                   </span>
                 </div>
               </div>
@@ -194,7 +211,7 @@ function CompressPDFContent() {
                   className="px-8 py-4 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-orange-500/30 transition-all flex items-center space-x-3 transform hover:-translate-y-1"
                 >
                   <Download className="w-5 h-5" />
-                  <span>Download Compressed PDF</span>
+                  <span>{stats.newSize >= stats.originalSize ? 'Download Original PDF' : 'Download Compressed PDF'}</span>
                 </button>
               </div>
               
