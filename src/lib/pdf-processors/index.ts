@@ -1678,8 +1678,8 @@ class PDFToWordConverter extends PDFProcessor {
         sections: sections
       });
       
-      const buffer = await Packer.toBuffer(doc);
-      const blob = new Blob([new Uint8Array(buffer)], { type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' });
+      const blob = await Packer.toBlob(doc);
+      const buffer = await blob.arrayBuffer();
       
       const outputFilename = `${file.name.replace(/\.pdf$/i, '')}_converted.docx`;
       
