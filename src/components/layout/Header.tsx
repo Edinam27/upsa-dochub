@@ -28,7 +28,7 @@ const Header = () => {
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-purple-500 rounded-full animate-pulse"></div>
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-bold text-white">Quiltra</span>
+              <span className="text-xl font-bold text-white">JoedyTools</span>
               <span className="text-xs text-gray-300 hidden sm:block">PDF Tools for Everyone</span>
             </div>
           </Link>

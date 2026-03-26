@@ -117,10 +117,11 @@ const StatsSection = () => {
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Trusted <span className="gradient-text">Worldwide</span>
+            Trusted by <span className="gradient-text">Users Worldwide</span>
           </h2>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Join thousands who rely on DocHub for secure, fast document processing — built for everyone.
+            Join thousands of users who rely on JoedyTools for their document processing needs. 
+            Fast, secure, and designed for everyone.
           </p>
         </motion.div>
 
@@ -146,7 +147,7 @@ const StatsSection = () => {
         >
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
             <h3 className="text-2xl font-bold text-white mb-4">
-              Why People Choose Quiltra
+              Why Users Choose JoedyTools
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-gray-300">
               <div className="flex flex-col items-center">

@@ -4,16 +4,16 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://upsa-dochub.vercel.app'),
+  metadataBase: new URL('https://joedytools.com'),
   title: {
-    default: "Quiltra - PDF Tools for Everyone",
-    template: "%s | Quiltra"
+    default: "JoedyTools - PDF Tools for Everyone",
+    template: "%s | JoedyTools"
   },
   description: "Complete PDF management solution for everyone. Merge, split, compress, convert, and process PDFs with ease — secure, fast, and private.",
   keywords: ["PDF tools", "PDF converter", "PDF merger", "OCR", "compress PDF", "document tools", "global"],
-  authors: [{ name: "Quiltra Team" }],
-  creator: "Quiltra",
-  publisher: "Quiltra",
+  authors: [{ name: "JoedyTools Team" }],
+  creator: "JoedyTools",
+  publisher: "JoedyTools",
   robots: {
     index: true,
     follow: true,
@@ -26,10 +26,10 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Quiltra - PDF Tools for Everyone",
-    description: "Complete PDF management solution. Free, secure, and local processing.",
-    url: "https://upsa-dochub.vercel.app",
-    siteName: "Quiltra",
+    title: "JoedyTools - PDF Tools for Everyone",
+    description: "Complete PDF management solution for everyone. Free, secure, and local processing.",
+    url: "https://joedytools.com",
+    siteName: "JoedyTools",
     type: "website",
     locale: "en_US",
     images: [
@@ -37,13 +37,13 @@ export const metadata: Metadata = {
         url: '/android-chrome-512x512.png',
         width: 512,
         height: 512,
-        alt: 'Quiltra Logo',
+        alt: 'JoedyTools Logo',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "Quiltra - PDF Tools for Everyone",
+    title: "JoedyTools - PDF Tools for Everyone",
     description: "Complete PDF management solution",
     images: ['/android-chrome-512x512.png'],
   },
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
   },
   manifest: '/site.webmanifest',
   alternates: {
-    canonical: 'https://upsa-dochub.vercel.app',
+    canonical: 'https://joedytools.com',
   },
 };
 
@@ -71,7 +71,7 @@ export default function RootLayout({
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "Quiltra",
+    "name": "JoedyTools",
     "applicationCategory": "UtilitiesApplication",
     "operatingSystem": "Web",
     "aggregateRating": {

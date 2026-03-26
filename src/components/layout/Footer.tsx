@@ -98,13 +98,11 @@ const Footer = () => {
         <div className="border-t border-gray-800 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 text-gray-400 text-sm">
-              <span>Made with</span>
-              <Heart className="h-4 w-4 text-red-500" />
-                  <span>for everyone</span>
+              <span>Made for everyone</span>
             </div>
             <div className="flex items-center space-x-6 mt-4 md:mt-0">
               <p className="text-gray-400 text-sm">
-                    © {new Date().getFullYear()} Quiltra. All rights reserved.
+                    © {new Date().getFullYear()} JoedyTools. All rights reserved.
               </p>
               <div className="flex items-center space-x-1 text-xs text-gray-500">
                 <Shield className="h-3 w-3" />

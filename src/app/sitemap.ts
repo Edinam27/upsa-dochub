@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { TOOLS } from '@/lib/tools-config';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://upsa-dochub.vercel.app';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://joedytools.com';
 
   const staticRoutes = [
     '',
