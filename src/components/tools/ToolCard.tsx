@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ArrowRight, Star } from 'lucide-react';
+import { ArrowRight, Star, Lock } from 'lucide-react';
 import { useState } from 'react';
 import Link from 'next/link';
 
@@ -13,6 +13,7 @@ interface Tool {
   category: string;
   color: string;
   features: string[];
+  isLocked?: boolean;
 }
 
 interface ToolCardProps {
@@ -37,15 +38,26 @@ const ToolCard = ({ tool }: ToolCardProps) => {
   };
 
   return (
-    <Link href={getToolRoute(tool.id)} className="block">
+    <Link href={tool.isLocked ? '#' : getToolRoute(tool.id)} className={`block ${tool.isLocked ? 'cursor-not-allowed' : ''}`}>
       <motion.div
         className="relative group cursor-pointer"
-        onHoverStart={() => setIsHovered(true)}
-        onHoverEnd={() => setIsHovered(false)}
-        whileHover={{ y: -8 }}
+        onHoverStart={() => !tool.isLocked && setIsHovered(true)}
+        onHoverEnd={() => !tool.isLocked && setIsHovered(false)}
+        whileHover={!tool.isLocked ? { y: -8 } : {}}
         transition={{ duration: 0.3 }}
       >
-      <div className="bg-white rounded-2xl p-6 border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-300 h-full">
+      <div className={`bg-white rounded-2xl p-6 border transition-all duration-300 h-full relative overflow-hidden ${tool.isLocked ? 'border-gray-200 bg-gray-50' : 'border-gray-200 hover:border-gray-300 hover:shadow-lg'}`}>
+        
+        {tool.isLocked && (
+          <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center text-center p-6">
+            <div className="bg-gray-900/5 p-4 rounded-full mb-3">
+              <Lock className="w-8 h-8 text-gray-500" />
+            </div>
+            <span className="text-gray-900 font-bold text-lg mb-1">Feature Locked</span>
+            <span className="text-gray-500 text-sm">This tool is currently unavailable</span>
+          </div>
+        )}
+
         {/* Tool Icon */}
         <div className="flex items-center justify-between mb-4 relative z-10">
           <div className={`p-3 rounded-xl bg-gradient-to-r ${tool.color} text-white group-hover:scale-110 transition-transform duration-300 shadow-md`}>

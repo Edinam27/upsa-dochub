@@ -1,6 +1,9 @@
 import { PDFDocument, rgb, StandardFonts, degrees, BlendMode } from 'pdf-lib';
 import { jsPDF } from 'jspdf';
 import * as mammoth from 'mammoth';
+import * as XLSX from 'xlsx';
+import JSZip from 'jszip';
+import PptxGenJS from 'pptxgenjs';
 import { ProcessingOptions, ProcessedFile, PDFPageInfo } from '../types';
 import { fileUtils, errorUtils } from '../utils';
 
@@ -60,6 +63,472 @@ abstract class PDFProcessor {
   protected getOutputFilename(originalName: string, suffix: string): string {
     const nameWithoutExt = originalName.replace(/\.[^/.]+$/, '');
     return `${nameWithoutExt}_${suffix}.pdf`;
+  }
+
+  protected parsePageRange(range: string, totalPages: number): number[] {
+    const indices: number[] = [];
+    if (!range) return indices;
+    
+    const parts = range.split(',');
+    
+    for (const part of parts) {
+      const trimmed = part.trim();
+      if (!trimmed) continue;
+      
+      if (trimmed.includes('-')) {
+        const [startStr, endStr] = trimmed.split('-');
+        const start = parseInt(startStr.trim()) - 1;
+        const end = parseInt(endStr.trim()) - 1;
+        
+        if (isNaN(start) || isNaN(end)) continue;
+        
+        for (let i = start; i <= end && i < totalPages; i++) {
+          if (i >= 0 && !indices.includes(i)) {
+            indices.push(i);
+          }
+        }
+      } else {
+        const page = parseInt(trimmed) - 1;
+        if (!isNaN(page) && page >= 0 && page < totalPages && !indices.includes(page)) {
+          indices.push(page);
+        }
+      }
+    }
+    
+    return indices.sort((a, b) => a - b);
+  }
+
+  protected async convertImageToBuffer(imgData: any): Promise<ArrayBuffer | null> {
+    if (!imgData) return null;
+    try {
+        if (typeof document === 'undefined') return null;
+        const canvas = document.createElement('canvas');
+        canvas.width = imgData.width;
+        canvas.height = imgData.height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return null;
+
+        const size = imgData.width * imgData.height;
+        const clamped = new Uint8ClampedArray(size * 4);
+        const data = imgData.data;
+
+        if (data.length === size * 4) {
+            clamped.set(data);
+        } else if (data.length === size * 3) {
+            for (let i = 0, j = 0; i < data.length; i += 3, j += 4) {
+                clamped[j] = data[i];
+                clamped[j + 1] = data[i + 1];
+                clamped[j + 2] = data[i + 2];
+                clamped[j + 3] = 255;
+            }
+        } else if (data.length === size) {
+            for (let i = 0, j = 0; i < data.length; i++, j += 4) {
+                const val = data[i];
+                clamped[j] = val;
+                clamped[j + 1] = val;
+                clamped[j + 2] = val;
+                clamped[j + 3] = 255;
+            }
+        } else {
+            return null;
+        }
+
+        const imageData = new ImageData(clamped, imgData.width, imgData.height);
+        ctx.putImageData(imageData, 0, 0);
+
+        return new Promise((resolve) => {
+            canvas.toBlob((blob) => {
+                if (blob) {
+                    blob.arrayBuffer().then(resolve);
+                } else {
+                    resolve(null);
+                }
+            }, 'image/png');
+        });
+    } catch (e) {
+        console.error('Error converting image to buffer:', e);
+        return null;
+    }
+  }
+
+  protected arrayBufferToBase64(buffer: ArrayBuffer): string {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+  }
+
+  protected detectStructure(lines: any[]): any[] {
+    const structure: any[] = [];
+    let currentTableRows: any[] = [];
+    let currentTableColumns: { x: number, width: number }[] = [];
+    
+    const COLUMN_GAP_TOLERANCE = 15; 
+    
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        
+        // 1. Check if line fits current table
+        let fitsCurrentTable = false;
+        if (currentTableRows.length > 0) {
+            fitsCurrentTable = this.checkLineAgainstColumns(line, currentTableColumns, COLUMN_GAP_TOLERANCE);
+        }
+        
+        // 2. Check if line starts a new table (lookahead)
+        let startsNewTable = false;
+        if (!fitsCurrentTable && i + 1 < lines.length) {
+             const nextLine = lines[i+1];
+             if (this.checkColumnAlignment(line, nextLine, COLUMN_GAP_TOLERANCE)) {
+                 startsNewTable = true;
+             }
+        }
+        
+        if (fitsCurrentTable) {
+            currentTableRows.push(line);
+            // Update columns
+            currentTableColumns = this.mergeColumns(currentTableColumns, line.items, COLUMN_GAP_TOLERANCE);
+        } else if (startsNewTable) {
+            // Close previous table
+            if (currentTableRows.length > 0) {
+                structure.push({ 
+                    type: 'table', 
+                    rows: currentTableRows,
+                    columns: currentTableColumns 
+                });
+            }
+            
+            // Start new table
+            currentTableRows = [line];
+            currentTableColumns = line.items.map((item: any) => ({ x: item.x, width: item.width }));
+        } else {
+            // Close previous table
+            if (currentTableRows.length > 0) {
+                structure.push({ 
+                    type: 'table', 
+                    rows: currentTableRows,
+                    columns: currentTableColumns 
+                });
+                currentTableRows = [];
+                currentTableColumns = [];
+            }
+            structure.push(line);
+        }
+    }
+    
+    if (currentTableRows.length > 0) {
+        structure.push({ 
+            type: 'table', 
+            rows: currentTableRows,
+            columns: currentTableColumns 
+        });
+    }
+    
+    return structure;
+  }
+  
+  protected checkLineAgainstColumns(line: any, columns: any[], tolerance: number): boolean {
+      const items = line.items;
+      if (items.length === 0) return true; 
+      
+      let matchCount = 0;
+      for (const item of items) {
+          const matched = columns.some(col => Math.abs(item.x - col.x) < tolerance);
+          if (matched) matchCount++;
+      }
+      
+      return matchCount >= items.length * 0.5;
+  }
+  
+  protected checkColumnAlignment(line1: any, line2: any, tolerance: number): boolean {
+      const items1 = line1.items;
+      const items2 = line2.items;
+      
+      if (items1.length < 2 && items2.length < 2) return false;
+      
+      let matches = 0;
+      for (const item1 of items1) {
+          const matched = items2.some((item2: any) => Math.abs(item1.x - item2.x) < tolerance);
+          if (matched) matches++;
+      }
+      
+      const minLen = Math.min(items1.length, items2.length);
+      // At least 2 matches or 50% of items align
+      return matches >= Math.max(2, minLen * 0.5); 
+  }
+
+  protected mergeColumns(currentCols: any[], newItems: any[], tolerance: number): any[] {
+      const updatedCols = [...currentCols];
+      
+      for (const item of newItems) {
+          const matched = updatedCols.some(col => Math.abs(item.x - col.x) < tolerance);
+          if (!matched) {
+              updatedCols.push({ x: item.x, width: item.width });
+          }
+      }
+      
+      return updatedCols;
+  }
+
+  protected getConsolidatedRows(rows: any[], columns: any[]): any[] {
+      if (rows.length === 0) return [];
+      
+      // 1. Refine Columns: Sort by X
+      const sortedCols = [...columns].sort((a: any, b: any) => a.x - b.x);
+      
+      // 2. Build Grid: Group visual lines by Y
+      const rowGroups: { y: number, items: any[] }[] = [];
+      
+      rows.forEach(row => {
+          const existing = rowGroups.find(rg => Math.abs(rg.y - row.y) < 10); 
+          if (existing) {
+              existing.items.push(...row.items);
+          } else {
+              rowGroups.push({ y: row.y, items: [...row.items] });
+          }
+      });
+      rowGroups.sort((a, b) => a.y - b.y);
+      
+      // 3. Consolidate "broken" rows (wrapped text) into logical rows
+      const logicalRows: { y: number, items: any[] }[] = [];
+      if (rowGroups.length > 0) {
+          let currentLogicalRow = rowGroups[0];
+          
+          for (let i = 1; i < rowGroups.length; i++) {
+              const nextRow = rowGroups[i];
+              const yDiff = Math.abs(nextRow.y - currentLogicalRow.y);
+              
+              const firstColX = sortedCols[0]?.x || 0;
+              const hasFirstCol = nextRow.items.some(item => Math.abs(item.x - firstColX) < 20);
+              const prevHasFirstCol = currentLogicalRow.items.some(item => Math.abs(item.x - firstColX) < 20);
+              
+              // Heuristic: Merge if next row looks like continuation (small gap, indented/empty first col)
+              if (yDiff < 25 && !hasFirstCol && prevHasFirstCol) {
+                  currentLogicalRow.items.push(...nextRow.items);
+              } else {
+                  logicalRows.push(currentLogicalRow);
+                  currentLogicalRow = nextRow;
+              }
+          }
+          logicalRows.push(currentLogicalRow);
+      }
+      
+      return logicalRows;
+  }
+
+  protected analyzeTableStructure(rows: any[], columns: any[]): { 
+      cells: { 
+          text: string; 
+          items: any[]; 
+          rowSpan: number; 
+          colSpan: number; 
+          rowIndex: number; 
+          colIndex: number; 
+          isCovered: boolean; 
+      }[][];
+  } {
+      if (rows.length === 0) return { cells: [] };
+      
+      const sortedCols = [...columns].sort((a: any, b: any) => a.x - b.x);
+      const logicalRows = this.getConsolidatedRows(rows, sortedCols);
+      
+      const grid: any[][] = [];
+      const coveredCells = new Set<string>(); // Tracks vertically and horizontally merged cells
+      
+      logicalRows.forEach((row, rowIndex) => {
+          const rowCells: any[] = [];
+          const distCells: any[] = Array(sortedCols.length).fill(null);
+          
+          // Distribute items
+          row.items.forEach((item: any) => {
+              let startCol = -1;
+              let minD = Infinity;
+              sortedCols.forEach((col, cIdx) => {
+                  const dist = Math.abs(item.x - col.x);
+                  if (dist < minD) { minD = dist; startCol = cIdx; }
+              });
+              if (startCol !== -1) {
+                  if (!distCells[startCol]) distCells[startCol] = { items: [item], text: item.text };
+                  else {
+                      distCells[startCol].text += ' ' + item.text;
+                      distCells[startCol].items.push(item);
+                  }
+              }
+          });
+          
+          for (let cIdx = 0; cIdx < sortedCols.length; cIdx++) {
+              if (coveredCells.has(`${rowIndex},${cIdx}`)) {
+                   rowCells.push({ 
+                      text: '', items: [], rowSpan: 1, colSpan: 1, 
+                      rowIndex, colIndex: cIdx, isCovered: true 
+                   });
+                   continue;
+              }
+              
+              const cellData = distCells[cIdx] || { items: [], text: '' };
+              const items = cellData.items;
+              
+              // Detect ColSpan
+              let colSpan = 1;
+              if (items.length > 0) {
+                  let maxEndCol = cIdx;
+                  const itemEnd = items.reduce((max: number, it: any) => Math.max(max, it.x + it.width), 0);
+                  
+                  for (let nextC = cIdx + 1; nextC < sortedCols.length; nextC++) {
+                      const col = sortedCols[nextC];
+                      const nextColX = sortedCols[nextC+1]?.x || (col.x + 100);
+                      const colW = nextColX - col.x;
+                      if (itemEnd > col.x + (colW * 0.4)) {
+                          maxEndCol = nextC;
+                      } else {
+                          break;
+                      }
+                  }
+                  colSpan = maxEndCol - cIdx + 1;
+              }
+              
+              // Merge items from spanned columns
+              if (colSpan > 1) {
+                  for (let k = 1; k < colSpan; k++) {
+                      const spannedData = distCells[cIdx + k];
+                      if (spannedData) {
+                          items.push(...spannedData.items);
+                          cellData.text += ' ' + spannedData.text;
+                      }
+                      coveredCells.add(`${rowIndex},${cIdx + k}`);
+                  }
+              }
+              
+              // Detect RowSpan
+              let rowSpan = 1;
+              if (items.length > 0) {
+                  const itemBottom = items.reduce((max: number, it: any) => Math.max(max, it.y + it.height), 0);
+                  for (let r = rowIndex + 1; r < logicalRows.length; r++) {
+                      const nextRowY = logicalRows[r].y;
+                      if (nextRowY < itemBottom - 5) {
+                          rowSpan++;
+                      } else {
+                          break;
+                      }
+                  }
+              }
+              
+              if (rowSpan > 1) {
+                  for (let r = 1; r < rowSpan; r++) {
+                      for (let c = 0; c < colSpan; c++) {
+                          coveredCells.add(`${rowIndex + r},${cIdx + c}`);
+                      }
+                  }
+              }
+              
+              rowCells.push({
+                  text: cellData.text,
+                  items: items,
+                  rowSpan,
+                  colSpan,
+                  rowIndex,
+                  colIndex: cIdx,
+                  isCovered: false
+              });
+          }
+          grid.push(rowCells);
+      });
+      
+      return { cells: grid };
+  }
+
+  protected groupItemsIntoLines(items: any[], adaptiveTolerance: boolean = false): any[] {
+      // Sort primarily by Y, then by X
+      items.sort((a, b) => a.y - b.y || a.x - b.x);
+
+      const lines: any[] = [];
+      let currentLine: any[] = [];
+      let currentY = -1;
+      let currentHeight = 0;
+
+      const finalizeLine = (lineItems: any[], y: number, height: number) => {
+          if (lineItems.length === 0) return null;
+          // Sort by X to ensure correct order
+          lineItems.sort((a, b) => a.x - b.x);
+          
+          const text = lineItems.reduce((str, item, idx) => {
+              if (idx === 0) return item.text;
+              const prev = lineItems[idx-1];
+              const gap = item.x - (prev.x + prev.width);
+              return str + (gap > 3 ? ' ' : '') + item.text;
+          }, '');
+
+          const x = lineItems[0].x;
+          const lastItem = lineItems[lineItems.length - 1];
+          const width = (lastItem.x + lastItem.width) - x;
+
+          return { 
+              items: lineItems, 
+              y, 
+              x, 
+              width,
+              height, 
+              text 
+          };
+      };
+
+      for (const item of items) {
+          if (currentY === -1) {
+              currentY = item.y;
+              currentHeight = item.height || 12;
+              currentLine.push(item);
+          } else {
+              const tolerance = adaptiveTolerance 
+                  ? Math.max(5, (currentHeight + (item.height || 12)) / 4) 
+                  : 5;
+              
+              if (Math.abs(item.y - currentY) < tolerance) {
+                  currentLine.push(item);
+              } else {
+                  const line = finalizeLine(currentLine, currentY, currentHeight);
+                  if (line) lines.push(line);
+                  
+                  currentLine = [item];
+                  currentY = item.y;
+                  currentHeight = item.height || 12;
+              }
+          }
+      }
+      const line = finalizeLine(currentLine, currentY, currentHeight);
+      if (line) lines.push(line);
+      
+      return lines;
+  }
+
+  protected mapFont(fontName: string): string {
+      if (!fontName) return 'Calibri';
+      const lower = fontName.toLowerCase();
+      
+      if (lower.includes('times')) return 'Times New Roman';
+      if (lower.includes('courier')) return 'Courier New';
+      if (lower.includes('arial') || lower.includes('helvetica')) return 'Arial';
+      if (lower.includes('verdana')) return 'Verdana';
+      if (lower.includes('tahoma')) return 'Tahoma';
+      if (lower.includes('trebuchet')) return 'Trebuchet MS';
+      if (lower.includes('georgia')) return 'Georgia';
+      if (lower.includes('garamond')) return 'Garamond';
+      if (lower.includes('comic')) return 'Comic Sans MS';
+      
+      return 'Calibri';
+  }
+
+  protected isBold(fontName: string): boolean {
+      if (!fontName) return false;
+      const lower = fontName.toLowerCase();
+      return lower.includes('bold') || lower.includes('bd') || lower.includes('demi') || lower.includes('black');
+  }
+
+  protected isItalic(fontName: string): boolean {
+      if (!fontName) return false;
+      const lower = fontName.toLowerCase();
+      return lower.includes('italic') || lower.includes('it') || lower.includes('oblique');
   }
 }
 
@@ -265,6 +734,32 @@ class PDFSplitter extends PDFProcessor {
             results.push(result);
          }
       }
+
+      if (this.options.asZip && results.length > 0) {
+        const zip = new JSZip();
+        
+        results.forEach(result => {
+          if (result.blob) {
+            zip.file(result.name, result.blob);
+          }
+        });
+        
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        const baseName = file.name.replace(/\.[^/.]+$/, '');
+        
+        return [{
+          id: `zip_${Date.now()}`,
+          name: `${baseName}_images.zip`,
+          originalName: file.name,
+          size: zipBlob.size,
+          type: 'application/zip',
+          data: [], 
+          processedAt: new Date().toISOString(),
+          toolUsed: 'pdf-to-images',
+          blob: zipBlob,
+          downloadUrl: URL.createObjectURL(zipBlob)
+        }];
+      }
       
       return results;
     } catch (error: any) {
@@ -357,30 +852,7 @@ class PDFPageExtractor extends PDFProcessor {
     return indices;
   }
 
-  private parsePageRange(range: string, totalPages: number): number[] {
-    const indices: number[] = [];
-    const parts = range.split(',');
-    
-    for (const part of parts) {
-      const trimmed = part.trim();
-      
-      if (trimmed.includes('-')) {
-        const [start, end] = trimmed.split('-').map(n => parseInt(n.trim()) - 1);
-        for (let i = start; i <= end && i < totalPages; i++) {
-          if (i >= 0 && !indices.includes(i)) {
-            indices.push(i);
-          }
-        }
-      } else {
-        const page = parseInt(trimmed) - 1;
-        if (page >= 0 && page < totalPages && !indices.includes(page)) {
-          indices.push(page);
-        }
-      }
-    }
-    
-    return indices.sort((a, b) => a - b);
-  }
+
 }
 
 // PDF Compressor
@@ -392,29 +864,38 @@ class PDFCompressor extends PDFProcessor {
          console.log('Using rasterization strategy for extreme compression/grayscale');
          // Use provided quality or default to 0.5 (aggressive)
          const quality = typeof this.options.quality === 'number' ? this.options.quality : 0.5;
-         const result = await this.applyRasterization(file, quality, this.options.grayscale || false);
+         let scale = typeof this.options.scale === 'number' ? this.options.scale : 1.0;
          
-         // For compression, check if the result is actually smaller (unless it's just a grayscale conversion where size might not be the only goal, 
-         // but if the user intent is "Compress", size matters).
-         // The user specifically complained about "compressed file size is larger... yet no comment popped up".
-         // So we must check size.
-         if (result.size >= file.size) {
-            console.log('File already highly compressed (Rasterization did not reduce size)');
-            // If it didn't help, we should probably warn or return original?
-            // But if the user WANTED grayscale, we should maybe still return it?
-            // The tool is "Compress PDF", so size reduction is the primary goal.
-            // If it's larger, it failed the "Compress" goal.
+         let result = await this.applyRasterization(file, quality, this.options.grayscale || false, scale);
+         
+         // Iterative compression: if result is not smaller, reduce scale and try again
+         // This ensures we "always compress further" as requested, even for already compressed files
+         let attempts = 0;
+         const maxAttempts = 4;
+         
+         while (result.size >= file.size && attempts < maxAttempts) {
+            console.log(`Compression result (${result.size} bytes) not smaller than original (${file.size} bytes). Reducing scale...`);
+            scale = scale * 0.6; // Reduce scale aggressively
+            attempts++;
             
-            // However, "Extreme Compression" is a specific mode. 
-            // If I return the original, the user sees "File already highly compressed" in logs (which they wanted).
-            // Let's assume we return the original if it failed to compress, matching the behavior of other strategies.
-             
-             // BUT, wait. If I select "Grayscale", I might want grayscale even if it's larger (rare, but possible).
-             // But the tool is COMPRESS PDF. 
-             // Let's stick to the user's complaint: "compressed file size is larger".
-             
-             // We will return the original file if the "compressed" one is larger, 
-             // AND log the message the user expects.
+            if (scale < 0.1) {
+               console.log('Scale too small, stopping reduction.');
+               break;
+            }
+            
+            console.log(`Retrying with scale: ${scale}`);
+            try {
+               result = await this.applyRasterization(file, quality, this.options.grayscale || false, scale);
+            } catch (e) {
+               console.error("Retry failed:", e);
+               break; 
+            }
+         }
+         
+         // If still larger after retries, return original (as a safety net)
+        // Unless 'force' is enabled (e.g., for sanitization or ensuring rasterization)
+        if (result.size >= file.size && !this.options.force) {
+           console.log('File already highly compressed (Rasterization did not reduce size) and force mode not enabled');
              
              const originalBuffer = new Uint8Array(await file.arrayBuffer());
              const blob = new Blob([originalBuffer], { type: 'application/pdf' });
@@ -433,7 +914,7 @@ class PDFCompressor extends PDFProcessor {
          }
 
          const blob = new Blob([new Uint8Array(result.buffer)], { type: 'application/pdf' });
-         const filename = this.getOutputFilename(file.name, this.options.grayscale ? 'grayscale' : 'rasterized');
+         const filename = this.getOutputFilename(file.name, this.options.grayscale ? 'grayscale' : 'compressed');
          
          return [{
           id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -1131,9 +1612,9 @@ class PDFCompressor extends PDFProcessor {
     }
   }
 
-  private async applyRasterization(file: File, quality: number = 0.5, grayscale: boolean = false): Promise<{ buffer: Uint8Array; size: number }> {
+  private async applyRasterization(file: File, quality: number = 0.5, grayscale: boolean = false, scale: number = 1.0): Promise<{ buffer: Uint8Array; size: number }> {
     try {
-      console.log(`Starting rasterization compression (grayscale: ${grayscale})...`);
+      console.log(`Starting rasterization compression (quality: ${quality}, grayscale: ${grayscale}, scale: ${scale})...`);
       const arrayBuffer = await file.arrayBuffer();
       
       // Use react-pdf's pdfjs export to ensure compatibility and avoid webpack issues
@@ -1159,7 +1640,12 @@ class PDFCompressor extends PDFProcessor {
       for (let i = 1; i <= numPages; i++) {
         console.log(`Processing page ${i}/${numPages}`);
         const page = await pdf.getPage(i);
-        const viewport = page.getViewport({ scale: 1.5 }); // Scale 1.5 for decent readability
+        
+        // Get original dimensions to preserve page size
+        const originalViewport = page.getViewport({ scale: 1.0 });
+        
+        // Get scaled viewport for rasterization (resolution control)
+        const viewport = page.getViewport({ scale: scale }); 
         
         // Create canvas with environment check
         if (typeof document === 'undefined') {
@@ -1208,12 +1694,16 @@ class PDFCompressor extends PDFProcessor {
         }
         
         const embeddedImage = await newPdfDoc.embedJpg(imgBytes);
-        const newPage = newPdfDoc.addPage([viewport.width, viewport.height]);
+        
+        // Create page with ORIGINAL dimensions
+        const newPage = newPdfDoc.addPage([originalViewport.width, originalViewport.height]);
+        
+        // Draw the (potentially low-res) image stretched to fill the original page size
         newPage.drawImage(embeddedImage, {
           x: 0,
           y: 0,
-          width: viewport.width,
-          height: viewport.height,
+          width: originalViewport.width,
+          height: originalViewport.height,
         });
         
         // Cleanup to save memory
@@ -1452,7 +1942,7 @@ class PDFToWordConverter extends PDFProcessor {
         Document, Packer, Paragraph, TextRun, ImageRun, HeadingLevel, 
         Table, TableRow, TableCell, WidthType, AlignmentType, 
         BorderStyle, Header, Footer, TextWrappingType, TextWrappingSide,
-        VerticalAlign
+        VerticalAlign, VerticalMergeType
       } = await import('docx');
       
       // Import PDF.js dynamically
@@ -1475,7 +1965,21 @@ class PDFToWordConverter extends PDFProcessor {
       
       const sections: any[] = [];
       
-      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      let pagesToConvert: number[] = [];
+      if (conversionOptions?.pageRange) {
+          // parsePageRange returns 0-based indices
+          const indices = this.parsePageRange(conversionOptions.pageRange, pdf.numPages);
+          pagesToConvert = indices.map(i => i + 1); // Convert to 1-based
+          
+          if (pagesToConvert.length === 0) {
+             // Fallback to all pages
+             pagesToConvert = Array.from({ length: pdf.numPages }, (_, i) => i + 1);
+          }
+      } else {
+          pagesToConvert = Array.from({ length: pdf.numPages }, (_, i) => i + 1);
+      }
+
+      for (const pageNum of pagesToConvert) {
         const page = await pdf.getPage(pageNum);
         const viewport = page.getViewport({ scale: 1.5 }); // Higher scale for better precision
         const { width: pageWidth, height: pageHeight } = viewport;
@@ -1634,19 +2138,22 @@ class PDFToWordConverter extends PDFProcessor {
         // Generate content for each section using the same structure logic
         const headerChildren = this.generateSectionContent(
             headerItems, 
-            Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, 
+            Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, BorderStyle,
+            VerticalMergeType, WidthType,
             conversionOptions
         );
         
         const footerChildren = this.generateSectionContent(
             footerItems, 
-            Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, 
+            Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, BorderStyle,
+            VerticalMergeType, WidthType,
             conversionOptions
         );
         
         const bodyChildren = this.generateSectionContent(
             bodyItems, 
-            Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, 
+            Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, BorderStyle,
+            VerticalMergeType, WidthType,
             conversionOptions
         );
         
@@ -1704,33 +2211,12 @@ class PDFToWordConverter extends PDFProcessor {
 
   private generateSectionContent(
     items: any[], 
-    Paragraph: any, TextRun: any, ImageRun: any, Table: any, TableRow: any, TableCell: any,
+    Paragraph: any, TextRun: any, ImageRun: any, Table: any, TableRow: any, TableCell: any, BorderStyle: any,
+    VerticalMergeType: any, WidthType: any,
     options: any
   ): any[] {
     // Group Items into Lines/Blocks
-    const blocks: any[] = [];
-    let currentBlock: any[] = [];
-    let currentY = -1;
-    
-    // Ensure items are sorted
-    items.sort((a, b) => {
-        if (Math.abs(a.y - b.y) < 5) return a.x - b.x;
-        return a.y - b.y;
-    });
-    
-    for (const item of items) {
-        if (currentY === -1) {
-            currentY = item.y;
-            currentBlock.push(item);
-        } else if (Math.abs(item.y - currentY) < (item.height || 12) / 2) { // Tolerance relative to height
-            currentBlock.push(item);
-        } else {
-            blocks.push({ type: 'line', items: currentBlock, y: currentY });
-            currentBlock = [item];
-            currentY = item.y;
-        }
-    }
-    if (currentBlock.length > 0) blocks.push({ type: 'line', items: currentBlock, y: currentY });
+    const blocks = this.groupItemsIntoLines(items, true);
     
     // Detect Tables only if preserveLayout is not explicitly false
     // Default to true if undefined
@@ -1746,7 +2232,7 @@ class PDFToWordConverter extends PDFProcessor {
     
     for (const element of structure) {
         if (element.type === 'table') {
-            children.push(this.createTable(element, Table, TableRow, TableCell, Paragraph, TextRun, options));
+            children.push(this.createTable(element, Table, TableRow, TableCell, Paragraph, TextRun, ImageRun, BorderStyle, VerticalMergeType, WidthType, options));
         } else {
             children.push(this.createParagraph(element, Paragraph, TextRun, ImageRun, options));
         }
@@ -1755,80 +2241,138 @@ class PDFToWordConverter extends PDFProcessor {
     return children;
   }
 
-  private detectStructure(lines: any[]): any[] {
-    const structure: any[] = [];
-    let currentTableRows: any[] = [];
-    
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        
-        // Simple heuristic: If line has > 1 items separated by gaps, it might be a table row
-        // Check alignment with next line
-        const nextLine = lines[i+1];
-        
-        // A line is a table candidate if it has multiple items
-        const isTableCandidate = (l: any) => l.items.length > 1;
-        
-        const alignWithNext = nextLine && this.checkAlignment(line, nextLine);
-        const alignWithPrev = currentTableRows.length > 0 && this.checkAlignment(currentTableRows[currentTableRows.length-1], line);
-        
-        if (alignWithNext || alignWithPrev) {
-            currentTableRows.push(line);
-        } else {
-            if (currentTableRows.length > 0) {
-                // End of table
-                structure.push({ type: 'table', rows: currentTableRows });
-                currentTableRows = [];
-            }
-            structure.push(line);
-        }
-    }
-    if (currentTableRows.length > 0) structure.push({ type: 'table', rows: currentTableRows });
-    
-    return structure;
-  }
-  
-  private checkAlignment(line1: any, line2: any): boolean {
-      // Check if items align vertically (similar X coords)
-      // This is a loose check
-      if (!line1 || !line2) return false;
-      const x1s = line1.items.map((i: any) => i.x);
-      const x2s = line2.items.map((i: any) => i.x);
-      
-      let matches = 0;
-      for (const x1 of x1s) {
-          if (x2s.some((x2: number) => Math.abs(x1 - x2) < 20)) matches++;
-      }
-      
-      return matches >= 2; // At least 2 columns align
-  }
 
-  private createTable(element: any, Table: any, TableRow: any, TableCell: any, Paragraph: any, TextRun: any, options: any): any {
-      const rows = element.rows.map((row: any) => {
-          // Sort items by X
-          row.items.sort((a: any, b: any) => a.x - b.x);
-          
-          const cells = row.items.map((item: any) => {
-              return new TableCell({
-                  children: [
-                      new Paragraph({
-                          children: [new TextRun({ 
-                              text: item.text, 
-                              size: options?.maintainFormatting !== false ? Math.round(item.fontSize || 24) : 24,
-                              font: options?.maintainFormatting !== false && item.fontName ? this.mapFont(item.fontName) : 'Calibri'
-                          })]
-                      })
-                  ]
-              });
-          });
-          return new TableRow({ children: cells });
-      });
-      
-      return new Table({
-          rows: rows,
-          width: { size: 100, type: "pct" } // Auto width
-      });
-  }
+
+  private createTable(element: any, Table: any, TableRow: any, TableCell: any, Paragraph: any, TextRun: any, ImageRun: any, BorderStyle: any, VerticalMergeType: any, WidthType: any, options: any): any {
+        // 1. Analyze table structure using centralized method
+        const { cells } = this.analyzeTableStructure(element.rows, element.columns || []);
+
+        // Track active vertical merges: index -> { remainingRows, colSpan }
+        const activeMerges: ({ remainingRows: number, colSpan: number } | null)[] = new Array(cells[0]?.length || 0).fill(null);
+
+        // 3. Create Table Rows with Span Detection
+        const tableRows = cells.map((row, rowIndex) => {
+            const rowChildren: any[] = [];
+            
+            for (let cIdx = 0; cIdx < row.length; cIdx++) {
+                const cellData = row[cIdx];
+                
+                // Check for active vertical merge
+                if (activeMerges[cIdx]) {
+                    const mergeInfo = activeMerges[cIdx]!;
+                    
+                    rowChildren.push(new TableCell({
+                        children: [new Paragraph({})], // Empty for continued merge
+                        verticalMerge: VerticalMergeType.CONTINUE,
+                        columnSpan: mergeInfo.colSpan,
+                        borders: {
+                            top: { style: BorderStyle.SINGLE, size: 1, color: "E0E0E0" },
+                            bottom: { style: BorderStyle.SINGLE, size: 1, color: "E0E0E0" },
+                            left: { style: BorderStyle.SINGLE, size: 1, color: "E0E0E0" },
+                            right: { style: BorderStyle.SINGLE, size: 1, color: "E0E0E0" },
+                        }
+                    }));
+                    
+                    // Decrement remaining rows
+                    mergeInfo.remainingRows--;
+                    if (mergeInfo.remainingRows <= 0) {
+                        // Clear merge info for all columns in this span
+                        for(let k=0; k<mergeInfo.colSpan; k++) {
+                             activeMerges[cIdx + k] = null;
+                        }
+                    } else {
+                         // Update remaining rows for other columns in this span (to keep them in sync, though we skip them)
+                         for(let k=1; k<mergeInfo.colSpan; k++) {
+                             if (activeMerges[cIdx + k]) {
+                                 activeMerges[cIdx + k]!.remainingRows = mergeInfo.remainingRows;
+                             }
+                         }
+                    }
+                    
+                    // Skip the columns covered by this merge's colSpan
+                    cIdx += (mergeInfo.colSpan - 1);
+                    continue;
+                }
+                
+                // If not in a vertical merge, check if this cell is covered by a horizontal merge from the left.
+                // analyzeTableStructure marks isCovered=true for both vertical and horizontal coverage.
+                if (cellData.isCovered) {
+                     continue;
+                }
+                
+                // Start of a new cell
+                const isVerticalMergeStart = cellData.rowSpan > 1;
+                
+                if (isVerticalMergeStart) {
+                     // Register in activeMerges
+                     for(let k=0; k<cellData.colSpan; k++) {
+                         activeMerges[cIdx + k] = { 
+                             remainingRows: cellData.rowSpan - 1, 
+                             colSpan: cellData.colSpan 
+                         };
+                     }
+                }
+                
+                // Create content
+                const paragraphChildren = [];
+                 for (const item of cellData.items) {
+                    if (item.type === 'image') {
+                        paragraphChildren.push(new ImageRun({
+                            data: item.data,
+                            transformation: { width: item.width, height: item.height }
+                        }));
+                    } else {
+                        paragraphChildren.push(new TextRun({ 
+                            text: item.text + " ", 
+                            size: options?.maintainFormatting !== false ? Math.round(item.fontSize || 24) : 24,
+                            font: options?.maintainFormatting !== false && item.fontName ? this.mapFont(item.fontName) : 'Calibri',
+                            bold: options?.maintainFormatting !== false && item.fontName ? this.isBold(item.fontName) : false,
+                            italics: options?.maintainFormatting !== false && item.fontName ? this.isItalic(item.fontName) : false
+                        }));
+                    }
+                }
+                
+                rowChildren.push(new TableCell({
+                    children: [
+                        new Paragraph({
+                            children: paragraphChildren
+                        })
+                    ],
+                    columnSpan: cellData.colSpan,
+                    verticalMerge: isVerticalMergeStart ? VerticalMergeType.RESTART : undefined,
+                    borders: {
+                        top: { style: BorderStyle.SINGLE, size: 1, color: "E0E0E0" },
+                        bottom: { style: BorderStyle.SINGLE, size: 1, color: "E0E0E0" },
+                        left: { style: BorderStyle.SINGLE, size: 1, color: "E0E0E0" },
+                        right: { style: BorderStyle.SINGLE, size: 1, color: "E0E0E0" },
+                    }
+                }));
+                
+                // Skip columns covered by this cell's colSpan
+                cIdx += (cellData.colSpan - 1);
+            }
+            
+            return new TableRow({
+                children: rowChildren
+            });
+        });
+
+        return new Table({
+            rows: tableRows,
+            width: {
+                size: 100,
+                type: WidthType.PERCENTAGE,
+            },
+            borders: {
+                top: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
+                bottom: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
+                left: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
+                right: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
+                insideHorizontal: { style: BorderStyle.SINGLE, size: 1, color: "000000" },
+                insideVertical: { style: BorderStyle.SINGLE, size: 1, color: "000000" }
+            }
+        });
+    }
 
   private createParagraph(element: any, Paragraph: any, TextRun: any, ImageRun: any, options: any): any {
       element.items.sort((a: any, b: any) => a.x - b.x);
@@ -1838,9 +2382,29 @@ class PDFToWordConverter extends PDFProcessor {
       
       const preserveLayout = options?.preserveLayout !== false;
 
-      // Calculate indent only if preserving layout
+      // Check for list markers
+      let bullet: any = undefined;
+      // Only check the first text item
+      const firstTextIndex = element.items.findIndex((i: any) => i.type === 'text');
+      if (firstTextIndex !== -1) {
+          const firstItem = element.items[firstTextIndex];
+          const text = firstItem.text.trim();
+          
+          // Bullet points: •, -, *
+          if (/^[•\-\*]$/.test(text) || /^[•\-\*]\s/.test(text)) {
+             bullet = { level: 0 };
+             // Strip the bullet char, accounting for potential leading spaces in original text
+             element.items[firstTextIndex].text = firstItem.text.replace(/^\s*[•\-\*]\s?/, '');
+          }
+          // Numbered lists: 1., 1), a., a)
+          // We won't try to reconstruct the numbering sequence logic for now, 
+          // just treat them as bullets or leave them as text.
+          // Treating them as text is safer to avoid breaking references.
+      }
+
+      // Calculate indent only if preserving layout AND not a list (lists handle their own indent)
       const firstItem = element.items[0];
-      const indent = preserveLayout ? Math.round(firstItem.x * 10) : 0; 
+      const indent = (preserveLayout && !bullet) ? Math.round(firstItem.x * 10) : undefined; 
       
       for (const item of element.items) {
           if (item.type === 'image') {
@@ -1857,7 +2421,9 @@ class PDFToWordConverter extends PDFProcessor {
              children.push(new TextRun({ 
                  text: item.text,
                  size: options?.maintainFormatting !== false ? Math.round((item.fontSize || 12) * 2) : 24, // Half-points
-                 font: options?.maintainFormatting !== false && item.fontName ? this.mapFont(item.fontName) : 'Calibri'
+                 font: options?.maintainFormatting !== false && item.fontName ? this.mapFont(item.fontName) : 'Calibri',
+                 bold: options?.maintainFormatting !== false && item.fontName ? this.isBold(item.fontName) : false,
+                 italics: options?.maintainFormatting !== false && item.fontName ? this.isItalic(item.fontName) : false
              }));
           }
           lastX = item.x + item.width;
@@ -1865,8 +2431,9 @@ class PDFToWordConverter extends PDFProcessor {
       
       return new Paragraph({
           children: children,
-          indent: { left: indent },
-          spacing: { after: 120 }
+          indent: indent ? { left: indent } : undefined,
+          spacing: { after: 120 },
+          bullet: bullet
       });
   }
   
@@ -1875,69 +2442,9 @@ class PDFToWordConverter extends PDFProcessor {
           children: items.map((item: any) => new TextRun({ text: item.text + " " }))
       });
   }
-  
-  private mapFont(fontName: string): string {
-      const lower = fontName.toLowerCase();
-      if (lower.includes('times')) return 'Times New Roman';
-      if (lower.includes('courier')) return 'Courier New';
-      if (lower.includes('arial')) return 'Arial';
-      return 'Calibri';
-  }
-
-  private async convertImageToBuffer(imgData: any): Promise<ArrayBuffer | null> {
-    if (!imgData) return null;
-    try {
-        const canvas = document.createElement('canvas');
-        canvas.width = imgData.width;
-        canvas.height = imgData.height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return null;
-
-        const size = imgData.width * imgData.height;
-        const clamped = new Uint8ClampedArray(size * 4);
-        const data = imgData.data;
-
-        if (data.length === size * 4) {
-            clamped.set(data);
-        } else if (data.length === size * 3) {
-            for (let i = 0, j = 0; i < data.length; i += 3, j += 4) {
-                clamped[j] = data[i];
-                clamped[j + 1] = data[i + 1];
-                clamped[j + 2] = data[i + 2];
-                clamped[j + 3] = 255;
-            }
-        } else if (data.length === size) {
-            for (let i = 0, j = 0; i < data.length; i++, j += 4) {
-                const val = data[i];
-                clamped[j] = val;
-                clamped[j + 1] = val;
-                clamped[j + 2] = val;
-                clamped[j + 3] = 255;
-            }
-        } else {
-            return null;
-        }
-
-        const imageData = new ImageData(clamped, imgData.width, imgData.height);
-        ctx.putImageData(imageData, 0, 0);
-
-        return new Promise((resolve) => {
-            canvas.toBlob((blob) => {
-                if (blob) {
-                    blob.arrayBuffer().then(resolve);
-                } else {
-                    resolve(null);
-                }
-            }, 'image/png');
-        });
-    } catch (e) {
-        console.error('Error converting image to buffer:', e);
-        return null;
-    }
-  }
 }
 
-// PDF to Images Converter
+// PDF Signature Processor
 class PDFSignatureProcessor extends PDFProcessor {
   private signatureData: any;
   private position: { x: number; y: number };
@@ -2164,6 +2671,32 @@ class PDFToImagesConverter extends PDFProcessor {
         }
       }
       
+      if (this.options.asZip && results.length > 0) {
+        const zip = new JSZip();
+        
+        results.forEach(result => {
+          if (result.blob) {
+            zip.file(result.name, result.blob);
+          }
+        });
+        
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        const baseName = file.name.replace(/\.[^/.]+$/, '');
+        
+        return [{
+          id: `zip_${Date.now()}`,
+          name: `${baseName}_images.zip`,
+          originalName: file.name,
+          size: zipBlob.size,
+          type: 'application/zip',
+          data: [], 
+          processedAt: new Date().toISOString(),
+          toolUsed: 'pdf-to-images',
+          blob: zipBlob,
+          downloadUrl: URL.createObjectURL(zipBlob)
+        }];
+      }
+
       return results;
     } catch (error: any) {
       if (error.code) throw error;
@@ -2595,6 +3128,329 @@ class ImageToPDFProcessor {
   }
 }
 
+// PDF to Excel Converter
+class PDFToExcelConverter extends PDFProcessor {
+  async process(file: File): Promise<ProcessedFile> {
+    try {
+      // Import PDF.js dynamically
+      const { pdfjs } = await import('react-pdf');
+      if (typeof window !== 'undefined') {
+        const { PDF_WORKER_URL } = await import('@/lib/pdf-worker');
+        pdfjs.GlobalWorkerOptions.workerSrc = PDF_WORKER_URL;
+      }
+      
+      const getDocument = pdfjs.getDocument;
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await getDocument({ data: arrayBuffer }).promise;
+      
+      const workbook = XLSX.utils.book_new();
+      
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        const viewport = page.getViewport({ scale: 1.0 });
+        
+        // Extract items with position
+        const items = textContent.items.map((item: any) => ({
+          text: item.str,
+          x: item.transform[4],
+          y: viewport.height - item.transform[5], // PDF coordinates are bottom-up
+          width: item.width,
+          height: item.height,
+          hasEOL: item.hasEOL
+        })).filter((item: any) => item.text.trim().length > 0);
+        
+        // Group items into lines
+        const lines = this.groupItemsIntoLines(items);
+        
+        // Detect structure (tables vs text)
+        const structure = this.detectStructure(lines);
+        
+        // Convert structure to sheet data
+        const sheetData: any[][] = [];
+        const pageMerges: any[] = [];
+        
+        structure.forEach((element: any) => {
+            if (element.type === 'table') {
+                // Analyze table structure using centralized method
+                const { cells } = this.analyzeTableStructure(element.rows, element.columns || []);
+                
+                // Adjust merge rows to match sheet position
+                const startRow = sheetData.length;
+                
+                cells.forEach((rowCells, rIdx) => {
+                    const rowData: string[] = [];
+                    rowCells.forEach((cell, cIdx) => {
+                        rowData.push(cell.text);
+                        
+                        if (!cell.isCovered && (cell.rowSpan > 1 || cell.colSpan > 1)) {
+                            pageMerges.push({
+                                s: { r: startRow + rIdx, c: cIdx },
+                                e: { r: startRow + rIdx + cell.rowSpan - 1, c: cIdx + cell.colSpan - 1 }
+                            });
+                        }
+                    });
+                    sheetData.push(rowData);
+                });
+                
+                // Add empty row after table
+                sheetData.push([]);
+            } else {
+                // Regular text line
+                const text = element.items.map((i: any) => i.text).join(' ');
+                sheetData.push([text]);
+            }
+        });
+        
+        const worksheet = XLSX.utils.aoa_to_sheet(sheetData);
+        if (pageMerges.length > 0) {
+            worksheet['!merges'] = pageMerges;
+        }
+        XLSX.utils.book_append_sheet(workbook, worksheet, `Page ${i}`);
+      }
+      
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      // Fix: output filename should have .xlsx extension
+      const filename = this.getOutputFilename(file.name, 'converted').replace(/\.pdf$/, '.xlsx');
+      
+      return {
+        id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        name: filename,
+        originalName: file.name,
+        size: blob.size,
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        data: Array.from(new Uint8Array(excelBuffer)),
+        processedAt: new Date().toISOString(),
+        toolUsed: 'pdf-to-excel',
+        blob,
+        downloadUrl: URL.createObjectURL(blob)
+      };
+      
+    } catch (error: any) {
+       throw errorUtils.createError('PROCESSING_FAILED', 'Failed to convert PDF to Excel', error);
+    }
+  }
+}
+
+// PDF to PowerPoint Converter
+class PDFToPPTConverter extends PDFProcessor {
+  async process(file: File): Promise<ProcessedFile> {
+    try {
+      // Import PDF.js dynamically
+      const { pdfjs } = await import('react-pdf');
+      if (typeof window !== 'undefined') {
+        const { PDF_WORKER_URL } = await import('@/lib/pdf-worker');
+        pdfjs.GlobalWorkerOptions.workerSrc = PDF_WORKER_URL;
+      }
+      
+      const getDocument = pdfjs.getDocument;
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await getDocument({ data: arrayBuffer }).promise;
+      
+      const pptx = new PptxGenJS();
+      pptx.layout = 'LAYOUT_16x9';
+      
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const viewport = page.getViewport({ scale: 1.0 });
+        const pageWidth = viewport.width;
+        const pageHeight = viewport.height;
+        
+        const slide = pptx.addSlide();
+
+        // 1. Extract and Add Images
+        if (this.options.extractImages !== false) {
+            try {
+                const operatorList = await page.getOperatorList();
+                const commonObjs = page.commonObjs;
+                const objs = page.objs;
+                
+                let currentMatrix = [1, 0, 0, 1, 0, 0];
+                const transformStack: any[] = [];
+                
+                for (let opIdx = 0; opIdx < operatorList.fnArray.length; opIdx++) {
+                    const fn = operatorList.fnArray[opIdx];
+                    const args = operatorList.argsArray[opIdx];
+                    
+                    if (fn === pdfjs.OPS.save) {
+                        transformStack.push([...currentMatrix]);
+                    } else if (fn === pdfjs.OPS.restore) {
+                        if (transformStack.length > 0) currentMatrix = transformStack.pop();
+                    } else if (fn === pdfjs.OPS.transform) {
+                        const m1 = currentMatrix;
+                        const m2 = args;
+                        currentMatrix = [
+                            m1[0] * m2[0] + m1[1] * m2[2],
+                            m1[0] * m2[1] + m1[1] * m2[3],
+                            m1[2] * m2[0] + m1[3] * m2[2],
+                            m1[2] * m2[1] + m1[3] * m2[3],
+                            m1[4] * m2[0] + m1[5] * m2[2] + m2[4],
+                            m1[4] * m2[1] + m1[5] * m2[3] + m2[5]
+                        ];
+                    } else if (fn === pdfjs.OPS.paintImageXObject || fn === pdfjs.OPS.paintJpegXObject) {
+                        const imgName = args[0];
+                        const imgData = await (objs.get(imgName) || commonObjs.get(imgName));
+                        if (imgData) {
+                            const w = Math.sqrt(currentMatrix[0] * currentMatrix[0] + currentMatrix[1] * currentMatrix[1]);
+                            const h = Math.sqrt(currentMatrix[2] * currentMatrix[2] + currentMatrix[3] * currentMatrix[3]);
+                            const x = currentMatrix[4];
+                            const y = currentMatrix[5];
+                            
+                            // PDF coords (bottom-up) to PPT coords (top-down)
+                            const pptX = x / 72;
+                            const pptY = (pageHeight - (y + h)) / 72;
+                            const pptW = w / 72;
+                            const pptH = h / 72;
+
+                            const imageBuffer = await this.convertImageToBuffer(imgData);
+                            if (imageBuffer) {
+                                const base64 = this.arrayBufferToBase64(imageBuffer);
+                                slide.addImage({
+                                    data: `image/png;base64,${base64}`,
+                                    x: Math.max(0, pptX),
+                                    y: Math.max(0, pptY),
+                                    w: pptW,
+                                    h: pptH
+                                });
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn('Error extracting images for PPT:', e);
+            }
+        }
+        
+        // 2. Extract and Add Text with Table Detection
+        const textContent = await page.getTextContent();
+        
+        // Extract items with position
+        const items = textContent.items.map((item: any) => ({
+          text: item.str,
+          x: item.transform[4],
+          y: viewport.height - item.transform[5], // PDF coordinates are bottom-up, convert to top-down
+          width: item.width,
+          height: item.height,
+          transform: item.transform,
+          hasEOL: item.hasEOL
+        })).filter((item: any) => item.text.trim().length > 0);
+        
+        // Group items into lines
+        const lines = this.groupItemsIntoLines(items, true);
+        
+        // Detect Tables
+        const structure = this.detectStructure(lines);
+        
+        // Render Structure
+        for (const element of structure) {
+            if (element.type === 'table') {
+                this.renderTableToSlide(slide, element);
+            } else {
+                // Render as text line
+                const x = element.x / 72;
+                const y = element.y / 72;
+                const w = Math.max(1, element.width / 72);
+                const h = Math.max(0.2, element.height / 72);
+                
+                const transform = element.items[0].transform;
+                const fontSize = Math.sqrt(transform[0] * transform[0] + transform[1] * transform[1]);
+                
+                slide.addText(element.text, {
+                    x: x, 
+                    y: y, 
+                    w: w, 
+                    h: h,
+                    fontSize: Math.round(fontSize) || 11,
+                    color: '000000'
+                });
+            }
+        }
+      }
+      
+      const blob = await pptx.write('blob') as Blob;
+      const filename = this.getOutputFilename(file.name, 'converted').replace(/\.pdf$/, '.pptx');
+      
+      return {
+        id: `processed_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        name: filename,
+        originalName: file.name,
+        size: blob.size,
+        type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        data: [], 
+        processedAt: new Date().toISOString(),
+        toolUsed: 'pdf-to-ppt',
+        blob,
+        downloadUrl: URL.createObjectURL(blob)
+      };
+      
+    } catch (error: any) {
+       throw errorUtils.createError('PROCESSING_FAILED', 'Failed to convert PDF to PowerPoint', error);
+    }
+  }
+
+  // --- Table Recognition Helpers ---
+
+  private renderTableToSlide(slide: any, tableElement: any) {
+      // 1. Sort and Filter Columns
+      let columnXs = tableElement.columns
+            .map((c: any) => c.x)
+            .sort((a: number, b: number) => a - b);
+      // Filter close columns
+      columnXs = columnXs.filter((x: number, i: number) => i === 0 || x - columnXs[i-1] > 10);
+      
+      if (columnXs.length === 0) columnXs = [tableElement.rows[0]?.x || 0];
+
+      // Create column objects for getConsolidatedRows
+      const columns = columnXs.map((x: number) => ({ x, width: 0 }));
+
+      // 2. Analyze Table Structure
+      const { cells } = this.analyzeTableStructure(tableElement.rows, columns);
+      
+      const pptRows: any[] = [];
+      
+      cells.forEach((rowCells) => {
+          const rowData: any[] = [];
+          rowCells.forEach((cell) => {
+              if (cell.isCovered) return;
+
+              const cellOptions: any = { fontSize: 10, breakLine: true, valign: 'top' };
+              if (cell.rowSpan > 1) cellOptions.rowspan = cell.rowSpan;
+              if (cell.colSpan > 1) cellOptions.colspan = cell.colSpan;
+              
+              rowData.push({ text: cell.text, options: cellOptions });
+          });
+          pptRows.push(rowData);
+      });
+
+      // 3. Calculate Column Widths
+      const colWidths: number[] = [];
+      for (let i = 0; i < columnXs.length; i++) {
+          let nextX = (i < columnXs.length - 1) ? columnXs[i+1] : (columnXs[i] + 100);
+          if (i === columnXs.length - 1) {
+             const lastRow = tableElement.rows[tableElement.rows.length - 1];
+             if (lastRow) {
+                 const lastItem = lastRow.items[lastRow.items.length - 1];
+                 if (lastItem) nextX = Math.max(nextX, lastItem.x + lastItem.width);
+             }
+          }
+          colWidths.push(Math.max(0.5, (nextX - columnXs[i]) / 72));
+      }
+
+      const tableX = columnXs[0] / 72;
+      const tableY = tableElement.rows[0].y / 72;
+      
+      slide.addTable(pptRows, {
+          x: tableX,
+          y: tableY,
+          colW: colWidths,
+          fontSize: 10,
+          border: { pt: 1, color: 'E0E0E0' },
+          autoPage: true // Handle page overflow if needed
+      });
+  }
+}
+
 // Export all processors
 export {
   PDFProcessor,
@@ -2605,6 +3461,8 @@ export {
   PDFWatermark,
   PDFPasswordProtector,
   PDFToWordConverter,
+  PDFToExcelConverter,
+  PDFToPPTConverter,
   PDFToImagesConverter,
   PDFSignatureProcessor,
   PDFInfoExtractor,
@@ -2662,7 +3520,14 @@ export function createPDFProcessor(
         return new PDFToImagesConverter(options);
 
       case 'pdf-to-word':
+      case 'to-word':
         return new PDFToWordConverter(options);
+      case 'pdf-to-excel':
+      case 'to-excel':
+        return new PDFToExcelConverter(options);
+      case 'pdf-to-ppt':
+      case 'to-ppt':
+        return new PDFToPPTConverter(options);
       case 'word-to-pdf':
         return new WordToPDFProcessor(options);
       case 'pdf-ocr':
@@ -2684,9 +3549,7 @@ export function createPDFProcessor(
       case 'pdf-unlock':
       case 'unlock':
         return new PDFUnlockProcessor(options as any);
-      case 'pdf-to-word':
-      case 'to-word':
-        return new PDFToWordConverter(options as any);
+
       default:
         throw errorUtils.createError(
           'INVALID_PROCESSOR',

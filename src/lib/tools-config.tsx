@@ -22,7 +22,9 @@ import {
   Minimize2,
   Edit3,
   QrCode,
-  CheckCircle
+  CheckCircle,
+  FileSpreadsheet,
+  Presentation
 } from 'lucide-react';
 import { Tool, ToolConfig } from './types';
 
@@ -209,6 +211,52 @@ export const TOOLS: Record<string, Tool & ToolConfig> = {
       outputFormat: 'docx'
     }
   },
+
+  'pdf-to-excel': {
+    id: 'pdf-to-excel',
+    name: 'PDF to Excel',
+    description: 'Convert PDF tables to editable Excel spreadsheets',
+    icon: <FileSpreadsheet className="w-6 h-6" />,
+    category: 'Conversion Tools',
+    color: 'from-green-600 to-green-700',
+    features: [
+      'Extract tables',
+      'Maintain structure',
+      'Editable cells',
+      'Multi-page support'
+    ],
+    acceptedTypes: ['.pdf', 'application/pdf'],
+    maxFileSize: 50 * 1024 * 1024,
+    maxFiles: 5,
+    supportsBatch: true,
+    options: {
+      quality: 'high',
+      outputFormat: 'xlsx'
+    }
+  },
+
+  'pdf-to-ppt': {
+    id: 'pdf-to-ppt',
+    name: 'PDF to PowerPoint',
+    description: 'Convert PDF slides to editable PowerPoint presentations',
+    icon: <Presentation className="w-6 h-6" />,
+    category: 'Conversion Tools',
+    color: 'from-orange-500 to-red-500',
+    features: [
+      'Convert slides',
+      'Editable text',
+      'Image preservation',
+      'Layout matching'
+    ],
+    acceptedTypes: ['.pdf', 'application/pdf'],
+    maxFileSize: 50 * 1024 * 1024,
+    maxFiles: 5,
+    supportsBatch: true,
+    options: {
+      quality: 'high',
+      outputFormat: 'pptx'
+    }
+  },
   
   'pdf-ocr': {
     id: 'pdf-ocr',
@@ -311,6 +359,7 @@ export const TOOLS: Record<string, Tool & ToolConfig> = {
     icon: <QrCode className="w-6 h-6" />,
     category: 'Verification Tools',
     color: 'from-violet-500 to-violet-600',
+    isLocked: true,
     features: [
       'Unique QR code generation',
       'Blockchain-like verification',
@@ -333,6 +382,7 @@ export const TOOLS: Record<string, Tool & ToolConfig> = {
     icon: <CheckCircle className="w-6 h-6" />,
     category: 'Verification Tools',
     color: 'from-emerald-500 to-emerald-600',
+    isLocked: true,
     features: [
       'Instant QR scanning',
       'Database verification',
@@ -369,6 +419,49 @@ export const TOOLS: Record<string, Tool & ToolConfig> = {
       quality: 'high',
       password: ''
     }
+  },
+
+  // Verification Tools (Locked)
+  'verify-signature': {
+    id: 'verify-signature',
+    name: 'Verify Signature',
+    description: 'Verify digital signatures and document integrity',
+    icon: <FileCheck className="w-6 h-6" />,
+    category: 'Verification Tools',
+    color: 'from-cyan-500 to-blue-600',
+    features: [
+      'Signature validation',
+      'Certificate check',
+      'Integrity verification',
+      'Tamper detection'
+    ],
+    acceptedTypes: ['.pdf', 'application/pdf'],
+    maxFileSize: 50 * 1024 * 1024,
+    maxFiles: 1,
+    supportsBatch: false,
+    isLocked: true,
+    options: {}
+  },
+
+  'verify-document': {
+    id: 'verify-document',
+    name: 'Verify Document',
+    description: 'Check document authenticity and metadata',
+    icon: <Shield className="w-6 h-6" />,
+    category: 'Verification Tools',
+    color: 'from-violet-500 to-purple-600',
+    features: [
+      'Authenticity check',
+      'Metadata analysis',
+      'Origin verification',
+      'Security audit'
+    ],
+    acceptedTypes: ['.pdf', 'application/pdf'],
+    maxFileSize: 50 * 1024 * 1024,
+    maxFiles: 1,
+    supportsBatch: false,
+    isLocked: true,
+    options: {}
   }
 };
 

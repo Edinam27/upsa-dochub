@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { GraduationCap, FileText, Zap, Shield, ArrowRight, Sparkles, BookOpen, Users } from 'lucide-react';
+import { FileText, Zap, Shield, ArrowRight, Sparkles, Users } from 'lucide-react';
 import Link from 'next/link';
 
 const HeroSection = () => {
@@ -36,16 +36,16 @@ const HeroSection = () => {
           className="text-center mb-16"
         >
           <div className="flex items-center justify-center mb-8">
-            <GraduationCap className="h-12 w-12 text-blue-600 mr-3" />
+            <FileText className="h-12 w-12 text-blue-600 mr-3" />
             <div>
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900">
-                UPSA <span className="text-blue-600">DocHub</span>
+                <span className="text-blue-600">DocHub</span>
               </h1>
             </div>
           </div>
           
           <p className="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto mb-4">
-            Professional PDF tools for students and academics
+            Professional PDF tools for everyone
           </p>
           <p className="text-gray-600 max-w-xl mx-auto">
             Convert, merge, split, and manage your documents with ease
@@ -99,15 +99,7 @@ const HeroSection = () => {
             <ArrowRight className="h-5 w-5" />
           </button>
           
-          <Link
-            href="https://upsasip.com/student-portal"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-white border border-gray-300 hover:border-gray-400 text-gray-700 font-semibold py-3 px-8 rounded-lg transition-colors duration-200 flex items-center space-x-2"
-          >
-            <BookOpen className="h-5 w-5" />
-            <span>Student Portal</span>
-          </Link>
+          
         </motion.div>
         
         {/* Quick Stats */}

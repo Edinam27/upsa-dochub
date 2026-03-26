@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { GraduationCap, Menu, X, ExternalLink } from 'lucide-react';
+import { FileText, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Header = () => {
@@ -24,12 +24,12 @@ const Header = () => {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 group">
             <div className="relative">
-              <GraduationCap className="h-8 w-8 text-yellow-400 group-hover:text-yellow-300 transition-colors" />
+              <FileText className="h-8 w-8 text-yellow-400 group-hover:text-yellow-300 transition-colors" />
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-purple-500 rounded-full animate-pulse"></div>
             </div>
             <div className="flex flex-col">
-              <span className="text-xl font-bold text-white">UPSA DocHub</span>
-              <span className="text-xs text-gray-300 hidden sm:block">Student PDF Tools</span>
+              <span className="text-xl font-bold text-white">DocHub</span>
+              <span className="text-xs text-gray-300 hidden sm:block">PDF Tools for Everyone</span>
             </div>
           </Link>
 
@@ -46,18 +46,8 @@ const Header = () => {
             ))}
           </nav>
 
-          {/* Student Portal Button */}
-          <div className="hidden md:flex items-center space-x-4">
-            <Link
-              href="https://upsasip.com/student-portal"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-4 py-2 rounded-lg transition-all duration-300 hover:shadow-lg"
-            >
-              <span>Student Portal</span>
-              <ExternalLink className="h-4 w-4" />
-            </Link>
-          </div>
+          {/* Actions */}
+          <div className="hidden md:flex items-center space-x-4"></div>
 
           {/* Mobile Menu Button */}
           <button
@@ -90,16 +80,7 @@ const Header = () => {
                   {item.name}
                 </Link>
               ))}
-              <Link
-                href="https://upsasip.com/student-portal"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 py-2 rounded-lg transition-all duration-300 w-fit"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                <span>Student Portal</span>
-                <ExternalLink className="h-4 w-4" />
-              </Link>
+              
             </div>
           </motion.div>
         )}

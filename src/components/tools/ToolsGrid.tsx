@@ -15,7 +15,10 @@ import {
   Image,
   Zap,
   Minimize2,
-  Edit3
+  Edit3,
+  QrCode,
+  CheckCircle,
+  FileSpreadsheet
 } from 'lucide-react';
 import ToolCard from './ToolCard';
 
@@ -27,6 +30,7 @@ interface Tool {
   category: string;
   color: string;
   features: string[];
+  isLocked?: boolean;
 }
 
 const ToolsGrid = () => {
@@ -153,9 +157,31 @@ const ToolsGrid = () => {
       color: 'from-purple-500 to-purple-600',
       features: ['Select Pages', 'Page Ranges', 'Multiple Selections']
     },
+    
+    // Verification Tools Category
+    {
+      id: 'verified-signature',
+      name: 'Enhanced Signature Receipt',
+      description: 'Add a secure, trackable signature with QR code verification',
+      icon: <QrCode className="h-6 w-6" />,
+      category: 'Verification Tools',
+      color: 'from-violet-500 to-violet-600',
+      isLocked: true,
+      features: ['QR Verification', 'Blockchain-like', 'Tamper-proof', 'Identity Check']
+    },
+    {
+      id: 'verify-document',
+      name: 'Verify Document',
+      description: 'Verify the authenticity of a signed document via QR code',
+      icon: <CheckCircle className="h-6 w-6" />,
+      category: 'Verification Tools',
+      color: 'from-emerald-500 to-emerald-600',
+      isLocked: true,
+      features: ['Instant Scanning', 'Database Check', 'Signer Identity', 'Timestamp']
+    }
   ];
 
-  const categories = ['Academic Tools', 'Conversion Tools', 'Study Tools'];
+  const categories = ['Academic Tools', 'Conversion Tools', 'Study Tools', 'Verification Tools'];
 
   const getCategoryDescription = (category: string) => {
     switch (category) {
@@ -165,6 +191,8 @@ const ToolsGrid = () => {
         return 'Convert between different file formats with ease';
       case 'Study Tools':
         return 'Advanced tools to enhance your study and research workflow';
+      case 'Verification Tools':
+        return 'Secure document verification and authenticity checking';
       default:
         return '';
     }
@@ -178,6 +206,8 @@ const ToolsGrid = () => {
         return '🔄';
       case 'Study Tools':
         return '🎯';
+      case 'Verification Tools':
+        return '🛡️';
       default:
         return '📄';
     }

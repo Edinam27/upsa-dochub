@@ -65,8 +65,8 @@ const FeaturesSection = () => {
     },
     {
       icon: <Users className="h-8 w-8" />,
-      title: "Built for Students",
-      description: "Designed specifically for university workflows with academic-focused features.",
+      title: "Built for Everyone",
+      description: "Designed for all workflows with user-friendly, practical features.",
       delay: 0.4,
     },
     {
@@ -94,10 +94,10 @@ const FeaturesSection = () => {
           className="text-center mb-20"
         >
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Why Choose <span className="text-blue-600">UPSA DocHub</span>?
+            Why Choose <span className="text-blue-600">DocHub</span>?
           </h2>
           <p className="text-xl text-gray-700 max-w-3xl mx-auto">
-            A complete document management solution designed with UPSA students' academic needs in mind.
+            A complete PDF toolkit designed for global use — fast, secure, and private.
           </p>
         </motion.div>
 
@@ -127,7 +127,7 @@ const FeaturesSection = () => {
               Ready to Get Started?
             </h3>
             <p className="text-gray-700 mb-8 max-w-2xl mx-auto">
-              Join thousands of UPSA students who streamline their document processing with our free tools.
+              Join thousands of people who streamline their document processing with our free tools.
             </p>
             <button 
               onClick={() => {

@@ -81,6 +81,18 @@ function CompressPDFContent() {
     loadAndProcess();
   }, [id]);
 
+  useEffect(() => {
+    if (status === 'success') {
+      const reduction = stats.originalSize > 0 ? (stats.originalSize - stats.newSize) / stats.originalSize : 0;
+      console.log('Compression stats:', {
+        original: stats.originalSize,
+        new: stats.newSize,
+        reductionPercent: (reduction * 100).toFixed(2) + '%',
+        isIneffective: reduction < 0.06
+      });
+    }
+  }, [status, stats]);
+
   const handleDownload = () => {
     if (!compressedPdf || !originalFile) return;
     
@@ -101,6 +113,9 @@ function CompressPDFContent() {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
+
+  const reduction = stats.originalSize > 0 ? (stats.originalSize - stats.newSize) / stats.originalSize : 0;
+  const isIneffective = isNaN(reduction) || reduction < 0.06 || stats.newSize <= 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50">
@@ -167,14 +182,14 @@ function CompressPDFContent() {
           {/* Success State */}
           {status === 'success' && (
             <div className="text-center py-8">
-              {stats.newSize >= stats.originalSize ? (
+              {isIneffective ? (
                 <>
                   <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
                     <AlertCircle className="w-10 h-10 text-orange-600" />
                   </div>
-                  <h2 className="text-3xl font-bold text-gray-900 mb-4">Already Optimized</h2>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-4">Compression Limited</h2>
                   <p className="text-gray-600 mb-8">
-                    This file is already compressed and cannot be further reduced without quality loss.
+                    Can not compress file any further
                   </p>
                 </>
               ) : (
@@ -192,28 +207,30 @@ function CompressPDFContent() {
                   <p className="text-sm text-gray-500 mb-1">Original Size</p>
                   <p className="text-lg font-semibold text-gray-900">{formatFileSize(stats.originalSize)}</p>
                 </div>
-                <div className={`${stats.newSize >= stats.originalSize ? 'bg-orange-50 border-orange-200' : 'bg-green-50 border-green-200'} p-4 rounded-xl border`}>
-                  <p className={`text-sm ${stats.newSize >= stats.originalSize ? 'text-orange-600' : 'text-green-600'} mb-1`}>
-                    {stats.newSize >= stats.originalSize ? 'Final Size' : 'Compressed Size'}
+                <div className={`${isIneffective ? 'bg-orange-50 border-orange-200' : 'bg-green-50 border-green-200'} p-4 rounded-xl border`}>
+                  <p className={`text-sm ${isIneffective ? 'text-orange-600' : 'text-green-600'} mb-1`}>
+                    {isIneffective ? 'Final Size' : 'Compressed Size'}
                   </p>
-                  <p className={`text-lg font-bold ${stats.newSize >= stats.originalSize ? 'text-orange-700' : 'text-green-700'}`}>
+                  <p className={`text-lg font-bold ${isIneffective ? 'text-orange-700' : 'text-green-700'}`}>
                     {formatFileSize(stats.newSize)}
                   </p>
-                  <span className={`text-xs font-medium ${stats.newSize >= stats.originalSize ? 'text-orange-600 bg-orange-100' : 'text-green-600 bg-green-100'} px-2 py-1 rounded-full mt-2 inline-block`}>
-                    {Math.max(0, Math.round((1 - stats.newSize / stats.originalSize) * 100))}% Reduction
+                  <span className={`text-xs font-medium ${isIneffective ? 'text-orange-600 bg-orange-100' : 'text-green-600 bg-green-100'} px-2 py-1 rounded-full mt-2 inline-block`}>
+                    {Math.max(0, Math.round(reduction * 100))}% Reduction
                   </span>
                 </div>
               </div>
 
-              <div className="flex justify-center space-x-4">
-                <button
-                  onClick={handleDownload}
-                  className="px-8 py-4 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-orange-500/30 transition-all flex items-center space-x-3 transform hover:-translate-y-1"
-                >
-                  <Download className="w-5 h-5" />
-                  <span>{stats.newSize >= stats.originalSize ? 'Download Original PDF' : 'Download Compressed PDF'}</span>
-                </button>
-              </div>
+              {!isIneffective && (
+                <div className="flex justify-center space-x-4">
+                  <button
+                    onClick={handleDownload}
+                    className="px-8 py-4 bg-orange-600 hover:bg-orange-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-orange-500/30 transition-all flex items-center space-x-3 transform hover:-translate-y-1"
+                  >
+                    <Download className="w-5 h-5" />
+                    <span>Download Compressed PDF</span>
+                  </button>
+                </div>
+              )}
               
               <div className="mt-8">
                 <Link 

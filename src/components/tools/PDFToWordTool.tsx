@@ -37,6 +37,7 @@ interface ConversionSettings {
 
 const PDFToWordTool: React.FC<PDFToWordToolProps> = ({ onProcess, isProcessing }) => {
   const [files, setFiles] = useState<File[]>([]);
+  const [error, setError] = useState<string>('');
   const [settings, setSettings] = useState<ConversionSettings>({
     outputFormat: 'docx',
     preserveLayout: true,
@@ -54,6 +55,17 @@ const PDFToWordTool: React.FC<PDFToWordToolProps> = ({ onProcess, isProcessing }
 
   const handleConvert = async () => {
     if (files.length === 0) return;
+    
+    // Validate page range
+    if (!settings.convertAllPages && settings.pageRange) {
+        // Allow spaces, commas, hyphens and numbers
+        // Regex checks for comma-separated list of numbers or ranges
+        if (!/^[\d\s,-]+$/.test(settings.pageRange) || !/\d/.test(settings.pageRange)) {
+            setError('Invalid page range format. Please use numbers separated by commas (e.g., 1,3,5-8)');
+            return;
+        }
+    }
+    setError('');
     
     const options = {
       outputFormat: settings.outputFormat,
@@ -265,10 +277,16 @@ const PDFToWordTool: React.FC<PDFToWordToolProps> = ({ onProcess, isProcessing }
                 <input
                   type="text"
                   value={settings.pageRange}
-                  onChange={(e) => setSettings({ ...settings, pageRange: e.target.value })}
+                  onChange={(e) => {
+                    setSettings({ ...settings, pageRange: e.target.value });
+                    setError('');
+                  }}
                   placeholder="e.g., 1,3,5-8,10"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                    error ? 'border-red-500' : 'border-gray-300'
+                  }`}
                 />
+                {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
                 <p className="text-sm text-gray-500 mt-1">
                   Enter page numbers separated by commas. Use hyphens for ranges (e.g., 1,3,5-8,10)
                 </p>

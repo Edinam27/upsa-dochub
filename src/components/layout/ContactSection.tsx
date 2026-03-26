@@ -20,14 +20,14 @@ const ContactSection = () => {
             Get in Touch
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Need help with our PDF tools? Have questions about UPSA DocHub? 
-            We're here to support your academic journey.
+            Need help with our PDF tools? Have questions about DocHub? 
+            We're here to help.
           </p>
         </motion.div>
 
         {/* Contact Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-          {/* UPSA Contact */}
+          {/* Contact Email */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -36,29 +36,27 @@ const ContactSection = () => {
             className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
           >
             <div className="flex items-center space-x-3 mb-4">
-              <div className="p-3 bg-upsa-blue/10 rounded-lg">
-                <MapPin className="h-6 w-6 text-upsa-blue" />
+              <div className="p-3 bg-blue-100 rounded-lg">
+                <Mail className="h-6 w-6 text-blue-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">University Campus</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Email Support</h3>
             </div>
             <p className="text-gray-600 mb-4">
-              University of Professional Studies, Accra
+              For help with the tools or to report a problem
             </p>
             <p className="text-sm text-gray-500 mb-4">
-              East Legon, Accra, Ghana
+              We respond as quickly as possible
             </p>
             <Link
-              href="https://upsa.edu.gh/contact"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center space-x-2 text-upsa-blue hover:text-upsa-blue/80 transition-colors"
+              href="/support"
+              className="inline-flex items-center space-x-2 text-blue-600 hover:text-blue-700 transition-colors"
             >
-              <span>Visit UPSA Website</span>
+              <span>Visit Support</span>
               <ExternalLink className="h-4 w-4" />
             </Link>
           </motion.div>
 
-          {/* Student Support */}
+          {/* Community & Updates */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -67,24 +65,22 @@ const ContactSection = () => {
             className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
           >
             <div className="flex items-center space-x-3 mb-4">
-              <div className="p-3 bg-upsa-gold/10 rounded-lg">
-                <Mail className="h-6 w-6 text-upsa-gold" />
+              <div className="p-3 bg-amber-100 rounded-lg">
+                <Mail className="h-6 w-6 text-amber-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900">Student Support</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Announcements</h3>
             </div>
             <p className="text-gray-600 mb-4">
-              For technical support with PDF tools
+              New features, improvements, and tips
             </p>
             <p className="text-sm text-gray-500 mb-4">
-              Available during academic hours
+              Check back regularly for updates
             </p>
             <Link
-              href="https://upsasip.com/student-portal"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center space-x-2 text-upsa-gold hover:text-upsa-gold/80 transition-colors"
+              href="/faq"
+              className="inline-flex items-center space-x-2 text-amber-600 hover:text-amber-700 transition-colors"
             >
-              <span>Student Portal</span>
+              <span>Read FAQs</span>
               <ExternalLink className="h-4 w-4" />
             </Link>
           </motion.div>
@@ -134,10 +130,10 @@ const ContactSection = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Link
               href="/tools"
-              className="flex items-center space-x-3 p-4 bg-upsa-blue/5 rounded-lg hover:bg-upsa-blue/10 transition-colors group"
+              className="flex items-center space-x-3 p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors group"
             >
-              <div className="p-2 bg-upsa-blue/10 rounded-lg group-hover:bg-upsa-blue/20 transition-colors">
-                <Mail className="h-5 w-5 text-upsa-blue" />
+              <div className="p-2 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
+                <Mail className="h-5 w-5 text-blue-600" />
               </div>
               <div>
                 <h4 className="font-semibold text-gray-900">Browse Tools</h4>
@@ -146,32 +142,15 @@ const ContactSection = () => {
             </Link>
             
             <Link
-              href="https://upsasip.com/student-portal"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center space-x-3 p-4 bg-upsa-gold/5 rounded-lg hover:bg-upsa-gold/10 transition-colors group"
+              href="/support"
+              className="flex items-center space-x-3 p-4 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors group"
             >
-              <div className="p-2 bg-upsa-gold/10 rounded-lg group-hover:bg-upsa-gold/20 transition-colors">
-                <ExternalLink className="h-5 w-5 text-upsa-gold" />
+              <div className="p-2 bg-amber-100 rounded-lg group-hover:bg-amber-200 transition-colors">
+                <ExternalLink className="h-5 w-5 text-amber-600" />
               </div>
               <div>
-                <h4 className="font-semibold text-gray-900">Student Portal</h4>
-                <p className="text-sm text-gray-600">Access your account</p>
-              </div>
-            </Link>
-            
-            <Link
-              href="https://upsa.edu.gh"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center space-x-3 p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors group"
-            >
-              <div className="p-2 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
-                <MapPin className="h-5 w-5 text-purple-600" />
-              </div>
-              <div>
-                <h4 className="font-semibold text-gray-900">UPSA Website</h4>
-                <p className="text-sm text-gray-600">University homepage</p>
+                <h4 className="font-semibold text-gray-900">Support</h4>
+                <p className="text-sm text-gray-600">Get help and guidance</p>
               </div>
             </Link>
           </div>

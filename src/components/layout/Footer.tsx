@@ -1,18 +1,12 @@
 import Link from 'next/link';
-import { GraduationCap, ExternalLink, Heart, Shield, Clock } from 'lucide-react';
+import { FileText, Shield, Clock, Heart } from 'lucide-react';
+import GoogleRating from '@/components/ui/GoogleRating';
 
 const Footer = () => {
-  const universityLinks = [
-    { name: 'UPSA Website', href: 'https://upsa.edu.gh', external: true },
-    { name: 'Student Portal', href: 'https://upsasip.com/student-portal', external: true },
-    { name: 'Library', href: 'https://library.upsa.edu.gh', external: true },
-    { name: 'Academic Calendar', href: 'https://upsa.edu.gh/academic-calendar', external: true },
-  ];
-
   const toolCategories = [
-    { name: 'Academic Tools', href: '#academic-tools' },
+    { name: 'Organize PDFs', href: '#academic-tools' },
     { name: 'Conversion Tools', href: '#conversion-tools' },
-    { name: 'Study Tools', href: '#study-tools' },
+    { name: 'Enhancement Tools', href: '#study-tools' },
     { name: 'All Tools', href: '#tools' },
   ];
 
@@ -30,15 +24,14 @@ const Footer = () => {
           {/* Brand Section */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center space-x-3 mb-4">
-              <GraduationCap className="h-8 w-8 text-yellow-400" />
+              <FileText className="h-8 w-8 text-yellow-400" />
               <div>
-                <span className="text-xl font-bold">UPSA DocHub</span>
-                <p className="text-sm text-gray-400">Student PDF Tools</p>
+                <span className="text-xl font-bold">DocHub</span>
+                <p className="text-sm text-gray-400">PDF Tools for Everyone</p>
               </div>
             </Link>
             <p className="text-gray-400 text-sm mb-4">
-              Empowering UPSA students with professional PDF tools for academic success. 
-              Process documents securely and efficiently.
+              Process documents securely and efficiently with fast, professional PDF tools built for everyone.
             </p>
             <div className="flex items-center space-x-4 text-sm text-gray-400">
               <div className="flex items-center space-x-1">
@@ -50,27 +43,21 @@ const Footer = () => {
                 <span>Fast</span>
               </div>
             </div>
+            
+            <div className="mt-6">
+              <a 
+                href="https://g.page/r/YOUR_GOOGLE_REVIEW_LINK" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-block hover:opacity-90 transition-opacity"
+              >
+                <GoogleRating />
+              </a>
+            </div>
           </div>
 
-          {/* University Links */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4 text-yellow-400">University Resources</h3>
-            <ul className="space-y-2">
-              {universityLinks.map((link) => (
-                <li key={link.name}>
-                  <Link
-                    href={link.href}
-                    target={link.external ? '_blank' : '_self'}
-                    rel={link.external ? 'noopener noreferrer' : ''}
-                    className="text-gray-400 hover:text-white transition-colors flex items-center space-x-1"
-                  >
-                    <span>{link.name}</span>
-                    {link.external && <ExternalLink className="h-3 w-3" />}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+          {/* Empty column for layout balance */}
+          <div />
 
           {/* Tool Categories */}
           <div>
@@ -113,11 +100,11 @@ const Footer = () => {
             <div className="flex items-center space-x-2 text-gray-400 text-sm">
               <span>Made with</span>
               <Heart className="h-4 w-4 text-red-500" />
-              <span>for UPSA students</span>
+                  <span>for everyone</span>
             </div>
             <div className="flex items-center space-x-6 mt-4 md:mt-0">
               <p className="text-gray-400 text-sm">
-                © {new Date().getFullYear()} UPSA DocHub. All rights reserved.
+                    © {new Date().getFullYear()} DocHub. All rights reserved.
               </p>
               <div className="flex items-center space-x-1 text-xs text-gray-500">
                 <Shield className="h-3 w-3" />

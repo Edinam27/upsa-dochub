@@ -4,6 +4,8 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useDropzone } from 'react-dropzone';
 import Tesseract from 'tesseract.js';
+import { enhanceImageForOCR } from '@/lib/image-processing';
+import { generatePDFBlob, generateDOCXBlob, generateTextBlob } from '@/lib/document-generators';
 import { 
   Upload, 
   FileText, 
@@ -14,8 +16,8 @@ import {
   Copy,
   AlertCircle,
   CheckCircle,
-  Eye,
-  Loader2
+  Loader2,
+  FileIcon
 } from 'lucide-react';
 
 interface OCRScannerToolProps {
@@ -104,8 +106,13 @@ export default function OCRScannerTool({ onProcess, isProcessing }: OCRScannerTo
           canvas: canvas
         }).promise;
         
-        // Convert canvas to image data URL
-        const imageDataUrl = canvas.toDataURL('image/png');
+        let imageDataUrl = canvas.toDataURL('image/png');
+        
+        // Apply enhancement if enabled
+        if (options.enhanceImage) {
+           imageDataUrl = await enhanceImageForOCR(imageDataUrl);
+        }
+
         images.push(imageDataUrl);
       }
       
@@ -244,8 +251,19 @@ export default function OCRScannerTool({ onProcess, isProcessing }: OCRScannerTo
           }
 
           // Process image files with Tesseract
+          let imageToProcess: File | string = file;
+
+          if (options.enhanceImage) {
+             setProgress(prev => prev.map(p => 
+                p.fileName === file.name 
+                  ? { ...p, status: 'Enhancing image...', progress: 5 }
+                  : p
+             ));
+             imageToProcess = await enhanceImageForOCR(file);
+          }
+
           const result = await Tesseract.recognize(
-            file,
+            imageToProcess,
             options.language,
             {
               logger: (m) => {
@@ -304,15 +322,39 @@ export default function OCRScannerTool({ onProcess, isProcessing }: OCRScannerTo
   };
 
   const downloadText = (text: string, fileName: string) => {
-    const blob = new Blob([text], { type: 'text/plain' });
+    const blob = generateTextBlob(text);
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${fileName.replace(/\.[^/.]+$/, '')}_extracted.txt`;
+    a.download = `${fileName.replace(/\.[^/.]+$/, '')}_ocr.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  };
+
+  const downloadAsPDF = async (text: string, fileName: string) => {
+    const blob = await generatePDFBlob(text, fileName);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${fileName.replace(/\.[^/.]+$/, '')}_ocr.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const downloadAsDOCX = async (text: string, fileName: string) => {
+      const blob = await generateDOCXBlob(text);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${fileName.replace(/\.[^/.]+$/, '')}_ocr.docx`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
   };
 
   return (
@@ -420,7 +462,7 @@ export default function OCRScannerTool({ onProcess, isProcessing }: OCRScannerTo
           {/* Output Format */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Output Format
+              Default Output Format
             </label>
             <select
               value={options.outputFormat}
@@ -428,7 +470,7 @@ export default function OCRScannerTool({ onProcess, isProcessing }: OCRScannerTo
               className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-upsa-gold focus:border-transparent"
             >
               <option value="text">Plain Text</option>
-              <option value="pdf">Searchable PDF</option>
+              <option value="pdf">PDF</option>
               <option value="docx">Word Document</option>
             </select>
           </div>
@@ -445,7 +487,7 @@ export default function OCRScannerTool({ onProcess, isProcessing }: OCRScannerTo
               onChange={(e) => handleOptionChange('preserveFormatting', e.target.checked)}
               className="w-4 h-4 text-upsa-blue border-gray-300 rounded focus:ring-upsa-gold"
             />
-            <span className="text-sm text-gray-700">Preserve original formatting</span>
+            <span className="text-sm text-gray-700">Preserve original formatting (Experimental)</span>
           </label>
 
           <label className="flex items-center space-x-3 cursor-pointer">
@@ -455,17 +497,7 @@ export default function OCRScannerTool({ onProcess, isProcessing }: OCRScannerTo
               onChange={(e) => handleOptionChange('enhanceImage', e.target.checked)}
               className="w-4 h-4 text-upsa-blue border-gray-300 rounded focus:ring-upsa-gold"
             />
-            <span className="text-sm text-gray-700">Enhance image quality before OCR</span>
-          </label>
-
-          <label className="flex items-center space-x-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={options.detectTables}
-              onChange={(e) => handleOptionChange('detectTables', e.target.checked)}
-              className="w-4 h-4 text-upsa-blue border-gray-300 rounded focus:ring-upsa-gold"
-            />
-            <span className="text-sm text-gray-700">Detect and preserve table structures</span>
+            <span className="text-sm text-gray-700">Enhance image quality (Grayscale & Contrast) - Recommended for better accuracy</span>
           </label>
         </div>
       </div>
@@ -571,45 +603,45 @@ export default function OCRScannerTool({ onProcess, isProcessing }: OCRScannerTo
                     >
                       <Copy className="w-4 h-4" />
                     </button>
+                    <div className="h-4 w-px bg-gray-300 mx-1"></div>
                     <button
                       onClick={() => downloadText(result.text, result.fileName)}
-                      className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded transition-colors"
-                      title="Download as text file"
+                      className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded transition-colors flex items-center space-x-1"
+                      title="Download as Text"
                     >
-                      <Download className="w-4 h-4" />
+                       <FileText className="w-4 h-4" />
+                       <span className="text-xs">TXT</span>
+                    </button>
+                     <button
+                      onClick={() => downloadAsPDF(result.text, result.fileName)}
+                      className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded transition-colors flex items-center space-x-1"
+                      title="Download as PDF"
+                    >
+                       <FileIcon className="w-4 h-4" />
+                       <span className="text-xs">PDF</span>
+                    </button>
+                     <button
+                      onClick={() => downloadAsDOCX(result.text, result.fileName)}
+                      className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded transition-colors flex items-center space-x-1"
+                      title="Download as DOCX"
+                    >
+                       <FileText className="w-4 h-4" />
+                       <span className="text-xs">DOCX</span>
                     </button>
                   </div>
                 </div>
               </div>
-              <div className="p-4">
-                <div className="bg-white border border-gray-200 rounded p-3 max-h-40 overflow-y-auto">
-                  <pre className="text-sm text-gray-800 whitespace-pre-wrap font-mono">
-                    {result.text}
-                  </pre>
-                </div>
+              <div className="p-4 bg-white">
+                <textarea
+                  readOnly
+                  value={result.text}
+                  className="w-full h-64 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-upsa-blue focus:border-transparent font-mono text-sm"
+                />
               </div>
             </motion.div>
           ))}
         </div>
       )}
-
-      {/* Info */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div className="flex items-start space-x-3">
-          <CheckCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-          <div className="text-sm text-blue-800">
-            <p className="font-medium mb-1">Powered by Tesseract.js:</p>
-            <ul className="space-y-1 text-xs">
-              <li>• Client-side OCR processing with Tesseract.js</li>
-              <li>• Supports 100+ languages and character sets</li>
-              <li>• Real-time progress tracking and confidence scoring</li>
-              <li>• Works with PNG, JPG, JPEG, GIF, BMP, and TIFF images</li>
-              <li>• PDF support with automatic page-by-page processing</li>
-              <li>• No server upload required - all processing happens locally</li>
-            </ul>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

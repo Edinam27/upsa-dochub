@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import JSZip from 'jszip';
 import {
   Upload,
   FileImage,
@@ -170,13 +171,13 @@ const PDFToImagesTool: React.FC<PDFToImagesToolProps> = ({ onProcess, isProcessi
       let scale = 1.0;
       switch (settings.quality) {
         case 'high':
-          scale = 2.0;
+          scale = 3.0; // ~216 DPI
           break;
         case 'medium':
-          scale = 1.5;
+          scale = 2.0; // ~144 DPI
           break;
         case 'low':
-          scale = 1.0;
+          scale = 1.0; // ~72 DPI
           break;
       }
       
@@ -201,10 +202,13 @@ const PDFToImagesTool: React.FC<PDFToImagesToolProps> = ({ onProcess, isProcessi
         }).promise;
         
         // Convert canvas to blob
-        const blob = await new Promise<Blob>((resolve) => {
+        const mimeType = settings.outputFormat === 'jpg' ? 'image/jpeg' : `image/${settings.outputFormat}`;
+        
+        const blob = await new Promise<Blob>((resolve, reject) => {
           canvas.toBlob((blob) => {
-            resolve(blob!);
-          }, `image/${settings.outputFormat}`, settings.outputFormat === 'jpg' ? 0.9 : undefined);
+            if (blob) resolve(blob);
+            else reject(new Error('Canvas to Blob failed'));
+          }, mimeType, settings.outputFormat === 'jpg' ? 0.9 : undefined);
         });
         
         const filename = `${file.name.replace('.pdf', '')}_page_${pageNum}.${settings.outputFormat}`;
@@ -212,7 +216,28 @@ const PDFToImagesTool: React.FC<PDFToImagesToolProps> = ({ onProcess, isProcessi
       }
       
       // Download all images
-      for (const { blob, filename } of images) {
+      if (images.length > 1) {
+        const zip = new JSZip();
+        images.forEach(({ blob, filename }) => {
+          zip.file(filename, blob);
+        });
+        
+        const content = await zip.generateAsync({ type: 'blob' });
+        const zipUrl = URL.createObjectURL(content);
+        
+        // Download ZIP
+        const a = document.createElement('a');
+        a.href = zipUrl;
+        a.download = `${file.name.replace('.pdf', '')}_images.zip`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(zipUrl);
+        
+        alert(`Successfully converted ${images.length} pages to ${settings.outputFormat.toUpperCase()} images (ZIP archive)!`);
+      } else if (images.length === 1) {
+        // Single file download
+        const { blob, filename } = images[0];
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -221,10 +246,11 @@ const PDFToImagesTool: React.FC<PDFToImagesToolProps> = ({ onProcess, isProcessi
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
+        
+        alert(`Successfully converted 1 page to ${settings.outputFormat.toUpperCase()} image!`);
       }
       
       setError('');
-      alert(`Successfully converted ${images.length} pages to ${settings.outputFormat.toUpperCase()} images!`);
       
     } catch (error) {
       console.error('Error converting PDF to images:', error);

@@ -35,6 +35,8 @@ import PDFToImagesTool from '@/components/tools/PDFToImagesTool';
 import RotatePDFTool from '@/components/tools/RotatePDFTool';
 import RepairPDFTool from '@/components/tools/RepairPDFTool';
 import PDFToWordTool from '@/components/tools/PDFToWordTool';
+import PDFToExcelTool from '@/components/tools/PDFToExcelTool';
+import PDFToPPTTool from '@/components/tools/PDFToPPTTool';
 import WordToPDFTool from '@/components/tools/WordToPDFTool';
 import WatermarkRemovalTool from '@/components/tools/WatermarkRemovalTool';
 import ImageCompressionTool from '@/components/tools/ImageCompressionTool';
@@ -61,6 +63,35 @@ export default function ToolPage() {
     notFound();
   }
   
+  // Show locked state if tool is locked
+  if (tool.isLocked) {
+    return (
+      <div className="min-h-screen bg-slate-50 pt-20 pb-12">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden p-12 text-center">
+            <div className="flex justify-center mb-6">
+              <div className="bg-gray-100 p-6 rounded-full">
+                <Shield className="w-16 h-16 text-gray-500" />
+              </div>
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">Feature Locked</h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
+              The <span className="font-semibold text-gray-900">{tool.name}</span> tool is currently unavailable. 
+              This feature is restricted or under development.
+            </p>
+            <Link 
+              href="/"
+              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5 mr-2" />
+              Back to Tools
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const isFavorite = preferences.favoriteTools?.includes(toolId) || false;
   
   // Track tool usage
@@ -167,6 +198,10 @@ export default function ToolPage() {
         return <RepairPDFTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
       case 'pdf-to-word':
         return <PDFToWordTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
+      case 'pdf-to-excel':
+        return <PDFToExcelTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
+      case 'pdf-to-ppt':
+        return <PDFToPPTTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
       case 'word-to-pdf':
         return <WordToPDFTool onProcess={handleStartProcessing} isProcessing={isProcessing} />;
       case 'watermark-removal':

@@ -7,12 +7,15 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import OCRScannerTool from '@/components/tools/OCRScannerTool';
 
+import { generatePDFBlob, generateDOCXBlob, generateTextBlob } from '@/lib/document-generators';
+
 export default function OCRTextExtractionProcessingPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingStatus, setProcessingStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const [extractedText, setExtractedText] = useState<string>('');
   const [processedFiles, setProcessedFiles] = useState<any[]>([]);
+  const [outputFormat, setOutputFormat] = useState<'text' | 'pdf' | 'docx'>('text');
 
   const handleStartProcessing = async (files: File[], options?: any) => {
     setIsProcessing(true);
@@ -21,15 +24,42 @@ export default function OCRTextExtractionProcessingPage() {
     setExtractedText('');
     setProcessedFiles([]);
     
+    // Store the requested format
+    const format = options?.outputFormat || 'text';
+    setOutputFormat(format);
+    
     try {
       // OCRScannerTool processes client-side and passes results in options
       if (options && options.results && options.results.length > 0) {
         const results = options.results;
-        const processedData = results.map((r: any) => ({
-             name: r.fileName.replace(/\.[^/.]+$/, ".txt"),
-             data: r.text, 
-             type: 'text/plain'
-        }));
+        const processedData = [];
+        
+        for (const r of results) {
+            let blob: Blob;
+            let extension: string;
+            let mimeType: string;
+
+            if (format === 'pdf') {
+                blob = await generatePDFBlob(r.text, r.fileName);
+                extension = 'pdf';
+                mimeType = 'application/pdf';
+            } else if (format === 'docx') {
+                blob = await generateDOCXBlob(r.text);
+                extension = 'docx';
+                mimeType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+            } else {
+                blob = generateTextBlob(r.text);
+                extension = 'txt';
+                mimeType = 'text/plain';
+            }
+
+            processedData.push({
+                name: r.fileName.replace(/\.[^/.]+$/, `_ocr.${extension}`),
+                data: blob, 
+                type: mimeType,
+                text: r.text // Keep text for preview
+            });
+        }
         
         setProcessedFiles(processedData);
         setProcessingStatus('success');
@@ -40,12 +70,10 @@ export default function OCRTextExtractionProcessingPage() {
         
         // Auto-download processed files
         processedData.forEach((processedFile: any) => {
-          const blob = new Blob([processedFile.data], { type: 'text/plain' });
-          const url = URL.createObjectURL(blob);
-          
+          const url = URL.createObjectURL(processedFile.data);
           const a = document.createElement('a');
           a.href = url;
-          a.download = processedFile.name || `extracted-text-${Date.now()}.txt`;
+          a.download = processedFile.name;
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
@@ -71,17 +99,30 @@ export default function OCRTextExtractionProcessingPage() {
     setProcessedFiles([]);
   };
 
-  const downloadText = () => {
+  const downloadResult = async () => {
     if (extractedText) {
-      const blob = new Blob([extractedText], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `extracted-text-${Date.now()}.txt`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+        let blob: Blob;
+        let extension: string;
+        
+        if (outputFormat === 'pdf') {
+            blob = await generatePDFBlob(extractedText, 'Combined Result');
+            extension = 'pdf';
+        } else if (outputFormat === 'docx') {
+            blob = await generateDOCXBlob(extractedText);
+            extension = 'docx';
+        } else {
+            blob = generateTextBlob(extractedText);
+            extension = 'txt';
+        }
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `extracted-text-combined-${Date.now()}.${extension}`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
   };
 
@@ -190,11 +231,11 @@ export default function OCRTextExtractionProcessingPage() {
                   <h3 className="text-lg font-semibold text-gray-900">Extracted Text Preview</h3>
                 </div>
                 <button
-                  onClick={downloadText}
+                  onClick={downloadResult}
                   className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
                 >
                   <Download className="h-4 w-4" />
-                  <span>Download Text</span>
+                  <span>Download {outputFormat.toUpperCase()}</span>
                 </button>
               </div>
               <div className="bg-gray-50 rounded-lg p-4 max-h-96 overflow-y-auto">

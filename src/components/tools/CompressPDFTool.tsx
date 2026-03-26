@@ -23,26 +23,27 @@ interface CompressPDFToolProps {
 const CompressPDFTool: React.FC<CompressPDFToolProps> = ({ onProcess, isProcessing: externalProcessing }) => {
   const router = useRouter();
   const [file, setFile] = useState<File | null>(null);
-  const [compressionLevel, setCompressionLevel] = useState<'grayscale' | 'extreme'>('grayscale');
+  const [compressionLevel, setCompressionLevel] = useState<'basic' | 'strong'>('basic');
+  const [isGrayscale, setIsGrayscale] = useState(false);
   const [error, setError] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
 
   const compressionOptions = {
-    grayscale: {
-      name: 'Convert to Grayscale',
-      description: 'Converts document to black & white. Best for text documents and forms.',
+    basic: {
+      name: 'Basic Compression',
+      description: 'High quality. Best for documents with text and images.',
       quality: 0.8,
-      grayscale: true,
-      useRasterization: true,
-      estimatedPercent: 50
+      useRasterization: false,
+      estimatedPercent: 40,
+      scale: 1.0
     },
-    extreme: {
-      name: 'Extreme Compression',
-      description: 'Maximum compression by rasterizing content. Best for archiving.',
-      quality: 0.4,
-      grayscale: false,
+    strong: {
+      name: 'Strong Compression',
+      description: 'Lowest size. Best for scanned documents and archiving.',
+      quality: 0.5,
       useRasterization: true,
-      estimatedPercent: 85
+      estimatedPercent: 75,
+      scale: 0.5 // Reduced scale (36 DPI) for strong compression to ensure size reduction
     }
   };
 
@@ -98,8 +99,9 @@ const CompressPDFTool: React.FC<CompressPDFToolProps> = ({ onProcess, isProcessi
         operation: 'compress',
         compressionLevel,
         quality: selectedOption.quality,
-        grayscale: selectedOption.grayscale,
-        useRasterization: selectedOption.useRasterization
+        grayscale: isGrayscale,
+        useRasterization: selectedOption.useRasterization,
+        scale: selectedOption.scale
       };
       await onProcess([file], options);
       setIsProcessing(false);
@@ -193,7 +195,7 @@ const CompressPDFTool: React.FC<CompressPDFToolProps> = ({ onProcess, isProcessi
             {Object.entries(compressionOptions).map(([level, option]) => (
               <button
                 key={level}
-                onClick={() => setCompressionLevel(level as 'grayscale' | 'extreme')}
+                onClick={() => setCompressionLevel(level as 'basic' | 'strong')}
                 className={`
                   p-4 border-2 rounded-lg text-left transition-all duration-200
                   ${
@@ -218,6 +220,19 @@ const CompressPDFTool: React.FC<CompressPDFToolProps> = ({ onProcess, isProcessi
                 </div>
               </button>
             ))}
+          </div>
+
+          <div className="flex items-center space-x-2 mt-4">
+            <input
+              type="checkbox"
+              id="grayscale"
+              checked={isGrayscale}
+              onChange={(e) => setIsGrayscale(e.target.checked)}
+              className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+            />
+            <label htmlFor="grayscale" className="text-sm text-gray-700">
+              Convert to Grayscale (reduces size further)
+            </label>
           </div>
 
           <div className="flex justify-end pt-6 border-t border-gray-200">

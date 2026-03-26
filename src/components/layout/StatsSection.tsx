@@ -74,7 +74,7 @@ const StatsSection = () => {
     {
       icon: <Users className="h-6 w-6" />,
       value: "5000",
-      label: "UPSA Students Served",
+      label: "Users Served",
       delay: 0.1,
     },
     {
@@ -117,11 +117,10 @@ const StatsSection = () => {
           className="text-center mb-16"
         >
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Trusted by <span className="gradient-text">UPSA Students</span>
+            Trusted <span className="gradient-text">Worldwide</span>
           </h2>
           <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-            Join thousands of UPSA students who rely on DocHub for their academic document processing needs. 
-            Fast, secure, and designed specifically for university workflows.
+            Join thousands who rely on DocHub for secure, fast document processing — built for everyone.
           </p>
         </motion.div>
 
@@ -147,7 +146,7 @@ const StatsSection = () => {
         >
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
             <h3 className="text-2xl font-bold text-white mb-4">
-              Why UPSA Students Choose DocHub
+              Why People Choose DocHub
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-gray-300">
               <div className="flex flex-col items-center">

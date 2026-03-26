@@ -8,6 +8,7 @@ export interface Tool {
   category: string;
   color: string;
   features: string[];
+  isLocked?: boolean;
 }
 
 export interface ProcessingOptions {
@@ -45,6 +46,8 @@ export interface ProcessingOptions {
   targetSize?: number;
   grayscale?: boolean;
   useRasterization?: boolean;
+  asZip?: boolean;
+  force?: boolean;
 }
 
 export interface FileInfo {
