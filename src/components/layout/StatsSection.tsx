@@ -146,7 +146,7 @@ const StatsSection = () => {
         >
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
             <h3 className="text-2xl font-bold text-white mb-4">
-              Why People Choose DocHub
+              Why People Choose Quiltra
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-gray-300">
               <div className="flex flex-col items-center">

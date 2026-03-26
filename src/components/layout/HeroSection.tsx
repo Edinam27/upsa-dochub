@@ -39,7 +39,7 @@ const HeroSection = () => {
             <FileText className="h-12 w-12 text-blue-600 mr-3" />
             <div>
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900">
-                <span className="text-blue-600">DocHub</span>
+                <span className="text-blue-600">Quiltra</span>
               </h1>
             </div>
           </div>

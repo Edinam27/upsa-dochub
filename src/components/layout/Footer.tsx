@@ -26,7 +26,7 @@ const Footer = () => {
             <Link href="/" className="flex items-center space-x-3 mb-4">
               <FileText className="h-8 w-8 text-yellow-400" />
               <div>
-                <span className="text-xl font-bold">DocHub</span>
+                <span className="text-xl font-bold">Quiltra</span>
                 <p className="text-sm text-gray-400">PDF Tools for Everyone</p>
               </div>
             </Link>
@@ -104,7 +104,7 @@ const Footer = () => {
             </div>
             <div className="flex items-center space-x-6 mt-4 md:mt-0">
               <p className="text-gray-400 text-sm">
-                    © {new Date().getFullYear()} DocHub. All rights reserved.
+                    © {new Date().getFullYear()} Quiltra. All rights reserved.
               </p>
               <div className="flex items-center space-x-1 text-xs text-gray-500">
                 <Shield className="h-3 w-3" />

@@ -20,7 +20,7 @@ const ContactSection = () => {
             Get in Touch
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Need help with our PDF tools? Have questions about DocHub? 
+            Need help with our PDF tools? Have questions about Quiltra? 
             We're here to help.
           </p>
         </motion.div>

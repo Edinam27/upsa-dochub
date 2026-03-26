@@ -6,14 +6,14 @@ import Footer from "@/components/layout/Footer";
 export const metadata: Metadata = {
   metadataBase: new URL('https://upsa-dochub.vercel.app'),
   title: {
-    default: "DocHub - PDF Tools for Everyone",
-    template: "%s | DocHub"
+    default: "Quiltra - PDF Tools for Everyone",
+    template: "%s | Quiltra"
   },
   description: "Complete PDF management solution for everyone. Merge, split, compress, convert, and process PDFs with ease — secure, fast, and private.",
   keywords: ["PDF tools", "PDF converter", "PDF merger", "OCR", "compress PDF", "document tools", "global"],
-  authors: [{ name: "DocHub Team" }],
-  creator: "DocHub",
-  publisher: "DocHub",
+  authors: [{ name: "Quiltra Team" }],
+  creator: "Quiltra",
+  publisher: "Quiltra",
   robots: {
     index: true,
     follow: true,
@@ -26,10 +26,10 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "DocHub - PDF Tools for Everyone",
+    title: "Quiltra - PDF Tools for Everyone",
     description: "Complete PDF management solution. Free, secure, and local processing.",
     url: "https://upsa-dochub.vercel.app",
-    siteName: "DocHub",
+    siteName: "Quiltra",
     type: "website",
     locale: "en_US",
     images: [
@@ -37,13 +37,13 @@ export const metadata: Metadata = {
         url: '/android-chrome-512x512.png',
         width: 512,
         height: 512,
-        alt: 'DocHub Logo',
+        alt: 'Quiltra Logo',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: "DocHub - PDF Tools for Everyone",
+    title: "Quiltra - PDF Tools for Everyone",
     description: "Complete PDF management solution",
     images: ['/android-chrome-512x512.png'],
   },
@@ -71,7 +71,7 @@ export default function RootLayout({
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": "DocHub",
+    "name": "Quiltra",
     "applicationCategory": "UtilitiesApplication",
     "operatingSystem": "Web",
     "aggregateRating": {

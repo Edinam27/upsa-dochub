@@ -94,7 +94,7 @@ const FeaturesSection = () => {
           className="text-center mb-20"
         >
           <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Why Choose <span className="text-blue-600">DocHub</span>?
+            Why Choose <span className="text-blue-600">Quiltra</span>?
           </h2>
           <p className="text-xl text-gray-700 max-w-3xl mx-auto">
             A complete PDF toolkit designed for global use — fast, secure, and private.
