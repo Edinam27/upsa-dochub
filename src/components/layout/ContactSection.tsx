@@ -68,7 +68,7 @@ const ContactSection = () => {
           >
             <div className="flex items-center space-x-3 mb-4">
                 <div className="w-12 h-12 bg-[#001f3f]/5 rounded-full flex items-center justify-center mb-4 group-hover:bg-[#00d2d3]/10 transition-colors">
-                  <Mail className="h-6 w-6 text-[#001f3f]" />
+                  <MessageSquare className="h-6 w-6 text-[#001f3f]" />
                 </div>
               <h3 className="text-lg font-semibold text-gray-900">Announcements</h3>
             </div>
@@ -96,9 +96,9 @@ const ContactSection = () => {
             className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
           >
             <div className="flex items-center space-x-3 mb-4">
-                <div className="w-12 h-12 bg-[#001f3f]/5 rounded-full flex items-center justify-center mb-4 group-hover:bg-[#00d2d3]/10 transition-colors">
-                  <MessageSquare className="h-6 w-6 text-[#001f3f]" />
-                </div>
+              <div className="w-12 h-12 bg-[#001f3f]/5 rounded-full flex items-center justify-center mb-4 group-hover:bg-[#00d2d3]/10 transition-colors">
+                <Clock className="h-6 w-6 text-[#001f3f]" />
+              </div>
               <h3 className="text-lg font-semibold text-gray-900">Service Hours</h3>
             </div>
             <div className="space-y-2 text-gray-600">

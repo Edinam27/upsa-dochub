@@ -14,7 +14,7 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-50 via-[#00d2d3]/5 to-[#001f3f]/5">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-50 via-[var(--color-joedy-cyan)]/5 to-[var(--color-joedy-navy)]/5">
       {/* Modern Background Pattern */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,210,211,0.1),transparent_50%)]" />
@@ -24,8 +24,8 @@ const HeroSection = () => {
       
       {/* Subtle Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 right-20 w-32 h-32 bg-[#00d2d3]/5 rounded-full" />
-        <div className="absolute bottom-20 left-20 w-24 h-24 bg-[#001f3f]/5 rounded-full" />
+        <div className="absolute top-20 right-20 w-32 h-32 bg-[var(--color-joedy-cyan)]/5 rounded-full" />
+        <div className="absolute bottom-20 left-20 w-24 h-24 bg-[var(--color-joedy-navy)]/5 rounded-full" />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
