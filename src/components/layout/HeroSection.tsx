@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion';
 import { FileText, Zap, Shield, ArrowRight, Sparkles, Users } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const HeroSection = () => {
   const scrollToTools = () => {
@@ -36,11 +37,14 @@ const HeroSection = () => {
           className="text-center mb-16"
         >
           <div className="flex items-center justify-center mb-8">
-            <FileText className="h-12 w-12 text-[#00d2d3] mr-3" />
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-[#001f3f]">
-                Joedy<span className="text-[#00d2d3]">Tools</span>
-              </h1>
+            <div className="relative w-64 h-16 md:w-80 md:h-20">
+              <Image 
+                src="/logo.png" 
+                alt="JoedyTools Logo" 
+                fill 
+                className="object-contain"
+                priority
+              />
             </div>
           </div>
           

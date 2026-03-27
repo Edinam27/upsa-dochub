@@ -2,7 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { FileText, Menu, X } from 'lucide-react';
+import Image from 'next/image';
+import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Header = () => {
@@ -23,13 +24,14 @@ const Header = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 group">
-            <div className="relative">
-              <FileText className="h-8 w-8 text-[#00d2d3] group-hover:text-[#00a8a8] transition-colors" />
-              <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#003366] rounded-full animate-pulse"></div>
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-bold text-white">Joedy<span className="text-[#00d2d3]">Tools</span></span>
-              <span className="text-xs text-gray-300 hidden sm:block">PDF Tools for Everyone</span>
+            <div className="relative w-40 h-10">
+              <Image 
+                src="/logo.png" 
+                alt="JoedyTools Logo" 
+                fill 
+                className="object-contain object-left"
+                priority
+              />
             </div>
           </Link>
 

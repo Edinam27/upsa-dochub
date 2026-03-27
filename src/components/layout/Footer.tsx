@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { FileText, Shield, Clock, Heart } from 'lucide-react';
+import Image from 'next/image';
+import { Shield, Clock, Heart } from 'lucide-react';
 import GoogleRating from '@/components/ui/GoogleRating';
 
 const Footer = () => {
@@ -24,10 +25,13 @@ const Footer = () => {
           {/* Brand Section */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center space-x-3 mb-4">
-              <FileText className="h-8 w-8 text-[#00d2d3]" />
-              <div>
-                <span className="text-xl font-bold">Joedy<span className="text-[#00d2d3]">Tools</span></span>
-                <p className="text-sm text-gray-400">PDF Tools for Everyone</p>
+              <div className="relative w-40 h-10">
+                <Image 
+                  src="/logo.png" 
+                  alt="JoedyTools Logo" 
+                  fill 
+                  className="object-contain object-left"
+                />
               </div>
             </Link>
             <p className="text-gray-400 text-sm mb-4">
