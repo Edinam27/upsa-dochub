@@ -14,7 +14,7 @@ const HeroSection = () => {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-50 via-[#00d2d3]/5 to-[#001f3f]/5">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-50 via-[var(--color-joedy-cyan)]/5 to-[var(--color-joedy-navy)]/5">
       {/* Modern Background Pattern */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(0,210,211,0.1),transparent_50%)]" />
@@ -24,8 +24,8 @@ const HeroSection = () => {
       
       {/* Subtle Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 right-20 w-32 h-32 bg-[#00d2d3]/5 rounded-full" />
-        <div className="absolute bottom-20 left-20 w-24 h-24 bg-[#001f3f]/5 rounded-full" />
+        <div className="absolute top-20 right-20 w-32 h-32 bg-[var(--color-joedy-cyan)]/5 rounded-full" />
+        <div className="absolute bottom-20 left-20 w-24 h-24 bg-[var(--color-joedy-navy)]/5 rounded-full" />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -64,24 +64,24 @@ const HeroSection = () => {
           className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 max-w-4xl mx-auto"
         >
           <div className="text-center">
-            <div className="w-16 h-16 bg-[#001f3f]/5 rounded-full flex items-center justify-center mx-auto mb-4">
-              <FileText className="h-8 w-8 text-[#001f3f]" />
+            <div className="w-16 h-16 bg-[var(--color-joedy-navy)]/5 rounded-full flex items-center justify-center mx-auto mb-4">
+              <FileText className="h-8 w-8 text-[var(--color-joedy-navy)]" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">12+ PDF Tools</h3>
             <p className="text-gray-700 text-sm">Convert, merge, split, compress and more</p>
           </div>
           
           <div className="text-center">
-            <div className="w-16 h-16 bg-[#00d2d3]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Zap className="h-8 w-8 text-[#00a8a8]" />
+            <div className="w-16 h-16 bg-[var(--color-joedy-cyan)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Zap className="h-8 w-8 text-[var(--color-joedy-cyan-dark)]" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Fast Processing</h3>
             <p className="text-gray-700 text-sm">Quick and efficient document handling</p>
           </div>
           
           <div className="text-center">
-            <div className="w-16 h-16 bg-[#003366]/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Shield className="h-8 w-8 text-[#003366]" />
+            <div className="w-16 h-16 bg-[var(--color-joedy-navy-light)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Shield className="h-8 w-8 text-[var(--color-joedy-navy-light)]" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Secure & Private</h3>
             <p className="text-gray-700 text-sm">All processing happens locally in your browser</p>
@@ -97,7 +97,7 @@ const HeroSection = () => {
         >
           <button
             onClick={scrollToTools}
-            className="bg-[#00d2d3] hover:bg-[#00a8a8] text-[#001f3f] font-bold py-3 px-8 rounded-lg transition-colors duration-200 flex items-center space-x-2"
+            className="bg-[var(--color-joedy-cyan)] hover:bg-[var(--color-joedy-cyan-dark)] text-[var(--color-joedy-navy)] font-bold py-3 px-8 rounded-lg transition-colors duration-200 flex items-center space-x-2"
           >
             <span>Explore Tools</span>
             <ArrowRight className="h-5 w-5" />
@@ -114,15 +114,15 @@ const HeroSection = () => {
           className="grid grid-cols-3 gap-8 max-w-md mx-auto text-center"
         >
           <div>
-            <div className="text-2xl font-bold text-[#001f3f]">12+</div>
+            <div className="text-2xl font-bold text-[var(--color-joedy-navy)]">12+</div>
             <div className="text-sm text-gray-700">Tools</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-[#00d2d3]">Free</div>
+            <div className="text-2xl font-bold text-[var(--color-joedy-cyan)]">Free</div>
             <div className="text-sm text-gray-700">Always</div>
           </div>
           <div>
-            <div className="text-2xl font-bold text-[#003366]">Secure</div>
+            <div className="text-2xl font-bold text-[var(--color-joedy-navy-light)]">Secure</div>
             <div className="text-sm text-gray-700">Local</div>
           </div>
         </motion.div>

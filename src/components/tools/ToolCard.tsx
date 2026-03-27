@@ -60,7 +60,7 @@ const ToolCard = ({ tool }: ToolCardProps) => {
 
         {/* Tool Icon */}
         <div className="flex items-center justify-between mb-4 relative z-10">
-          <div className={`p-3 rounded-xl bg-gradient-to-r ${tool.color} text-white group-hover:scale-110 transition-transform duration-300 shadow-md`}>
+          <div className={`w-14 h-14 rounded-xl mb-6 flex items-center justify-center bg-gradient-to-br ${tool.color} text-white shadow-lg transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 relative z-10`}>
             {tool.icon}
           </div>
           <div className="flex items-center space-x-1">
@@ -120,7 +120,7 @@ const ToolCard = ({ tool }: ToolCardProps) => {
 
         {/* Hover Overlay */}
         <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-[#00d2d3]/5 to-[#001f3f]/5 rounded-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-300 pointer-events-none"
+          className="absolute inset-0 bg-gradient-to-r from-[var(--color-joedy-cyan)]/5 to-[var(--color-joedy-navy)]/5 rounded-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-300 pointer-events-none"
           animate={{ opacity: isHovered ? 0.3 : 0 }}
         />
 

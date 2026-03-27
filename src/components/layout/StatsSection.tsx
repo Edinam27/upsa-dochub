@@ -100,13 +100,13 @@ const StatsSection = () => {
   return (
     <section className="py-20 relative overflow-hidden">
       {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#001f3f]/90 to-[#003366]/90">
+      <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-joedy-navy)]/90 to-[var(--color-joedy-navy-light)]/90">
         <div className="absolute inset-0 bg-black/20"></div>
       </div>
 
       {/* Decorative Elements */}
-      <div className="absolute top-10 left-10 w-32 h-32 bg-[#00d2d3]/10 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-10 right-10 w-40 h-40 bg-[#00a8a8]/10 rounded-full blur-3xl"></div>
+      <div className="absolute top-10 left-10 w-32 h-32 bg-[var(--color-joedy-cyan)]/10 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-10 right-10 w-40 h-40 bg-[var(--color-joedy-cyan-dark)]/10 rounded-full blur-3xl"></div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
@@ -151,22 +151,22 @@ const StatsSection = () => {
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-gray-300">
               <div className="flex flex-col items-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-green-500 rounded-full flex items-center justify-center mb-3">
-                  <span className="text-white font-bold text-lg">✓</span>
+                <div className="w-12 h-12 bg-gradient-to-r from-[var(--color-joedy-cyan)] to-[var(--color-joedy-cyan-dark)] rounded-full flex items-center justify-center mb-3">
+                  <span className="text-[var(--color-joedy-navy)] font-bold text-lg">✓</span>
                 </div>
                 <h4 className="font-semibold text-white mb-2">No Registration Required</h4>
                 <p className="text-sm">Start using tools immediately without creating accounts</p>
               </div>
               <div className="flex flex-col items-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-[#00d2d3] to-[#00a8a8] rounded-full flex items-center justify-center mb-3">
-                  <span className="text-[#001f3f] font-bold text-lg">⚡</span>
+                <div className="w-12 h-12 bg-gradient-to-r from-[var(--color-joedy-cyan)] to-[var(--color-joedy-cyan-dark)] rounded-full flex items-center justify-center mb-3">
+                  <span className="text-[var(--color-joedy-navy)] font-bold text-lg">⚡</span>
                 </div>
                 <h4 className="font-semibold text-white mb-2">Lightning Fast Processing</h4>
                 <p className="text-sm">Process documents in seconds, not minutes</p>
               </div>
               <div className="flex flex-col items-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full flex items-center justify-center mb-3">
-                  <span className="text-white font-bold text-lg">🔒</span>
+                <div className="w-12 h-12 bg-gradient-to-r from-[var(--color-joedy-cyan)] to-[var(--color-joedy-cyan-dark)] rounded-full flex items-center justify-center mb-3">
+                  <span className="text-[var(--color-joedy-navy)] font-bold text-lg">🔒</span>
                 </div>
                 <h4 className="font-semibold text-white mb-2">Complete Privacy</h4>
                 <p className="text-sm">Files processed locally and automatically deleted</p>
