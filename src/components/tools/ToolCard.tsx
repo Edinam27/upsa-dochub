@@ -74,7 +74,7 @@ const ToolCard = ({ tool }: ToolCardProps) => {
         </div>
 
         {/* Tool Name */}
-        <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors relative z-10">
+        <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[#00d2d3] transition-colors relative z-10">
           {tool.name}
         </h3>
 
@@ -93,7 +93,7 @@ const ToolCard = ({ tool }: ToolCardProps) => {
               transition={{ duration: 0.3, delay: index * 0.1 }}
               className="flex items-center space-x-2"
             >
-              <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+              <div className="w-1.5 h-1.5 bg-[#00d2d3] rounded-full"></div>
               <span className="text-gray-600 text-xs font-medium">{feature}</span>
             </motion.div>
           ))}
@@ -109,7 +109,7 @@ const ToolCard = ({ tool }: ToolCardProps) => {
             {tool.category}
           </span>
           <motion.div
-            className="flex items-center space-x-1 text-blue-600 group-hover:text-blue-700"
+            className="flex items-center space-x-1 text-[#00d2d3] group-hover:text-[#00a8a8]"
             animate={{ x: isHovered ? 5 : 0 }}
             transition={{ duration: 0.3 }}
           >
@@ -120,7 +120,7 @@ const ToolCard = ({ tool }: ToolCardProps) => {
 
         {/* Hover Overlay */}
         <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-300 pointer-events-none"
+          className="absolute inset-0 bg-gradient-to-r from-[#00d2d3]/5 to-[#001f3f]/5 rounded-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-300 pointer-events-none"
           animate={{ opacity: isHovered ? 0.3 : 0 }}
         />
 

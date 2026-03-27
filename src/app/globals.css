@@ -14,14 +14,14 @@ html, body {
 @theme {
   --font-family-sans: Inter, system-ui, sans-serif;
   
-  --color-upsa-blue: #1e3a8a;
-  --color-upsa-gold: #f59e0b;
-  --color-upsa-light-blue: #3b82f6;
-  --color-upsa-dark-blue: #1e40af;
-  --color-primary-purple: #4f46e5;
-  --color-primary-purple-dark: #7c3aed;
-  --color-primary-gold: #f59e0b;
-  --color-primary-gold-dark: #d97706;
+  --color-joedy-navy: #001f3f;
+  --color-joedy-navy-light: #003366;
+  --color-joedy-cyan: #00d2d3;
+  --color-joedy-cyan-dark: #00a8a8;
+  --color-primary-purple: #001f3f;
+  --color-primary-purple-dark: #003366;
+  --color-primary-gold: #00d2d3;
+  --color-primary-gold-dark: #00a8a8;
   --color-text-primary: #1f2937;
   --color-text-secondary: #6b7280;
   --color-bg-primary: #ffffff;
@@ -45,7 +45,7 @@ html, body {
 /* Custom Utility Classes */
 @layer utilities {
   .gradient-text {
-    background: linear-gradient(135deg, theme(colors.upsa-blue), theme(colors.upsa-gold));
+    background: linear-gradient(135deg, theme(colors.joedy-navy), theme(colors.joedy-cyan));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -87,18 +87,18 @@ html, body {
   }
   
   .file-upload-area.drag-over {
-    border-color: theme(colors.upsa-gold);
-    background-color: rgba(245, 158, 11, 0.05);
+    border-color: theme(colors.joedy-cyan);
+    background-color: rgba(0, 210, 211, 0.05);
   }
   
   .progress-bar {
-    background: linear-gradient(90deg, theme(colors.upsa-blue), theme(colors.upsa-gold));
+    background: linear-gradient(90deg, theme(colors.joedy-navy), theme(colors.joedy-cyan));
     transition: width 0.3s ease;
   }
   
   .spinner {
     border: 3px solid theme(colors.gray.100);
-    border-top: 3px solid theme(colors.upsa-blue);
+    border-top: 3px solid theme(colors.joedy-navy);
     border-radius: 50%;
     width: 24px;
     height: 24px;

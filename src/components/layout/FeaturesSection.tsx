@@ -26,9 +26,9 @@ const FeatureCard = ({ icon, title, description, delay }: FeatureProps) => {
       viewport={{ once: true }}
       className="group text-center"
     >
-      <div className="bg-white rounded-xl p-8 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 hover:border-blue-200 h-full">
-        <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-blue-100 transition-colors">
-          <div className="text-blue-600">
+      <div className="bg-white rounded-xl p-8 shadow-sm hover:shadow-md transition-all duration-300 border border-gray-100 hover:border-[#00d2d3] h-full">
+        <div className="w-16 h-16 bg-[#001f3f]/5 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-[#00d2d3]/10 transition-colors">
+          <div className="text-[#001f3f]">
             {icon}
           </div>
         </div>
@@ -93,8 +93,8 @@ const FeaturesSection = () => {
           viewport={{ once: true }}
           className="text-center mb-20"
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Why Choose <span className="text-blue-600">JoedyTools</span>?
+          <h2 className="text-4xl md:text-5xl font-bold text-[#001f3f] mb-6">
+            Why Choose <span className="text-[#00d2d3]">JoedyTools</span>?
           </h2>
           <p className="text-xl text-gray-700 max-w-3xl mx-auto">
             A complete PDF toolkit designed for global use — fast, secure, and private.

@@ -54,7 +54,7 @@ const StatItem = ({ icon, value, label, delay }: StatItemProps) => {
     >
       <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 hover:bg-white/20 transition-all duration-300 hover:scale-105 border border-white/20">
         <div className="flex justify-center mb-4">
-          <div className="p-3 bg-gradient-to-r from-yellow-400 to-yellow-500 rounded-full text-gray-900 group-hover:scale-110 transition-transform duration-300">
+          <div className="p-3 bg-gradient-to-r from-[#00d2d3] to-[#00a8a8] rounded-full text-[#001f3f] group-hover:scale-110 transition-transform duration-300">
             {icon}
           </div>
         </div>
@@ -100,13 +100,13 @@ const StatsSection = () => {
   return (
     <section className="py-20 relative overflow-hidden">
       {/* Background */}
-      <div className="absolute inset-0 bg-gradient-to-r from-purple-900/50 to-blue-900/50">
-        <div className="absolute inset-0 bg-black/30"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-[#001f3f]/90 to-[#003366]/90">
+        <div className="absolute inset-0 bg-black/20"></div>
       </div>
 
       {/* Decorative Elements */}
-      <div className="absolute top-10 left-10 w-32 h-32 bg-yellow-400/10 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-10 right-10 w-40 h-40 bg-purple-400/10 rounded-full blur-3xl"></div>
+      <div className="absolute top-10 left-10 w-32 h-32 bg-[#00d2d3]/10 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-10 right-10 w-40 h-40 bg-[#00a8a8]/10 rounded-full blur-3xl"></div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
@@ -158,14 +158,14 @@ const StatsSection = () => {
                 <p className="text-sm">Start using tools immediately without creating accounts</p>
               </div>
               <div className="flex flex-col items-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full flex items-center justify-center mb-3">
-                  <span className="text-white font-bold text-lg">⚡</span>
+                <div className="w-12 h-12 bg-gradient-to-r from-[#00d2d3] to-[#00a8a8] rounded-full flex items-center justify-center mb-3">
+                  <span className="text-[#001f3f] font-bold text-lg">⚡</span>
                 </div>
                 <h4 className="font-semibold text-white mb-2">Lightning Fast Processing</h4>
                 <p className="text-sm">Process documents in seconds, not minutes</p>
               </div>
               <div className="flex flex-col items-center">
-                <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-purple-500 rounded-full flex items-center justify-center mb-3">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full flex items-center justify-center mb-3">
                   <span className="text-white font-bold text-lg">🔒</span>
                 </div>
                 <h4 className="font-semibold text-white mb-2">Complete Privacy</h4>

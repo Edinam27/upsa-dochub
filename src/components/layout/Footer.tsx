@@ -18,15 +18,15 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-gray-900 text-white">
+    <footer className="bg-[#001f3f] text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand Section */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center space-x-3 mb-4">
-              <FileText className="h-8 w-8 text-yellow-400" />
+              <FileText className="h-8 w-8 text-[#00d2d3]" />
               <div>
-                <span className="text-xl font-bold">Quiltra</span>
+                <span className="text-xl font-bold">Joedy<span className="text-[#00d2d3]">Tools</span></span>
                 <p className="text-sm text-gray-400">PDF Tools for Everyone</p>
               </div>
             </Link>
@@ -61,13 +61,13 @@ const Footer = () => {
 
           {/* Tool Categories */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-yellow-400">PDF Tools</h3>
+            <h3 className="text-lg font-semibold mb-4 text-[#00d2d3]">PDF Tools</h3>
             <ul className="space-y-2">
               {toolCategories.map((category) => (
                 <li key={category.name}>
                   <Link
                     href={category.href}
-                    className="text-gray-400 hover:text-white transition-colors"
+                    className="text-gray-400 hover:text-[#00d2d3] transition-colors"
                   >
                     {category.name}
                   </Link>
@@ -78,13 +78,13 @@ const Footer = () => {
 
           {/* Support Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-yellow-400">Support</h3>
+            <h3 className="text-lg font-semibold mb-4 text-[#00d2d3]">Support</h3>
             <ul className="space-y-2">
               {supportLinks.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-gray-400 hover:text-white transition-colors"
+                    className="text-gray-400 hover:text-[#00d2d3] transition-colors"
                   >
                     {link.name}
                   </Link>
