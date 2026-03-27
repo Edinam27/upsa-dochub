@@ -19,7 +19,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-[var(--color-joedy-navy)] text-white">
+    <footer className="bg-[#001f3f] text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand Section */}
@@ -65,13 +65,13 @@ const Footer = () => {
 
           {/* Tool Categories */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-[var(--color-joedy-cyan)]">PDF Tools</h3>
+            <h3 className="text-lg font-semibold mb-4 text-[#00d2d3]">PDF Tools</h3>
             <ul className="space-y-2">
               {toolCategories.map((category) => (
                 <li key={category.name}>
                   <Link
                     href={category.href}
-                    className="text-gray-400 hover:text-[var(--color-joedy-cyan)] transition-colors"
+                    className="text-gray-400 hover:text-[#00d2d3] transition-colors"
                   >
                     {category.name}
                   </Link>
@@ -82,13 +82,13 @@ const Footer = () => {
 
           {/* Support Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-[var(--color-joedy-cyan)]">Support</h3>
+            <h3 className="text-lg font-semibold mb-4 text-[#00d2d3]">Support</h3>
             <ul className="space-y-2">
               {supportLinks.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-gray-400 hover:text-[var(--color-joedy-cyan)] transition-colors"
+                    className="text-gray-400 hover:text-[#00d2d3] transition-colors"
                   >
                     {link.name}
                   </Link>

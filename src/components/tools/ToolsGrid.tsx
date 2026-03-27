@@ -42,7 +42,7 @@ const ToolsGrid = () => {
       description: 'Combine multiple PDF files with drag-and-drop reordering',
       icon: <Merge className="h-6 w-6" />,
       category: 'Organize PDFs',
-      color: 'from-[var(--color-joedy-navy)] to-[var(--color-joedy-navy-light)]',
+      color: 'from-[#001f3f] to-[#003366]',
       features: ['Drag & Drop', 'Custom Order', 'Batch Processing']
     },
     {
@@ -51,7 +51,7 @@ const ToolsGrid = () => {
       description: 'Extract specific pages or split by page ranges',
       icon: <Split className="h-6 w-6" />,
       category: 'Organize PDFs',
-      color: 'from-[var(--color-joedy-cyan)] to-[var(--color-joedy-cyan-dark)]',
+      color: 'from-[#00d2d3] to-[#00a8a8]',
       features: ['Page Ranges', 'Single Pages', 'Custom Split']
     },
     {
@@ -60,7 +60,7 @@ const ToolsGrid = () => {
       description: 'Reduce file size with quality options',
       icon: <Zap className="h-6 w-6" />,
       category: 'Organize PDFs',
-      color: 'from-[var(--color-joedy-navy-light)] to-[var(--color-joedy-navy)]',
+      color: 'from-[#003366] to-[#001f3f]',
       features: ['Quality Control', 'Size Optimization', 'Fast Processing']
     },
     {
@@ -69,7 +69,7 @@ const ToolsGrid = () => {
       description: 'Text/image watermarks with positioning options',
       icon: <Droplets className="h-6 w-6" />,
       category: 'Organize PDFs',
-      color: 'from-[var(--color-joedy-cyan-dark)] to-[var(--color-joedy-cyan)]',
+      color: 'from-[#00a8a8] to-[#00d2d3]',
       features: ['Text & Image', 'Custom Position', 'Transparency']
     },
 
@@ -80,7 +80,7 @@ const ToolsGrid = () => {
       description: 'Convert PDF pages to high-quality images',
       icon: <FileImage className="h-6 w-6" />,
       category: 'Conversion Tools',
-      color: 'from-[var(--color-joedy-navy)] to-[var(--color-joedy-cyan)]',
+      color: 'from-[#001f3f] to-[#00d2d3]',
       features: ['Multiple Formats', 'Custom Resolution', 'Quality Control']
     },
     {
@@ -89,7 +89,7 @@ const ToolsGrid = () => {
       description: 'Convert images to a single PDF document',
       icon: <Image className="h-6 w-6" />,
       category: 'Conversion Tools',
-      color: 'from-[var(--color-joedy-cyan)] to-[var(--color-joedy-navy)]',
+      color: 'from-[#00d2d3] to-[#001f3f]',
       features: ['Multiple Formats', 'Layout Options', 'Quality Control']
     },
     {
@@ -98,7 +98,7 @@ const ToolsGrid = () => {
       description: 'Convert PDF documents to editable Word DOCX files',
       icon: <FileText className="h-6 w-6" />,
       category: 'Conversion Tools',
-      color: 'from-[var(--color-joedy-navy-light)] to-[var(--color-joedy-navy)]',
+      color: 'from-[#003366] to-[#001f3f]',
       features: ['Editable Output', 'Text Recognition', 'Format Retention']
     },
     {
@@ -107,7 +107,7 @@ const ToolsGrid = () => {
       description: 'Convert PDF tables to editable Excel spreadsheets',
       icon: <FileSpreadsheet className="h-6 w-6" />,
       category: 'Conversion Tools',
-      color: 'from-[var(--color-joedy-cyan-dark)] to-[var(--color-joedy-cyan)]',
+      color: 'from-[#00a8a8] to-[#00d2d3]',
       features: ['Extract Tables', 'Maintain Structure', 'Editable Cells']
     },
     {
@@ -116,7 +116,7 @@ const ToolsGrid = () => {
       description: 'Convert PDF slides to editable PowerPoint presentations',
       icon: <Presentation className="h-6 w-6" />,
       category: 'Conversion Tools',
-      color: 'from-[var(--color-joedy-navy)] to-[var(--color-joedy-cyan-dark)]',
+      color: 'from-[#001f3f] to-[#00a8a8]',
       features: ['Convert Slides', 'Editable Text', 'Image Preservation']
     },
     {
@@ -125,7 +125,7 @@ const ToolsGrid = () => {
       description: 'Extract text from scanned PDFs using advanced OCR',
       icon: <ScanLine className="h-6 w-6" />,
       category: 'Conversion Tools',
-      color: 'from-[var(--color-joedy-cyan)] to-[var(--color-joedy-navy-light)]',
+      color: 'from-[#00d2d3] to-[#003366]',
       features: ['Advanced OCR', 'Multiple Languages', 'High Accuracy']
     },
 
@@ -136,7 +136,7 @@ const ToolsGrid = () => {
       description: 'Compress images to reduce file size while maintaining quality',
       icon: <Minimize2 className="h-6 w-6" />,
       category: 'Enhancement Tools',
-      color: 'from-[var(--color-joedy-cyan-dark)] to-[var(--color-joedy-navy)]',
+      color: 'from-[#00a8a8] to-[#001f3f]',
       features: ['Quality Control', 'Batch Processing', 'Multiple Formats']
     },
     {
@@ -145,7 +145,7 @@ const ToolsGrid = () => {
       description: 'Add digital signatures to PDF documents',
       icon: <Edit3 className="h-6 w-6" />,
       category: 'Enhancement Tools',
-      color: 'from-[var(--color-joedy-navy-light)] to-[var(--color-joedy-cyan)]',
+      color: 'from-[#003366] to-[#00d2d3]',
       features: ['Digital Signature', 'Custom Position', 'Secure Signing']
     },
     {
@@ -154,7 +154,7 @@ const ToolsGrid = () => {
       description: 'Secure PDF files with password protection',
       icon: <Lock className="h-6 w-6" />,
       category: 'Enhancement Tools',
-      color: 'from-[var(--color-joedy-navy)] to-[var(--color-joedy-navy-light)]',
+      color: 'from-[#001f3f] to-[#003366]',
       features: ['Strong Encryption', 'Access Control', 'Security Options']
     },
     {
@@ -163,7 +163,7 @@ const ToolsGrid = () => {
       description: 'Remove password protection from PDF files',
       icon: <Lock className="h-6 w-6" />,
       category: 'Enhancement Tools',
-      color: 'from-[var(--color-joedy-cyan)] to-[var(--color-joedy-cyan-dark)]',
+      color: 'from-[#00d2d3] to-[#00a8a8]',
       features: ['Password Removal', 'Unlock Restrictions', 'Restore Access']
     },
     {
@@ -172,7 +172,7 @@ const ToolsGrid = () => {
       description: 'Extract specific pages from PDF documents',
       icon: <RotateCcw className="h-6 w-6" />,
       category: 'Enhancement Tools',
-      color: 'from-[var(--color-joedy-navy)] to-[var(--color-joedy-cyan)]',
+      color: 'from-[#001f3f] to-[#00d2d3]',
       features: ['Select Pages', 'Page Ranges', 'Multiple Selections']
     },
     
@@ -183,7 +183,7 @@ const ToolsGrid = () => {
       description: 'Add a secure, trackable signature with QR code verification',
       icon: <QrCode className="h-6 w-6" />,
       category: 'Verification Tools',
-      color: 'from-[var(--color-joedy-cyan)] to-[var(--color-joedy-navy)]',
+      color: 'from-[#00d2d3] to-[#001f3f]',
       isLocked: true,
       features: ['QR Verification', 'Blockchain-like', 'Tamper-proof', 'Identity Check']
     },
@@ -193,7 +193,7 @@ const ToolsGrid = () => {
       description: 'Verify the authenticity of a signed document via QR code',
       icon: <CheckCircle className="h-6 w-6" />,
       category: 'Verification Tools',
-      color: 'from-[var(--color-joedy-cyan-dark)] to-[var(--color-joedy-navy-light)]',
+      color: 'from-[#00a8a8] to-[#003366]',
       isLocked: true,
       features: ['Instant Scanning', 'Database Check', 'Signer Identity', 'Timestamp']
     }

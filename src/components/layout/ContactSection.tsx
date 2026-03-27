@@ -8,7 +8,7 @@ const ContactSection = () => {
   return (
     <section id="contact" className="py-20 bg-gray-50 relative">
       {/* Background with JoedyTools Brand Colors */}
-      <div className="absolute inset-0 bg-gradient-to-b from-white to-[var(--color-joedy-cyan)]/5"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-white to-[#00d2d3]/5"></div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}
         <motion.div
@@ -18,9 +18,9 @@ const ContactSection = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-[var(--color-joedy-navy)] mb-6">
-            Get in <span className="text-[var(--color-joedy-cyan)]">Touch</span>
-          </h2>
+          <h2 className="text-4xl md:text-5xl font-bold text-[#001f3f] mb-6">
+              Get in <span className="text-[#00d2d3]">Touch</span>
+            </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Need help with our PDF tools? Have questions about JoedyTools? 
             We're here to support you.
@@ -38,9 +38,9 @@ const ContactSection = () => {
             className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
           >
             <div className="flex items-center space-x-3 mb-4">
-              <div className="w-12 h-12 bg-[var(--color-joedy-navy)]/5 rounded-full flex items-center justify-center mb-4 group-hover:bg-[var(--color-joedy-cyan)]/10 transition-colors">
-                <Mail className="h-6 w-6 text-[var(--color-joedy-navy)]" />
-              </div>
+                <div className="w-12 h-12 bg-[#001f3f]/5 rounded-full flex items-center justify-center mb-4 group-hover:bg-[#00d2d3]/10 transition-colors">
+                  <Mail className="h-6 w-6 text-[#001f3f]" />
+                </div>
               <h3 className="text-lg font-semibold text-gray-900">Email Support</h3>
             </div>
             <p className="text-gray-600 mb-4">
@@ -67,9 +67,9 @@ const ContactSection = () => {
             className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
           >
             <div className="flex items-center space-x-3 mb-4">
-              <div className="w-12 h-12 bg-[var(--color-joedy-navy)]/5 rounded-full flex items-center justify-center mb-4 group-hover:bg-[var(--color-joedy-cyan)]/10 transition-colors">
-                <Mail className="h-6 w-6 text-[var(--color-joedy-navy)]" />
-              </div>
+                <div className="w-12 h-12 bg-[#001f3f]/5 rounded-full flex items-center justify-center mb-4 group-hover:bg-[#00d2d3]/10 transition-colors">
+                  <Mail className="h-6 w-6 text-[#001f3f]" />
+                </div>
               <h3 className="text-lg font-semibold text-gray-900">Announcements</h3>
             </div>
             <p className="text-gray-600 mb-4">
@@ -96,8 +96,8 @@ const ContactSection = () => {
             className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow"
           >
             <div className="flex items-center space-x-3 mb-4">
-                <div className="w-12 h-12 bg-[var(--color-joedy-navy)]/5 rounded-full flex items-center justify-center mb-4 group-hover:bg-[var(--color-joedy-cyan)]/10 transition-colors">
-                  <Clock className="h-6 w-6 text-[var(--color-joedy-navy)]" />
+                <div className="w-12 h-12 bg-[#001f3f]/5 rounded-full flex items-center justify-center mb-4 group-hover:bg-[#00d2d3]/10 transition-colors">
+                  <MessageSquare className="h-6 w-6 text-[#001f3f]" />
                 </div>
               <h3 className="text-lg font-semibold text-gray-900">Service Hours</h3>
             </div>

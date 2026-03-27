@@ -120,7 +120,7 @@ const ToolCard = ({ tool }: ToolCardProps) => {
 
         {/* Hover Overlay */}
         <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-[var(--color-joedy-cyan)]/5 to-[var(--color-joedy-navy)]/5 rounded-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-300 pointer-events-none"
+          className="absolute inset-0 bg-gradient-to-r from-[#00d2d3]/5 to-[#001f3f]/5 rounded-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-300 pointer-events-none"
           animate={{ opacity: isHovered ? 0.3 : 0 }}
         />
 
