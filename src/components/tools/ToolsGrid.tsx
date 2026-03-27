@@ -35,13 +35,13 @@ interface Tool {
 
 const ToolsGrid = () => {
   const tools: Tool[] = [
-    // Academic Tools Category
+    // Organize PDFs Category
     {
       id: 'pdf-merge',
       name: 'Merge PDFs',
       description: 'Combine multiple PDF files with drag-and-drop reordering',
       icon: <Merge className="h-6 w-6" />,
-      category: 'Academic Tools',
+      category: 'Organize PDFs',
       color: 'from-blue-500 to-blue-600',
       features: ['Drag & Drop', 'Custom Order', 'Batch Processing']
     },
@@ -50,7 +50,7 @@ const ToolsGrid = () => {
       name: 'Split PDF',
       description: 'Extract specific pages or split by page ranges',
       icon: <Split className="h-6 w-6" />,
-      category: 'Academic Tools',
+      category: 'Organize PDFs',
       color: 'from-green-500 to-green-600',
       features: ['Page Ranges', 'Single Pages', 'Custom Split']
     },
@@ -59,7 +59,7 @@ const ToolsGrid = () => {
       name: 'Compress PDF',
       description: 'Reduce file size with quality options',
       icon: <Zap className="h-6 w-6" />,
-      category: 'Academic Tools',
+      category: 'Organize PDFs',
       color: 'from-orange-500 to-orange-600',
       features: ['Quality Control', 'Size Optimization', 'Fast Processing']
     },
@@ -68,7 +68,7 @@ const ToolsGrid = () => {
       name: 'Add Watermark',
       description: 'Text/image watermarks with positioning options',
       icon: <Droplets className="h-6 w-6" />,
-      category: 'Academic Tools',
+      category: 'Organize PDFs',
       color: 'from-purple-500 to-purple-600',
       features: ['Text & Image', 'Custom Position', 'Transparency']
     },
@@ -95,29 +95,47 @@ const ToolsGrid = () => {
     {
       id: 'pdf-to-word',
       name: 'PDF to Word',
-      description: 'Convert PDF documents to editable Word files',
+      description: 'Convert PDF documents to editable Word DOCX files',
       icon: <FileText className="h-6 w-6" />,
       category: 'Conversion Tools',
       color: 'from-blue-600 to-blue-700',
       features: ['Editable Output', 'Text Recognition', 'Format Retention']
     },
     {
+      id: 'pdf-to-excel',
+      name: 'PDF to Excel',
+      description: 'Convert PDF tables to editable Excel spreadsheets',
+      icon: <FileSpreadsheet className="h-6 w-6" />,
+      category: 'Conversion Tools',
+      color: 'from-green-600 to-green-700',
+      features: ['Extract Tables', 'Maintain Structure', 'Editable Cells']
+    },
+    {
+      id: 'pdf-to-ppt',
+      name: 'PDF to PowerPoint',
+      description: 'Convert PDF slides to editable PowerPoint presentations',
+      icon: <Presentation className="h-6 w-6" />,
+      category: 'Conversion Tools',
+      color: 'from-orange-500 to-red-500',
+      features: ['Convert Slides', 'Editable Text', 'Image Preservation']
+    },
+    {
       id: 'pdf-ocr',
       name: 'OCR Text Extract',
-      description: 'Extract text from scanned PDFs using OCR',
+      description: 'Extract text from scanned PDFs using advanced OCR',
       icon: <ScanLine className="h-6 w-6" />,
       category: 'Conversion Tools',
       color: 'from-teal-500 to-teal-600',
       features: ['Advanced OCR', 'Multiple Languages', 'High Accuracy']
     },
 
-    // Study Tools Category
+    // Enhancement Tools Category
     {
       id: 'image-compress',
       name: 'Image Compression',
       description: 'Compress images to reduce file size while maintaining quality',
       icon: <Minimize2 className="h-6 w-6" />,
-      category: 'Study Tools',
+      category: 'Enhancement Tools',
       color: 'from-yellow-500 to-orange-500',
       features: ['Quality Control', 'Batch Processing', 'Multiple Formats']
     },
@@ -126,7 +144,7 @@ const ToolsGrid = () => {
       name: 'Add Signature',
       description: 'Add digital signatures to PDF documents',
       icon: <Edit3 className="h-6 w-6" />,
-      category: 'Study Tools',
+      category: 'Enhancement Tools',
       color: 'from-indigo-500 to-purple-500',
       features: ['Digital Signature', 'Custom Position', 'Secure Signing']
     },
@@ -135,7 +153,7 @@ const ToolsGrid = () => {
       name: 'Password Protect',
       description: 'Secure PDF files with password protection',
       icon: <Lock className="h-6 w-6" />,
-      category: 'Study Tools',
+      category: 'Enhancement Tools',
       color: 'from-gray-600 to-gray-700',
       features: ['Strong Encryption', 'Access Control', 'Security Options']
     },
@@ -144,7 +162,7 @@ const ToolsGrid = () => {
       name: 'Remove Password',
       description: 'Remove password protection from PDF files',
       icon: <Lock className="h-6 w-6" />,
-      category: 'Study Tools',
+      category: 'Enhancement Tools',
       color: 'from-emerald-500 to-emerald-600',
       features: ['Password Removal', 'Unlock Restrictions', 'Restore Access']
     },
@@ -153,7 +171,7 @@ const ToolsGrid = () => {
       name: 'Extract Pages',
       description: 'Extract specific pages from PDF documents',
       icon: <RotateCcw className="h-6 w-6" />,
-      category: 'Study Tools',
+      category: 'Enhancement Tools',
       color: 'from-purple-500 to-purple-600',
       features: ['Select Pages', 'Page Ranges', 'Multiple Selections']
     },
@@ -181,16 +199,16 @@ const ToolsGrid = () => {
     }
   ];
 
-  const categories = ['Academic Tools', 'Conversion Tools', 'Study Tools', 'Verification Tools'];
+  const categories = ['Organize PDFs', 'Conversion Tools', 'Enhancement Tools', 'Verification Tools'];
 
   const getCategoryDescription = (category: string) => {
     switch (category) {
-      case 'Academic Tools':
-        return 'Essential tools for academic document management and processing';
+      case 'Organize PDFs':
+        return 'Essential tools to merge, split, and manage your PDF documents';
       case 'Conversion Tools':
-        return 'Convert between different file formats with ease';
-      case 'Study Tools':
-        return 'Advanced tools to enhance your study and research workflow';
+        return 'Easily convert PDFs to Word, Excel, Images, and more';
+      case 'Enhancement Tools':
+        return 'Compress, secure, and edit your files for better workflows';
       case 'Verification Tools':
         return 'Secure document verification and authenticity checking';
       default:

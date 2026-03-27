@@ -9,8 +9,12 @@ export const metadata: Metadata = {
     default: "JoedyTools - PDF Tools for Everyone",
     template: "%s | JoedyTools"
   },
-  description: "Complete PDF management solution for everyone. Merge, split, compress, convert, and process PDFs with ease — secure, fast, and private.",
-  keywords: ["PDF tools", "PDF converter", "PDF merger", "OCR", "compress PDF", "document tools", "global"],
+  description: "JoedyTools offers a complete suite of free, secure, and fast PDF tools. Easily merge, split, compress, convert PDF to Word/Excel, extract OCR text, and process documents locally in your browser.",
+  keywords: [
+    "PDF tools", "free PDF editor", "PDF converter", "merge PDF", "split PDF", "compress PDF", 
+    "PDF to Word", "PDF to Excel", "PDF to PowerPoint", "OCR text extraction", "secure PDF tools",
+    "local PDF processing", "browser based PDF editor", "document management", "JoedyTools"
+  ],
   authors: [{ name: "JoedyTools Team" }],
   creator: "JoedyTools",
   publisher: "JoedyTools",
@@ -70,20 +74,35 @@ export default function RootLayout({
 }) {
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "JoedyTools",
-    "applicationCategory": "UtilitiesApplication",
-    "operatingSystem": "Web",
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.8",
-      "ratingCount": "124"
-    },
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    }
+    "@graph": [
+      {
+        "@type": "SoftwareApplication",
+        "name": "JoedyTools",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "Web",
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.8",
+          "ratingCount": "124"
+        },
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD"
+        }
+      },
+      {
+        "@type": "WebSite",
+        "name": "JoedyTools",
+        "url": "https://joedytools.com",
+        "description": "Free, secure, and fast PDF tools for everyone.",
+        "potentialAction": {
+          "@type": "SearchAction",
+          "target": "https://joedytools.com/tools?q={search_term_string}",
+          "query-input": "required name=search_term_string"
+        }
+      }
+    ]
   };
 
   return (

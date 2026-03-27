@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, notFound } from 'next/navigation';
+import Head from 'next/head';
 import { TOOLS, getToolById } from '@/lib/tools-config';
 import { useUserPreferencesStore, useUsageStatsStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
@@ -62,6 +63,17 @@ export default function ToolPage() {
   if (!tool) {
     notFound();
   }
+
+  // Set up document metadata dynamically
+  useEffect(() => {
+    if (tool) {
+      document.title = `${tool.name} | JoedyTools - PDF Tools for Everyone`;
+      const metaDescription = document.querySelector('meta[name="description"]');
+      if (metaDescription) {
+        metaDescription.setAttribute('content', tool.description);
+      }
+    }
+  }, [tool]);
   
   // Show locked state if tool is locked
   if (tool.isLocked) {

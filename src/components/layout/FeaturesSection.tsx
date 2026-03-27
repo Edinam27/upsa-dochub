@@ -78,7 +78,7 @@ const FeaturesSection = () => {
     {
       icon: <Award className="h-8 w-8" />,
       title: "Professional Quality",
-      description: "Industry-standard PDF processing with high-quality output for academic use.",
+      description: "Industry-standard PDF processing with high-quality output for all your needs.",
       delay: 0.6,
     },
   ];

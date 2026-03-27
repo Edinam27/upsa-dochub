@@ -44,11 +44,11 @@ const HeroSection = () => {
             </div>
           </div>
           
-          <p className="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto mb-4">
-            Professional PDF tools for everyone
-          </p>
+          <h2 className="text-lg md:text-xl text-gray-700 max-w-2xl mx-auto mb-4 font-medium">
+            Free, Secure, and Professional PDF Tools for Everyone
+          </h2>
           <p className="text-gray-600 max-w-xl mx-auto">
-            Convert, merge, split, and manage your documents with ease
+            Easily convert PDF to Word, merge, split, compress, and edit your documents directly in your browser. No registration required.
           </p>
         </motion.div>
 
