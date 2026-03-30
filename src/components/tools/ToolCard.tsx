@@ -23,7 +23,6 @@ interface ToolCardProps {
 const ToolCard = ({ tool }: ToolCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
 
-  // Helper function to get the correct route for each tool
   const getToolRoute = (toolId: string) => {
     switch (toolId) {
       case 'pdf-to-word':
@@ -40,114 +39,94 @@ const ToolCard = ({ tool }: ToolCardProps) => {
   return (
     <Link href={tool.isLocked ? '#' : getToolRoute(tool.id)} className={`block ${tool.isLocked ? 'cursor-not-allowed' : ''}`}>
       <motion.div
-        className="relative group cursor-pointer"
+        className="relative group"
         onHoverStart={() => !tool.isLocked && setIsHovered(true)}
         onHoverEnd={() => !tool.isLocked && setIsHovered(false)}
         whileHover={!tool.isLocked ? { y: -8 } : {}}
         transition={{ duration: 0.3 }}
       >
-      <div className={`bg-white rounded-2xl p-6 border transition-all duration-300 h-full relative overflow-hidden ${tool.isLocked ? 'border-gray-200 bg-gray-50' : 'border-gray-200 hover:border-gray-300 hover:shadow-lg'}`}>
-        
-        {tool.isLocked && (
-          <div className="absolute inset-0 bg-white/60 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center text-center p-6">
-            <div className="bg-gray-900/5 p-4 rounded-full mb-3">
-              <Lock className="w-8 h-8 text-gray-500" />
+        <div className={`card-interactive relative overflow-hidden h-full ${tool.isLocked ? 'opacity-60' : ''}`}>
+          
+          {tool.isLocked && (
+            <div className="absolute inset-0 bg-white/80 backdrop-blur-sm z-20 flex flex-col items-center justify-center text-center p-6">
+              <div className="bg-neutral-900/5 p-4 rounded-full mb-3">
+                <Lock className="w-8 h-8 text-neutral-500" />
+              </div>
+              <span className="text-neutral-900 font-bold text-lg mb-1">Coming Soon</span>
+              <span className="text-neutral-600 text-sm">This feature is being developed</span>
             </div>
-            <span className="text-gray-900 font-bold text-lg mb-1">Feature Locked</span>
-            <span className="text-gray-500 text-sm">This tool is currently unavailable</span>
+          )}
+
+          <div className="p-6 space-y-4 relative z-10">
+            {/* Header with Icon and Rating */}
+            <div className="flex items-start justify-between">
+              <motion.div
+                className={`w-14 h-14 rounded-xl flex items-center justify-center bg-gradient-to-br ${tool.color} text-white shadow-md`}
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ duration: 0.3 }}
+              >
+                {tool.icon}
+              </motion.div>
+              <div className="flex items-center space-x-0.5">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className="h-3.5 w-3.5 text-amber-400 fill-amber-400"
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Tool Name */}
+            <div>
+              <h3 className="text-lg font-bold text-neutral-900 group-hover:text-primary-600 transition-colors">
+                {tool.name}
+              </h3>
+            </div>
+
+            {/* Tool Description */}
+            <p className="text-neutral-600 text-sm leading-relaxed line-clamp-2">
+              {tool.description}
+            </p>
+
+            {/* Features */}
+            <div className="space-y-2 pt-2">
+              {tool.features.slice(0, 3).map((feature, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  className="flex items-center space-x-2"
+                >
+                  <div className="w-1.5 h-1.5 bg-primary-500 rounded-full flex-shrink-0"></div>
+                  <span className="text-neutral-600 text-xs font-medium">{feature}</span>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-between pt-4 border-t border-neutral-200">
+              <span className="text-xs text-neutral-500 uppercase tracking-wide font-semibold">
+                {tool.category}
+              </span>
+              <motion.div
+                className="flex items-center space-x-1 text-primary-600 font-medium text-sm"
+                animate={{ x: isHovered ? 4 : 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <span>Use</span>
+                <ArrowRight className="h-4 w-4" />
+              </motion.div>
+            </div>
           </div>
-        )}
 
-        {/* Tool Icon */}
-        <div className="flex items-center justify-between mb-4 relative z-10">
-          <div className={`w-14 h-14 rounded-xl mb-6 flex items-center justify-center bg-gradient-to-br ${tool.color} text-white shadow-lg transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300 relative z-10`}>
-            {tool.icon}
-          </div>
-          <div className="flex items-center space-x-1">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className="h-3 w-3 text-yellow-500 fill-yellow-400"
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Tool Name */}
-        <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[#00d2d3] transition-colors relative z-10">
-          {tool.name}
-        </h3>
-
-        {/* Tool Description */}
-        <p className="text-gray-700 text-sm mb-4 leading-relaxed relative z-10">
-          {tool.description}
-        </p>
-
-        {/* Features */}
-        <div className="space-y-2 mb-6 relative z-10">
-          {tool.features.map((feature, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: isHovered ? 1 : 0.7, x: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
-              className="flex items-center space-x-2"
-            >
-              <div className="w-1.5 h-1.5 bg-[#00d2d3] rounded-full"></div>
-              <span className="text-gray-600 text-xs font-medium">{feature}</span>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Action Button */}
-        <motion.div
-          className="flex items-center justify-between relative z-10"
-          animate={{ opacity: isHovered ? 1 : 0.8 }}
-          transition={{ duration: 0.3 }}
-        >
-          <span className="text-xs text-gray-500 uppercase tracking-wide font-medium">
-            {tool.category}
-          </span>
+          {/* Glow Effect */}
           <motion.div
-            className="flex items-center space-x-1 text-[#00d2d3] group-hover:text-[#00a8a8]"
-            animate={{ x: isHovered ? 5 : 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <span className="text-sm font-medium">Use Tool</span>
-            <ArrowRight className="h-4 w-4" />
-          </motion.div>
-        </motion.div>
-
-        {/* Hover Overlay */}
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-[#00d2d3]/5 to-[#001f3f]/5 rounded-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-300 pointer-events-none"
-          animate={{ opacity: isHovered ? 0.3 : 0 }}
-        />
-
-        {/* Popular Badge for certain tools */}
-        {['merge-pdf', 'compress-pdf', 'word-to-pdf', 'ocr-scanner'].includes(tool.id) && (
-          <div className="absolute -top-2 -right-2">
-            <div className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 text-xs font-bold px-2 py-1 rounded-full">
-              Popular
-            </div>
-          </div>
-        )}
-
-        {/* New Badge for newer tools */}
-        {['organize-pages'].includes(tool.id) && (
-          <div className="absolute -top-2 -right-2">
-            <div className="bg-gradient-to-r from-green-400 to-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-              New
-            </div>
-          </div>
-        )}
-      </div>
-
-        {/* Glow Effect */}
-        <motion.div
-          className={`absolute inset-0 bg-gradient-to-r ${tool.color} rounded-2xl blur-xl opacity-0 group-hover:opacity-20 transition-opacity duration-300 -z-10`}
-          animate={{ opacity: isHovered ? 0.2 : 0 }}
-        />
+            className={`absolute inset-0 bg-gradient-to-br ${tool.color} rounded-xl blur-2xl opacity-0 group-hover:opacity-10 transition-opacity duration-300 -z-10`}
+            animate={{ opacity: isHovered ? 0.1 : 0 }}
+          />
+        </div>
       </motion.div>
     </Link>
   );

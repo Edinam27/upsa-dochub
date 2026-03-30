@@ -19,8 +19,8 @@ const Header = () => {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-[#001f3f]/95 backdrop-blur-md border-b border-gray-700/50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-neutral-200 shadow-sm">
+      <div className="container-max">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3 group">
@@ -41,7 +41,7 @@ const Header = () => {
               <Link
                 key={item.name}
                 href={item.href}
-                className="text-white hover:text-[#00d2d3] transition-colors font-medium"
+                className="text-neutral-700 hover:text-primary-600 transition-colors font-medium text-sm"
               >
                 {item.name}
               </Link>
@@ -54,7 +54,7 @@ const Header = () => {
           {/* Mobile Menu Button */}
           <button
             onClick={toggleMenu}
-            className="md:hidden text-white hover:text-[#00d2d3] transition-colors"
+            className="md:hidden text-neutral-700 hover:text-primary-600 transition-colors"
             aria-label="Toggle menu"
           >
             {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -69,20 +69,19 @@ const Header = () => {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden glass-effect border-t border-white/20 bg-[#001f3f]/95"
+            className="md:hidden glass border-t border-neutral-200 bg-white/95"
           >
-            <div className="px-4 py-4 space-y-4">
+            <div className="container-max px-4 py-4 space-y-4">
               {navItems.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className="block text-white hover:text-[#00d2d3] transition-colors font-medium"
+                  className="block text-neutral-700 hover:text-primary-600 transition-colors font-medium"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}
                 </Link>
               ))}
-              
             </div>
           </motion.div>
         )}

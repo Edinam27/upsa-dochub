@@ -42,7 +42,7 @@ const ToolsGrid = () => {
       description: 'Combine multiple PDF files with drag-and-drop reordering',
       icon: <Merge className="h-6 w-6" />,
       category: 'Organize PDFs',
-      color: 'from-[#001f3f] to-[#003366]',
+      color: 'from-primary-600 to-primary-500',
       features: ['Drag & Drop', 'Custom Order', 'Batch Processing']
     },
     {
@@ -51,7 +51,7 @@ const ToolsGrid = () => {
       description: 'Extract specific pages or split by page ranges',
       icon: <Split className="h-6 w-6" />,
       category: 'Organize PDFs',
-      color: 'from-[#00d2d3] to-[#00a8a8]',
+      color: 'from-accent-600 to-accent-500',
       features: ['Page Ranges', 'Single Pages', 'Custom Split']
     },
     {
@@ -60,7 +60,7 @@ const ToolsGrid = () => {
       description: 'Reduce file size with quality options',
       icon: <Zap className="h-6 w-6" />,
       category: 'Organize PDFs',
-      color: 'from-[#003366] to-[#001f3f]',
+      color: 'from-blue-600 to-blue-500',
       features: ['Quality Control', 'Size Optimization', 'Fast Processing']
     },
     {
@@ -69,7 +69,7 @@ const ToolsGrid = () => {
       description: 'Text/image watermarks with positioning options',
       icon: <Droplets className="h-6 w-6" />,
       category: 'Organize PDFs',
-      color: 'from-[#00a8a8] to-[#00d2d3]',
+      color: 'from-cyan-600 to-cyan-500',
       features: ['Text & Image', 'Custom Position', 'Transparency']
     },
 
@@ -80,7 +80,7 @@ const ToolsGrid = () => {
       description: 'Convert PDF pages to high-quality images',
       icon: <FileImage className="h-6 w-6" />,
       category: 'Conversion Tools',
-      color: 'from-[#001f3f] to-[#00d2d3]',
+      color: 'from-primary-600 to-accent-500',
       features: ['Multiple Formats', 'Custom Resolution', 'Quality Control']
     },
     {
@@ -89,7 +89,7 @@ const ToolsGrid = () => {
       description: 'Convert images to a single PDF document',
       icon: <Image className="h-6 w-6" />,
       category: 'Conversion Tools',
-      color: 'from-[#00d2d3] to-[#001f3f]',
+      color: 'from-accent-600 to-primary-500',
       features: ['Multiple Formats', 'Layout Options', 'Quality Control']
     },
     {
@@ -98,7 +98,7 @@ const ToolsGrid = () => {
       description: 'Convert PDF documents to editable Word DOCX files',
       icon: <FileText className="h-6 w-6" />,
       category: 'Conversion Tools',
-      color: 'from-[#003366] to-[#001f3f]',
+      color: 'from-blue-600 to-primary-500',
       features: ['Editable Output', 'Text Recognition', 'Format Retention']
     },
     {
@@ -107,7 +107,7 @@ const ToolsGrid = () => {
       description: 'Convert PDF tables to editable Excel spreadsheets',
       icon: <FileSpreadsheet className="h-6 w-6" />,
       category: 'Conversion Tools',
-      color: 'from-[#00a8a8] to-[#00d2d3]',
+      color: 'from-green-600 to-accent-500',
       features: ['Extract Tables', 'Maintain Structure', 'Editable Cells']
     },
     {
@@ -116,7 +116,7 @@ const ToolsGrid = () => {
       description: 'Convert PDF slides to editable PowerPoint presentations',
       icon: <Presentation className="h-6 w-6" />,
       category: 'Conversion Tools',
-      color: 'from-[#001f3f] to-[#00a8a8]',
+      color: 'from-orange-600 to-primary-500',
       features: ['Convert Slides', 'Editable Text', 'Image Preservation']
     },
     {
@@ -125,7 +125,7 @@ const ToolsGrid = () => {
       description: 'Extract text from scanned PDFs using advanced OCR',
       icon: <ScanLine className="h-6 w-6" />,
       category: 'Conversion Tools',
-      color: 'from-[#00d2d3] to-[#003366]',
+      color: 'from-accent-600 to-blue-500',
       features: ['Advanced OCR', 'Multiple Languages', 'High Accuracy']
     },
 
@@ -136,7 +136,7 @@ const ToolsGrid = () => {
       description: 'Compress images to reduce file size while maintaining quality',
       icon: <Minimize2 className="h-6 w-6" />,
       category: 'Enhancement Tools',
-      color: 'from-[#00a8a8] to-[#001f3f]',
+      color: 'from-cyan-600 to-primary-500',
       features: ['Quality Control', 'Batch Processing', 'Multiple Formats']
     },
     {
@@ -145,7 +145,7 @@ const ToolsGrid = () => {
       description: 'Add digital signatures to PDF documents',
       icon: <Edit3 className="h-6 w-6" />,
       category: 'Enhancement Tools',
-      color: 'from-[#003366] to-[#00d2d3]',
+      color: 'from-blue-600 to-accent-500',
       features: ['Digital Signature', 'Custom Position', 'Secure Signing']
     },
     {
@@ -154,7 +154,7 @@ const ToolsGrid = () => {
       description: 'Secure PDF files with password protection',
       icon: <Lock className="h-6 w-6" />,
       category: 'Enhancement Tools',
-      color: 'from-[#001f3f] to-[#003366]',
+      color: 'from-primary-600 to-blue-500',
       features: ['Strong Encryption', 'Access Control', 'Security Options']
     },
     {
@@ -163,7 +163,7 @@ const ToolsGrid = () => {
       description: 'Remove password protection from PDF files',
       icon: <Lock className="h-6 w-6" />,
       category: 'Enhancement Tools',
-      color: 'from-[#00d2d3] to-[#00a8a8]',
+      color: 'from-accent-600 to-cyan-500',
       features: ['Password Removal', 'Unlock Restrictions', 'Restore Access']
     },
     {
@@ -172,7 +172,7 @@ const ToolsGrid = () => {
       description: 'Extract specific pages from PDF documents',
       icon: <RotateCcw className="h-6 w-6" />,
       category: 'Enhancement Tools',
-      color: 'from-[#001f3f] to-[#00d2d3]',
+      color: 'from-primary-600 to-accent-500',
       features: ['Select Pages', 'Page Ranges', 'Multiple Selections']
     },
     
@@ -183,7 +183,7 @@ const ToolsGrid = () => {
       description: 'Add a secure, trackable signature with QR code verification',
       icon: <QrCode className="h-6 w-6" />,
       category: 'Verification Tools',
-      color: 'from-[#00d2d3] to-[#001f3f]',
+      color: 'from-accent-600 to-primary-500',
       isLocked: true,
       features: ['QR Verification', 'Blockchain-like', 'Tamper-proof', 'Identity Check']
     },
@@ -193,7 +193,7 @@ const ToolsGrid = () => {
       description: 'Verify the authenticity of a signed document via QR code',
       icon: <CheckCircle className="h-6 w-6" />,
       category: 'Verification Tools',
-      color: 'from-[#00a8a8] to-[#003366]',
+      color: 'from-green-600 to-accent-500',
       isLocked: true,
       features: ['Instant Scanning', 'Database Check', 'Signer Identity', 'Timestamp']
     }
@@ -232,13 +232,17 @@ const ToolsGrid = () => {
   };
 
   return (
-    <section id="tools" className="py-20 relative bg-[#001f3f]">
-      {/* Background */}
-      <div className="absolute inset-0 bg-white/5">
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#003366]/20 to-transparent"></div>
+    <section id="tools" className="py-20 relative bg-gradient-to-b from-neutral-50 to-white">
+      {/* Background Decoration */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <motion.div
+          animate={{ opacity: [0.3, 0.6, 0.3] }}
+          transition={{ duration: 8, repeat: Infinity }}
+          className="absolute top-1/4 right-0 w-96 h-96 bg-primary-100/20 rounded-full blur-3xl"
+        />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative z-10 container-max">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -246,23 +250,22 @@ const ToolsGrid = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Complete <span className="gradient-text">PDF Toolkit</span>
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">
+            <span className="gradient-text">Complete PDF Toolkit</span>
           </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
-            Everything you need to manage your documents. 
-            From basic operations to advanced processing, all tools are designed for you.
+          <p className="text-xl text-neutral-600 max-w-3xl mx-auto mb-8">
+            Everything you need to manage your documents. From basic operations to advanced processing, all tools are designed for you.
           </p>
-          <div className="flex flex-wrap justify-center gap-4">
-            <div className="bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20">
-              <span className="text-white font-medium">✨ No Registration Required</span>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20">
-              <span className="text-white font-medium">🔒 100% Secure & Private</span>
-            </div>
-            <div className="bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 border border-white/20">
-              <span className="text-white font-medium">⚡ Lightning Fast</span>
-            </div>
+          <div className="flex flex-wrap justify-center gap-3">
+            {['✨ No Registration', '🔒 100% Secure', '⚡ Lightning Fast'].map((badge, idx) => (
+              <motion.div
+                key={idx}
+                whileHover={{ scale: 1.05 }}
+                className="badge badge-primary"
+              >
+                {badge}
+              </motion.div>
+            ))}
           </div>
         </motion.div>
 
@@ -271,19 +274,19 @@ const ToolsGrid = () => {
             key={category}
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: categoryIndex * 0.2 }}
+            transition={{ duration: 0.8, delay: categoryIndex * 0.1 }}
             viewport={{ once: true }}
-            className="mb-16"
+            className="mb-20"
           >
-            <div className="text-center mb-8">
+            <div className="text-center mb-12">
               <div className="flex items-center justify-center mb-4">
                 <span className="text-4xl mr-3">{getCategoryIcon(category)}</span>
-                <h3 className="text-3xl font-bold text-white">{category}</h3>
+                <h3 className="text-3xl font-bold text-neutral-900">{category}</h3>
               </div>
-              <p className="text-gray-300 text-lg">{getCategoryDescription(category)}</p>
+              <p className="text-lg text-neutral-600">{getCategoryDescription(category)}</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid-auto-4">
               {tools
                 .filter(tool => tool.category === category)
                 .map((tool, index) => (
@@ -308,18 +311,24 @@ const ToolsGrid = () => {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="text-center mt-16"
+          className="mt-20"
         >
-          <div className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
-            <h3 className="text-2xl font-bold text-white mb-4">
-              Ready to streamline your academic workflow?
-            </h3>
-            <p className="text-gray-300 mb-6">
-              Choose any tool above to get started. No downloads, no registration - just instant PDF processing.
-            </p>
-            <button className="bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-gray-900 font-bold py-3 px-8 rounded-full transition-all duration-300 hover:shadow-xl hover:scale-105">
-              Start Processing Documents
-            </button>
+          <div className="card p-8 md:p-12 bg-gradient-to-r from-primary-50 to-accent-50 border-primary-200">
+            <div className="text-center space-y-6">
+              <h3 className="text-3xl font-bold text-neutral-900">
+                Ready to streamline your workflow?
+              </h3>
+              <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
+                Choose any tool above to get started. No downloads, no registration - just instant PDF processing.
+              </p>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="btn btn-primary btn-lg"
+              >
+                Start Processing Documents
+              </motion.button>
+            </div>
           </div>
         </motion.div>
       </div>

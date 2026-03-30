@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { Shield, Clock, Heart } from 'lucide-react';
+import { Shield, Zap, Heart, Github, Twitter, Linkedin } from 'lucide-react';
 import GoogleRating from '@/components/ui/GoogleRating';
 
 const Footer = () => {
@@ -18,13 +18,20 @@ const Footer = () => {
     { name: 'Contact Support', href: '/contact-support' },
   ];
 
+  const socialLinks = [
+    { icon: Github, href: '#', label: 'GitHub' },
+    { icon: Twitter, href: '#', label: 'Twitter' },
+    { icon: Linkedin, href: '#', label: 'LinkedIn' },
+  ];
+
   return (
-    <footer className="bg-[#001f3f] text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+    <footer className="bg-gradient-to-b from-neutral-50 to-neutral-100 border-t border-neutral-200">
+      <div className="container-max py-16">
+        {/* Main Footer Content */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           {/* Brand Section */}
-          <div className="lg:col-span-1">
-            <Link href="/" className="flex items-center space-x-3 mb-4">
+          <div className="lg:col-span-1 space-y-4">
+            <Link href="/" className="inline-block">
               <div className="relative w-40 h-10">
                 <Image 
                   src="/logo.png" 
@@ -34,21 +41,21 @@ const Footer = () => {
                 />
               </div>
             </Link>
-            <p className="text-gray-400 text-sm mb-4">
+            <p className="text-neutral-600 text-sm leading-relaxed">
               Process documents securely and efficiently with fast, professional PDF tools built for everyone.
             </p>
-            <div className="flex items-center space-x-4 text-sm text-gray-400">
+            <div className="flex items-center space-x-4 text-sm text-neutral-600 pt-2">
               <div className="flex items-center space-x-1">
-                <Shield className="h-4 w-4" />
+                <Shield className="h-4 w-4 text-primary-600" />
                 <span>Secure</span>
               </div>
               <div className="flex items-center space-x-1">
-                <Clock className="h-4 w-4" />
+                <Zap className="h-4 w-4 text-primary-600" />
                 <span>Fast</span>
               </div>
             </div>
             
-            <div className="mt-6">
+            <div className="pt-4">
               <a 
                 href="https://g.page/r/YOUR_GOOGLE_REVIEW_LINK" 
                 target="_blank" 
@@ -60,18 +67,15 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Empty column for layout balance */}
-          <div />
-
           {/* Tool Categories */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-[#00d2d3]">PDF Tools</h3>
-            <ul className="space-y-2">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-900 mb-6">PDF Tools</h3>
+            <ul className="space-y-3">
               {toolCategories.map((category) => (
                 <li key={category.name}>
                   <Link
                     href={category.href}
-                    className="text-gray-400 hover:text-[#00d2d3] transition-colors"
+                    className="text-neutral-600 hover:text-primary-600 transition-colors text-sm font-medium"
                   >
                     {category.name}
                   </Link>
@@ -82,13 +86,13 @@ const Footer = () => {
 
           {/* Support Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-[#00d2d3]">Support</h3>
-            <ul className="space-y-2">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-900 mb-6">Support</h3>
+            <ul className="space-y-3">
               {supportLinks.map((link) => (
                 <li key={link.name}>
                   <Link
                     href={link.href}
-                    className="text-gray-400 hover:text-[#00d2d3] transition-colors"
+                    className="text-neutral-600 hover:text-primary-600 transition-colors text-sm font-medium"
                   >
                     {link.name}
                   </Link>
@@ -96,22 +100,47 @@ const Footer = () => {
               ))}
             </ul>
           </div>
+
+          {/* Newsletter / Social */}
+          <div>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-900 mb-6">Connect</h3>
+            <div className="space-y-4">
+              <p className="text-neutral-600 text-sm">
+                Stay updated with the latest PDF tools and features.
+              </p>
+              <div className="flex items-center space-x-3">
+                {socialLinks.map((social) => (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    aria-label={social.label}
+                    className="p-2 rounded-lg bg-neutral-200 text-neutral-700 hover:bg-primary-600 hover:text-white transition-all duration-300"
+                  >
+                    <social.icon className="h-5 w-5" />
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
 
+        {/* Divider */}
+        <div className="border-t border-neutral-200 my-8"></div>
+
         {/* Bottom Section */}
-        <div className="border-t border-gray-800 mt-8 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center space-x-2 text-gray-400 text-sm">
-              <span>Made for everyone</span>
-            </div>
-            <div className="flex items-center space-x-6 mt-4 md:mt-0">
-              <p className="text-gray-400 text-sm">
-                    © {new Date().getFullYear()} JoedyTools. All rights reserved.
-              </p>
-              <div className="flex items-center space-x-1 text-xs text-gray-500">
-                <Shield className="h-3 w-3" />
-                <span>Files processed locally</span>
-              </div>
+        <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+          <div className="flex items-center space-x-2 text-neutral-600 text-sm">
+            <Heart className="h-4 w-4 text-red-500" />
+            <span>Made with care for everyone</span>
+          </div>
+          
+          <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
+            <p className="text-neutral-600 text-sm">
+              © {new Date().getFullYear()} JoedyTools. All rights reserved.
+            </p>
+            <div className="flex items-center space-x-1 text-xs text-neutral-500 bg-neutral-100 px-3 py-1 rounded-full">
+              <Shield className="h-3 w-3" />
+              <span>Files processed locally</span>
             </div>
           </div>
         </div>
