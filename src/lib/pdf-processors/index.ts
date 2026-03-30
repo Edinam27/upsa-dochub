@@ -514,21 +514,21 @@ abstract class PDFProcessor {
   }
 
   protected mapFont(fontName: string): string {
-      if (!fontName) return 'Calibri';
-      const lower = fontName.toLowerCase();
-      
-      if (lower.includes('times')) return 'Times New Roman';
-      if (lower.includes('courier')) return 'Courier New';
-      if (lower.includes('arial') || lower.includes('helvetica')) return 'Arial';
-      if (lower.includes('verdana')) return 'Verdana';
-      if (lower.includes('tahoma')) return 'Tahoma';
-      if (lower.includes('trebuchet')) return 'Trebuchet MS';
-      if (lower.includes('georgia')) return 'Georgia';
-      if (lower.includes('garamond')) return 'Garamond';
-      if (lower.includes('comic')) return 'Comic Sans MS';
-      
-      return 'Calibri';
-  }
+        if (!fontName) return 'Calibri';
+        const lower = fontName.toLowerCase();
+
+        if (lower.includes('times') || lower === 'serif') return 'Times New Roman';
+        if (lower.includes('courier') || lower === 'monospace') return 'Courier New';
+        if (lower.includes('arial') || lower.includes('helvetica') || lower === 'sans-serif' || lower === 'sans') return 'Arial';
+        if (lower.includes('verdana')) return 'Verdana';
+        if (lower.includes('tahoma')) return 'Tahoma';
+        if (lower.includes('trebuchet')) return 'Trebuchet MS';
+        if (lower.includes('georgia')) return 'Georgia';
+        if (lower.includes('garamond')) return 'Garamond';
+        if (lower.includes('comic')) return 'Comic Sans MS';
+
+        return 'Calibri';
+    }
 
   protected isBold(fontName: string): boolean {
       if (!fontName) return false;
@@ -2000,7 +2000,7 @@ class PDFToWordConverter extends PDFProcessor {
 
       for (const pageNum of pagesToConvert) {
         const page = await pdf.getPage(pageNum);
-        const viewport = page.getViewport({ scale: 1.5 }); // Higher scale for better precision
+        const viewport = page.getViewport({ scale: 1.0 }); // Use 1.0 scale for accurate point-to-twip mapping
         const { width: pageWidth, height: pageHeight } = viewport;
         
         // 1. Extract Items (Text and Images)
@@ -2024,20 +2024,22 @@ class PDFToWordConverter extends PDFProcessor {
                     const tx = item.transform;
                     // Transform to viewport coordinates
                     // pdf.js transform: [scaleX, skewY, skewX, scaleY, tx, ty]
-                    // We need to apply viewport scaling
-                    const x = tx[4] * 1.5; // Apply scale factor
-                    const y = tx[5] * 1.5;
+                    const x = tx[4];
+                    const y = tx[5];
                     const docY = pageHeight - y; // Word uses Top-Left origin
                     
+                    const style = textContent.styles[item.fontName];
+                    const fontFamily = style ? style.fontFamily : item.fontName;
+
                     return {
                         type: 'text',
                         text: item.str,
                         x: x,
                         y: docY, // Use Word Y (from top)
-                        width: item.width * 1.5,
-                        height: item.height * 1.5,
-                        fontName: item.fontName,
-                        fontSize: Math.sqrt(tx[0]*tx[0] + tx[1]*tx[1]) * 1.5, // Approx font size
+                        width: item.width,
+                        height: item.height,
+                        fontName: fontFamily,
+                        fontSize: Math.sqrt(tx[0]*tx[0] + tx[1]*tx[1]), // Exact point size
                         hasEOL: item.hasEOL
                     };
                 }).filter((item: any) => item.text.trim().length > 0);
@@ -2045,16 +2047,17 @@ class PDFToWordConverter extends PDFProcessor {
         }
         
         if (useOCR) {
-            // Render to canvas for OCR
+            // Render to canvas for OCR (Use higher scale for better OCR accuracy)
+            const ocrViewport = page.getViewport({ scale: 2.0 });
             const canvas = document.createElement('canvas');
-            canvas.width = pageWidth;
-            canvas.height = pageHeight;
+            canvas.width = ocrViewport.width;
+            canvas.height = ocrViewport.height;
             const context = canvas.getContext('2d');
             
             if (context) {
                 await page.render({
                     canvasContext: context,
-                    viewport: viewport
+                    viewport: ocrViewport
                 }).promise;
                 
                 const imageDataUrl = canvas.toDataURL('image/png');
@@ -2065,17 +2068,21 @@ class PDFToWordConverter extends PDFProcessor {
                 );
                 
                 // Map OCR words to items
-                const ocrItems = result.data.words.map((word: any) => ({
-                    type: 'text',
-                    text: word.text,
-                    x: word.bbox.x0,
-                    y: word.bbox.y0,
-                    width: word.bbox.x1 - word.bbox.x0,
-                    height: word.bbox.y1 - word.bbox.y0,
-                    fontName: 'OCR',
-                    fontSize: word.bbox.y1 - word.bbox.y0, // Height as proxy for font size
-                    confidence: word.confidence
-                }));
+                const ocrItems = result.data.words.map((word: any) => {
+                    // Convert back from OCR scale (2.0) to 1.0 scale
+                    const scaleFactor = 2.0;
+                    return {
+                        type: 'text',
+                        text: word.text,
+                        x: word.bbox.x0 / scaleFactor,
+                        y: word.bbox.y0 / scaleFactor,
+                        width: (word.bbox.x1 - word.bbox.x0) / scaleFactor,
+                        height: (word.bbox.y1 - word.bbox.y0) / scaleFactor,
+                        fontName: 'OCR',
+                        fontSize: (word.bbox.y1 - word.bbox.y0) / scaleFactor, // Height as proxy for font size
+                        confidence: word.confidence
+                    };
+                });
                 
                 pageItems = [...pageItems, ...ocrItems];
             }
@@ -2114,8 +2121,8 @@ class PDFToWordConverter extends PDFProcessor {
                         const imgName = args[0];
                         const imgData = await (objs.get(imgName) || commonObjs.get(imgName));
                         if (imgData) {
-                            // Apply current transform + viewport scale
-                            const scale = 1.5;
+                            // Apply current transform + viewport scale (1.0)
+                            const scale = 1.0;
                             const x = currentMatrix[4] * scale;
                             const y = currentMatrix[5] * scale;
                             const w = Math.sqrt(currentMatrix[0] * currentMatrix[0] + currentMatrix[1] * currentMatrix[1]) * scale;
@@ -2154,34 +2161,65 @@ class PDFToWordConverter extends PDFProcessor {
         const footerItems = pageItems.filter(item => item.y > footerThreshold);
         const bodyItems = pageItems.filter(item => item.y >= headerThreshold && item.y <= footerThreshold);
         
+        // Calculate dynamic margins based on bodyItems to preserve exact layout
+        // Default to 1 inch (1440 twips) if empty
+        let leftMarginTwips = 1440;
+        let rightMarginTwips = 1440;
+        let topMarginTwips = 1440;
+        let bottomMarginTwips = 1440;
+        
+        if (bodyItems.length > 0) {
+            const minX = Math.min(...bodyItems.map(i => i.x));
+            const maxX = Math.max(...bodyItems.map(i => i.x + i.width));
+            const minY = Math.min(...bodyItems.map(i => i.y));
+            const maxY = Math.max(...bodyItems.map(i => i.y + i.height));
+            
+            // Convert points to twips (1 point = 20 twips)
+            // We cap margins to prevent them from becoming too small or negative
+            leftMarginTwips = Math.max(360, Math.round(minX * 20));
+            rightMarginTwips = Math.max(360, Math.round((pageWidth - maxX) * 20));
+            
+            // Top and bottom margins might be dictated by header/footer
+            topMarginTwips = Math.max(360, Math.round(minY * 20));
+            bottomMarginTwips = Math.max(360, Math.round((pageHeight - maxY) * 20));
+        }
+
         // Generate content for each section using the same structure logic
         const headerChildren = this.generateSectionContent(
             headerItems, 
             Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, BorderStyle,
             VerticalMergeType, WidthType,
-            conversionOptions
+            { ...conversionOptions, leftMarginTwips }
         );
         
         const footerChildren = this.generateSectionContent(
             footerItems, 
             Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, BorderStyle,
             VerticalMergeType, WidthType,
-            conversionOptions
+            { ...conversionOptions, leftMarginTwips }
         );
         
         const bodyChildren = this.generateSectionContent(
             bodyItems, 
             Paragraph, TextRun, ImageRun, Table, TableRow, TableCell, BorderStyle,
             VerticalMergeType, WidthType,
-            conversionOptions
+            { ...conversionOptions, leftMarginTwips }
         );
         
         // Add Page Section
         sections.push({
             properties: {
                 page: {
-                    margin: { top: 720, right: 720, bottom: 720, left: 720 }, // 0.5 inch
-                    size: { width: pageWidth * 15, height: pageHeight * 15 }
+                    margin: { 
+                        top: topMarginTwips, 
+                        right: rightMarginTwips, 
+                        bottom: bottomMarginTwips, 
+                        left: leftMarginTwips 
+                    },
+                    size: { 
+                        width: Math.round(pageWidth * 20), 
+                        height: Math.round(pageHeight * 20) 
+                    }
                 }
             },
             headers: {
@@ -2417,7 +2455,7 @@ class PDFToWordConverter extends PDFProcessor {
                     } else {
                         paragraphChildren.push(new TextRun({ 
                             text: item.text + " ", 
-                            size: options?.maintainFormatting !== false ? Math.round(item.fontSize || 24) : 24,
+                            size: options?.maintainFormatting !== false ? Math.round((item.fontSize || 12) * 2) : 24,
                             font: options?.maintainFormatting !== false && item.fontName ? this.mapFont(item.fontName) : 'Calibri',
                             bold: options?.maintainFormatting !== false && item.fontName ? this.isBold(item.fontName) : false,
                             italics: options?.maintainFormatting !== false && item.fontName ? this.isItalic(item.fontName) : false
@@ -2496,7 +2534,13 @@ class PDFToWordConverter extends PDFProcessor {
               }
               const firstItemOverall = line.items[0];
               if (firstItemOverall && preserveLayout && !bullet) {
-                  indent = Math.round(firstItemOverall.x * 10);
+                  // Calculate absolute position in twips
+                  const absoluteTwips = firstItemOverall.x * 20;
+                  // Subtract the document's left margin to get relative indent
+                  const relativeIndent = absoluteTwips - (options?.leftMarginTwips || 0);
+                  if (relativeIndent > 100) { // Small tolerance
+                      indent = Math.round(relativeIndent);
+                  }
               }
           } else {
               // Add a space between lines to ensure text flows naturally in Word
