@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Clock, ExternalLink } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock, ExternalLink, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 
 const ContactSection = () => {

@@ -30,6 +30,7 @@ interface FileUploadProps {
   onFilesAdded?: (files: FileInfo[]) => void;
   disabled?: boolean;
   showPreview?: boolean;
+  label?: string;
 }
 
 export default function FileUpload({
@@ -39,7 +40,8 @@ export default function FileUpload({
   className,
   onFilesAdded,
   disabled = false,
-  showPreview = true
+  showPreview = true,
+  label
 }: FileUploadProps) {
   const {
     files,
@@ -135,6 +137,11 @@ export default function FileUpload({
 
   return (
     <div className={cn('w-full space-y-4', className)}>
+      {label && (
+        <label className="block text-sm font-medium text-neutral-700 mb-2">
+          {label}
+        </label>
+      )}
       {/* Upload Area */}
       <div
         {...getRootProps()}

@@ -101,10 +101,9 @@ export default function OCRScannerTool({ onProcess, isProcessing }: OCRScannerTo
       
       if (context) {
         await page.render({
-          canvasContext: context,
-          viewport: viewport,
-          canvas: canvas
-        }).promise;
+            canvasContext: context,
+            viewport: viewport
+          }).promise;
         
         let imageDataUrl = canvas.toDataURL('image/png');
         

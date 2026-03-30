@@ -111,7 +111,7 @@ export default function ToolPage() {
     incrementToolUsage(toolId);
   }, [toolId, incrementToolUsage]);
   
-  const handleStartProcessing = async (files: File[], options?: any) => {
+  const handleStartProcessing = async (files: File[], options: any = {}): Promise<any> => {
     setIsProcessing(true);
     try {
       const processor = createPDFProcessor(toolId, options);

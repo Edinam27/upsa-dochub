@@ -273,9 +273,10 @@ export const TOOLS: Record<string, Tool & ToolConfig> = {
     ],
     acceptedTypes: ['.pdf', 'application/pdf'],
     maxFileSize: 100 * 1024 * 1024,
-    maxFiles: 10,
-    supportsBatch: true,
-    options: {
+      maxFiles: 10,
+      supportsBatch: true,
+      isLocked: true,
+      options: {
       quality: 'high'
     }
   },
@@ -434,27 +435,6 @@ export const TOOLS: Record<string, Tool & ToolConfig> = {
       'Certificate check',
       'Integrity verification',
       'Tamper detection'
-    ],
-    acceptedTypes: ['.pdf', 'application/pdf'],
-    maxFileSize: 50 * 1024 * 1024,
-    maxFiles: 1,
-    supportsBatch: false,
-    isLocked: true,
-    options: {}
-  },
-
-  'verify-document': {
-    id: 'verify-document',
-    name: 'Verify Document',
-    description: 'Check document authenticity and metadata',
-    icon: <Shield className="w-6 h-6" />,
-    category: 'Verification Tools',
-    color: 'from-violet-500 to-purple-600',
-    features: [
-      'Authenticity check',
-      'Metadata analysis',
-      'Origin verification',
-      'Security audit'
     ],
     acceptedTypes: ['.pdf', 'application/pdf'],
     maxFileSize: 50 * 1024 * 1024,

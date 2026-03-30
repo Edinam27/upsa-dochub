@@ -21,7 +21,11 @@ export interface ProcessingOptions {
   watermarkText?: string;
   watermarkPosition?: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right' | 'center';
   pageRange?: string;
-  outputFormat?: 'pdf' | 'docx' | 'txt' | 'jpg' | 'png';
+  outputFormat?: 'pdf' | 'docx' | 'txt' | 'jpg' | 'png' | 'xlsx' | 'pptx';
+  language?: string;
+  extractImages?: boolean;
+  scale?: number;
+  dpi?: number;
   fileType?: string;
   imageFiles?: Array<{ data: Uint8Array; type: string }>;
   compressionLevel?: 'low' | 'medium' | 'high';

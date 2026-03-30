@@ -196,10 +196,9 @@ const PDFToImagesTool: React.FC<PDFToImagesToolProps> = ({ onProcess, isProcessi
         
         // Render page to canvas
         await page.render({
-          canvasContext: context,
-          viewport: viewport,
-          canvas: canvas
-        }).promise;
+            canvasContext: context,
+            viewport: viewport
+          }).promise;
         
         // Convert canvas to blob
         const mimeType = settings.outputFormat === 'jpg' ? 'image/jpeg' : `image/${settings.outputFormat}`;

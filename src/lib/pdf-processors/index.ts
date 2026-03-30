@@ -20,8 +20,19 @@ abstract class PDFProcessor {
   }
 
   abstract process(file: File): Promise<ProcessedFile | ProcessedFile[]>;
-  
-  protected async loadPDF(file: File): Promise<PDFDocument> {
+
+    protected parseColor(hex: string) {
+      hex = hex.replace(/^#/, '');
+      if (hex.length === 3) {
+        hex = hex.split('').map(c => c + c).join('');
+      }
+      const r = parseInt(hex.substring(0, 2), 16) / 255;
+      const g = parseInt(hex.substring(2, 4), 16) / 255;
+      const b = parseInt(hex.substring(4, 6), 16) / 255;
+      return rgb(r, g, b);
+    }
+
+    protected async loadPDF(file: File): Promise<PDFDocument> {
     try {
       const arrayBuffer = await file.arrayBuffer();
       return await PDFDocument.load(arrayBuffer);
@@ -583,8 +594,8 @@ class PDFMerger {
 }
 
 // PDF Splitter
-class PDFSplitter extends PDFProcessor {
-  private getOutputFilename(originalName: string, suffix: string): string {
+  class PDFSplitter extends PDFProcessor {
+    protected getOutputFilename(originalName: string, suffix: string): string {
     const nameWithoutExt = originalName.replace(/\.[^/.]+$/, '');
     return `${nameWithoutExt}_${suffix}.pdf`;
   }
@@ -1850,7 +1861,7 @@ class PDFWatermark extends PDFProcessor {
                 rotate: degrees(this.rotation)
             });
         } else if (this.watermarkText && embeddedFont) {
-            const rgbColor = this.parseColor(this.color);
+            const rgbColor = this.parseColor(this.options.color || '#000000');
             page.drawText(this.watermarkText, {
               x,
               y,
@@ -1910,11 +1921,19 @@ class PDFPasswordProtector extends PDFProcessor {
          );
       }
 
+      // PDF-lib v1.x does not support encryption natively.
+      // A server-side or alternative solution is required.
+      throw errorUtils.createError(
+        'PROCESSING_FAILED',
+        'PDF encryption is not supported in the current environment.'
+      );
+      /*
       await pdf.encrypt({
         userPassword: this.userPassword || '',
         ownerPassword: this.ownerPassword || '',
         permissions: this.permissions,
       });
+      */
       
       const filename = this.getOutputFilename(file.name, 'protected');
       return [await this.savePDF(pdf, filename)];
@@ -2091,7 +2110,7 @@ class PDFToWordConverter extends PDFProcessor {
                             m1[4] * m2[0] + m1[5] * m2[2] + m2[4],
                             m1[4] * m2[1] + m1[5] * m2[3] + m2[5]
                         ];
-                    } else if (fn === pdfjsLib.OPS.paintImageXObject || fn === pdfjsLib.OPS.paintJpegXObject) {
+                    } else if (fn === pdfjsLib.OPS.paintImageXObject || fn === (pdfjsLib.OPS as any).paintJpegXObject || fn === (pdfjsLib.OPS as any).paintXObject) {
                         const imgName = args[0];
                         const imgData = await (objs.get(imgName) || commonObjs.get(imgName));
                         if (imgData) {
@@ -2548,19 +2567,10 @@ class PDFSignatureProcessor extends PDFProcessor {
         error
       );
     }
+    }
   }
 
-  private parseColor(colorString: string) {
-    // Convert hex color to RGB values for pdf-lib
-    const hex = colorString.replace('#', '');
-    const r = parseInt(hex.substr(0, 2), 16) / 255;
-    const g = parseInt(hex.substr(2, 2), 16) / 255;
-    const b = parseInt(hex.substr(4, 2), 16) / 255;
-    return rgb(r, g, b);
-  }
-}
-
-class PDFToImagesConverter extends PDFProcessor {
+  class PDFToImagesConverter extends PDFProcessor {
   async process(file: File): Promise<ProcessedFile[]> {
     try {
       // Import PDF.js dynamically via react-pdf
@@ -2641,7 +2651,7 @@ class PDFToImagesConverter extends PDFProcessor {
           await page.render({
             canvasContext: context,
             viewport: viewport,
-            canvas: canvas
+            
           }).promise;
           
           // Convert canvas to blob
@@ -2821,7 +2831,7 @@ class PDFRotateProcessor extends PDFProcessor {
     }
   }
 
-  private getOutputFilename(originalName: string, suffix: string): string {
+  protected getOutputFilename(originalName: string, suffix: string): string {
     const nameWithoutExt = originalName.replace(/\.[^/.]+$/, '');
     return `${nameWithoutExt}_${suffix}.pdf`;
   }
@@ -2938,7 +2948,7 @@ class PDFUnlockProcessor extends PDFProcessor {
       try {
         // Try loading with password if provided
         if (this.password) {
-          pdf = await PDFDocument.load(arrayBuffer, { password: this.password });
+          pdf = await PDFDocument.load(arrayBuffer, { password: this.password } as any);
         } else {
           pdf = await PDFDocument.load(arrayBuffer);
         }
@@ -2965,7 +2975,7 @@ class PDFUnlockProcessor extends PDFProcessor {
     }
   }
 
-  private getOutputFilename(originalName: string, suffix: string): string {
+  protected getOutputFilename(originalName: string, suffix: string): string {
     const nameWithoutExt = originalName.replace(/\.[^/.]+$/, '');
     return `${nameWithoutExt}_${suffix}.pdf`;
   }
@@ -3045,7 +3055,7 @@ class RepairPDFProcessor extends PDFProcessor {
     }
   }
 
-  private getOutputFilename(originalName: string, suffix: string): string {
+  protected getOutputFilename(originalName: string, suffix: string): string {
     const nameWithoutExt = originalName.replace(/\.[^/.]+$/, '');
     return `${nameWithoutExt}_${suffix}.pdf`;
   }
@@ -3288,7 +3298,7 @@ class PDFToPPTConverter extends PDFProcessor {
                             m1[4] * m2[0] + m1[5] * m2[2] + m2[4],
                             m1[4] * m2[1] + m1[5] * m2[3] + m2[5]
                         ];
-                    } else if (fn === pdfjs.OPS.paintImageXObject || fn === pdfjs.OPS.paintJpegXObject) {
+                    } else if (fn === pdfjs.OPS.paintImageXObject || fn === (pdfjs.OPS as any).paintJpegXObject || fn === (pdfjs.OPS as any).paintXObject) {
                         const imgName = args[0];
                         const imgData = await (objs.get(imgName) || commonObjs.get(imgName));
                         if (imgData) {
@@ -3368,7 +3378,7 @@ class PDFToPPTConverter extends PDFProcessor {
         }
       }
       
-      const blob = await pptx.write('blob') as Blob;
+      const blob = await pptx.write({ outputType: 'blob' }) as Blob;
       const filename = this.getOutputFilename(file.name, 'converted').replace(/\.pdf$/, '.pptx');
       
       return {
@@ -3477,7 +3487,7 @@ export {
 export function createPDFProcessor(
   type: string,
   options: ProcessingOptions = {}
-): PDFProcessor | PDFMerger | PDFSplitter | ImageToPDFProcessor | null {
+): any {
   if (!type) {
     return null;
   }

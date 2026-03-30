@@ -56,7 +56,7 @@ function CompressPDFContent() {
         if (!processor) throw new Error('Failed to create PDF processor');
 
         // The processor handles the heavy lifting (including rasterization if requested)
-        const results = await processor.process(stored.file);
+        const results = await (processor as any).process(stored.file);
         const result = Array.isArray(results) ? results[0] : results;
         
         if (!result || !result.blob) {

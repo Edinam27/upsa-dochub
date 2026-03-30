@@ -24,7 +24,7 @@ interface FileUploadState {
   setUploadConfig: (config: { maxFiles?: number; maxFileSize?: number; acceptedTypes?: string[] }) => void;
 }
 
-export const useFileUploadStore = create<FileUploadState>(
+export const useFileUploadStore = create<FileUploadState>()(
   devtools(
     (set, get) => ({
       files: [],
@@ -170,7 +170,7 @@ interface ProcessingStore extends ProcessingState {
   resetProcessing: () => void;
 }
 
-export const useProcessingStore = create<ProcessingStore>(
+export const useProcessingStore = create<ProcessingStore>()(
   devtools(
     (set) => ({
       isProcessing: false,
@@ -251,7 +251,7 @@ const defaultPreferences: UserPreferences = {
   favoriteTools: []
 };
 
-export const useUserPreferencesStore = create<UserPreferencesStore>(
+export const useUserPreferencesStore = create<UserPreferencesStore>()(
   devtools(
     persist(
       (set, get) => ({
@@ -335,7 +335,7 @@ const defaultStats: UsageStats = {
   userSatisfaction: 0
 };
 
-export const useUsageStatsStore = create<UsageStatsStore>(
+export const useUsageStatsStore = create<UsageStatsStore>()(
   devtools(
     persist(
       (set, get) => ({
@@ -425,7 +425,7 @@ interface AppState {
   clearNotifications: () => void;
 }
 
-export const useAppStore = create<AppState>(
+export const useAppStore = create<AppState>()(
   devtools(
     (set, get) => ({
       isLoading: false,

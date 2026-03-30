@@ -74,8 +74,7 @@ const VerifiedSignatureTool: React.FC<VerifiedSignatureToolProps> = () => {
       if (context) {
         await page.render({
           canvasContext: context,
-          viewport: viewport,
-          canvas
+          viewport: viewport
         }).promise;
         setPreviewUrl(canvas.toDataURL());
         setPdfDimensions({ width: viewport.width, height: viewport.height });
@@ -218,7 +217,7 @@ const VerifiedSignatureTool: React.FC<VerifiedSignatureToolProps> = () => {
 
       // Save PDF
       const modifiedPdfBytes = await pdfDoc.save();
-      const blob = new Blob([modifiedPdfBytes], { type: 'application/pdf' });
+      const blob = new Blob([modifiedPdfBytes.buffer as ArrayBuffer], { type: 'application/pdf' });
       const url = URL.createObjectURL(blob);
       
       // Download
