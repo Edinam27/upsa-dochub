@@ -58,10 +58,10 @@ const StatItem = ({ icon, value, label, delay }: StatItemProps) => {
             {icon}
           </div>
         </div>
-        <div className="text-3xl md:text-4xl font-bold text-white mb-2">
+        <div className="text-3xl md:text-4xl font-mono font-bold text-white mb-2">
           {formatValue(count)}
         </div>
-        <div className="text-gray-300 font-medium">
+        <div className="text-gray-300 font-mono font-medium">
           {label}
         </div>
       </div>
@@ -116,10 +116,10 @@ const StatsSection = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Trusted by <span className="gradient-text">Users Worldwide</span>
+          <h2 className="text-4xl md:text-5xl font-mono font-bold text-white mb-6">
+            Trusted by <span className="text-joedy-cyan">Users Worldwide</span>
           </h2>
-          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-300 font-mono max-w-3xl mx-auto">
             Join thousands of users who rely on JoedyTools for their document processing needs. 
             Fast, secure, and designed for everyone.
           </p>
@@ -146,29 +146,29 @@ const StatsSection = () => {
           className="mt-16 text-center"
         >
           <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/10">
-            <h3 className="text-2xl font-bold text-white mb-4">
+            <h3 className="text-2xl font-mono font-bold text-white mb-4">
               Why Users Choose JoedyTools
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-gray-300">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 font-mono text-gray-300">
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 bg-gradient-to-r from-[#00d2d3] to-[#00a8a8] rounded-full flex items-center justify-center mb-3">
                   <span className="text-[#001f3f] font-bold text-lg">✓</span>
                 </div>
-                <h4 className="font-semibold text-white mb-2">No Registration Required</h4>
+                <h4 className="font-semibold font-mono text-white mb-2">No Registration Required</h4>
                 <p className="text-sm">Start using tools immediately without creating accounts</p>
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 bg-gradient-to-r from-[#00d2d3] to-[#00a8a8] rounded-full flex items-center justify-center mb-3">
                   <span className="text-[#001f3f] font-bold text-lg">⚡</span>
                 </div>
-                <h4 className="font-semibold text-white mb-2">Lightning Fast Processing</h4>
+                <h4 className="font-semibold font-mono text-white mb-2">Lightning Fast Processing</h4>
                 <p className="text-sm">Process documents in seconds, not minutes</p>
               </div>
               <div className="flex flex-col items-center">
                 <div className="w-12 h-12 bg-gradient-to-r from-[#00d2d3] to-[#00a8a8] rounded-full flex items-center justify-center mb-3">
                   <span className="text-[#001f3f] font-bold text-lg">🔒</span>
                 </div>
-                <h4 className="font-semibold text-white mb-2">Complete Privacy</h4>
+                <h4 className="font-semibold font-mono text-white mb-2">Complete Privacy</h4>
                 <p className="text-sm">Files processed locally and automatically deleted</p>
               </div>
             </div>

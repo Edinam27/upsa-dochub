@@ -41,16 +41,16 @@ const Footer = () => {
                 />
               </div>
             </Link>
-            <p className="text-neutral-600 text-sm leading-relaxed">
+            <p className="text-neutral-600 font-mono text-sm leading-relaxed">
               Process documents securely and efficiently with fast, professional PDF tools built for everyone.
             </p>
-            <div className="flex items-center space-x-4 text-sm text-neutral-600 pt-2">
+            <div className="flex items-center space-x-4 text-sm font-mono text-neutral-600 pt-2">
               <div className="flex items-center space-x-1">
-                <Shield className="h-4 w-4 text-primary-600" />
+                <Shield className="h-4 w-4 text-joedy-cyan" />
                 <span>Secure</span>
               </div>
               <div className="flex items-center space-x-1">
-                <Zap className="h-4 w-4 text-primary-600" />
+                <Zap className="h-4 w-4 text-joedy-cyan" />
                 <span>Fast</span>
               </div>
             </div>
@@ -69,13 +69,13 @@ const Footer = () => {
 
           {/* Tool Categories */}
           <div>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-900 mb-6">PDF Tools</h3>
+            <h3 className="text-sm font-mono font-bold uppercase tracking-wider text-neutral-900 mb-6">PDF Tools</h3>
             <ul className="space-y-3">
               {toolCategories.map((category) => (
                 <li key={category.name}>
-                  <Link
+                  <Link 
                     href={category.href}
-                    className="text-neutral-600 hover:text-primary-600 transition-colors text-sm font-medium"
+                    className="text-neutral-600 font-mono hover:text-joedy-cyan transition-colors text-sm font-medium"
                   >
                     {category.name}
                   </Link>
@@ -86,13 +86,13 @@ const Footer = () => {
 
           {/* Support Links */}
           <div>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-900 mb-6">Support</h3>
+            <h3 className="text-sm font-mono font-bold uppercase tracking-wider text-neutral-900 mb-6">Support</h3>
             <ul className="space-y-3">
               {supportLinks.map((link) => (
                 <li key={link.name}>
-                  <Link
+                  <Link 
                     href={link.href}
-                    className="text-neutral-600 hover:text-primary-600 transition-colors text-sm font-medium"
+                    className="text-neutral-600 font-mono hover:text-joedy-cyan transition-colors text-sm font-medium"
                   >
                     {link.name}
                   </Link>
@@ -103,9 +103,9 @@ const Footer = () => {
 
           {/* Newsletter / Social */}
           <div>
-            <h3 className="text-sm font-bold uppercase tracking-wider text-neutral-900 mb-6">Connect</h3>
+            <h3 className="text-sm font-mono font-bold uppercase tracking-wider text-neutral-900 mb-6">Connect</h3>
             <div className="space-y-4">
-              <p className="text-neutral-600 text-sm">
+              <p className="text-neutral-600 font-mono text-sm">
                 Stay updated with the latest PDF tools and features.
               </p>
               <div className="flex items-center space-x-3">
@@ -113,8 +113,10 @@ const Footer = () => {
                   <a
                     key={social.label}
                     href={social.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     aria-label={social.label}
-                    className="p-2 rounded-lg bg-neutral-200 text-neutral-700 hover:bg-primary-600 hover:text-white transition-all duration-300"
+                    className="p-2 rounded-lg bg-neutral-200 text-neutral-700 hover:bg-joedy-cyan hover:text-white transition-all duration-300"
                   >
                     <social.icon className="h-5 w-5" />
                   </a>
@@ -129,16 +131,16 @@ const Footer = () => {
 
         {/* Bottom Section */}
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          <div className="flex items-center space-x-2 text-neutral-600 text-sm">
-            <Heart className="h-4 w-4 text-red-500" />
-            <span>Made with care for everyone</span>
-          </div>
-          
-          <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
-            <p className="text-neutral-600 text-sm">
-              © {new Date().getFullYear()} JoedyTools. All rights reserved.
-            </p>
-            <div className="flex items-center space-x-1 text-xs text-neutral-500 bg-neutral-100 px-3 py-1 rounded-full">
+            <div className="flex items-center space-x-2 text-neutral-600 font-mono text-sm">
+              <Heart className="h-4 w-4 text-red-500" />
+              <span>Made with care for everyone</span>
+            </div>
+
+            <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-6">
+              <p className="text-neutral-600 font-mono text-sm">
+                © {new Date().getFullYear()} JoedyTools. All rights reserved.
+              </p>
+              <div className="flex items-center space-x-1 text-xs text-neutral-500 bg-neutral-100 font-mono px-3 py-1 rounded-full">
               <Shield className="h-3 w-3" />
               <span>Files processed locally</span>
             </div>

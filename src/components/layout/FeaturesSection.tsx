@@ -39,10 +39,10 @@ const FeatureCard = ({ icon, title, description, delay }: FeatureProps) => {
         </motion.div>
         
         <div>
-          <h3 className="text-lg font-bold text-neutral-900 mb-2">
+          <h3 className="text-lg font-mono font-bold text-neutral-900 mb-2">
             {title}
           </h3>
-          <p className="text-neutral-600 text-sm leading-relaxed">
+          <p className="text-neutral-600 font-mono text-sm leading-relaxed">
             {description}
           </p>
         </div>
@@ -101,10 +101,10 @@ const FeaturesSection = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-6">
-            Why Choose <span className="gradient-text">JoedyTools</span>?
+          <h2 className="text-4xl md:text-5xl font-mono font-bold tracking-tight mb-6">
+            Why Choose <span className="text-joedy-cyan">JoedyTools</span>?
           </h2>
-          <p className="text-xl text-neutral-600 max-w-3xl mx-auto">
+          <p className="text-xl text-neutral-600 font-mono max-w-3xl mx-auto">
             A complete PDF toolkit designed for global use — fast, secure, and private.
           </p>
         </motion.div>
@@ -131,10 +131,10 @@ const FeaturesSection = () => {
         >
           <div className="card p-12 bg-gradient-to-r from-primary-50 to-accent-50 border-primary-200">
             <div className="text-center space-y-6">
-              <h3 className="text-3xl font-bold text-neutral-900">
+              <h3 className="text-3xl font-mono font-bold text-neutral-900">
                 Ready to Get Started?
               </h3>
-              <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
+              <p className="text-lg text-neutral-600 font-mono max-w-2xl mx-auto">
                 Join thousands of people who streamline their document processing with our free tools.
               </p>
               <motion.button
@@ -146,7 +146,7 @@ const FeaturesSection = () => {
                     toolsSection.scrollIntoView({ behavior: 'smooth' });
                   }
                 }}
-                className="btn btn-primary btn-lg"
+                className="btn btn-primary font-mono btn-lg"
               >
                 Explore Tools
               </motion.button>

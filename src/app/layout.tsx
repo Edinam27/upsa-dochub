@@ -1,7 +1,19 @@
 import type { Metadata, Viewport } from "next";
+import { Space_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+
+const spaceMono = Space_Mono({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-mono",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://joedytools.com'),
@@ -116,8 +128,8 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      <body className="antialiased" suppressHydrationWarning>
-        <div className="min-h-screen flex flex-col">
+      <body className={`antialiased ${spaceMono.variable} ${inter.variable}`} suppressHydrationWarning>
+        <div className="min-h-screen flex flex-col font-sans">
           <Header />
           <main className="flex-1 pt-16">
             {children}
