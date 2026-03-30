@@ -1,11 +1,61 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { FileText, Zap, Shield, ArrowRight, Sparkles } from 'lucide-react';
-import Link from 'next/link';
-import Image from 'next/image';
+import * as React from "react";
+import {
+  FileText,
+  ArrowRight,
+  Zap,
+  Shield,
+  Layers,
+  Lock,
+} from "lucide-react";
+import { motion, useAnimation, useInView } from "framer-motion";
+import { Button } from "@/components/ui/button";
+
+const labels = [
+  { icon: FileText, label: "PDF Conversions" },
+  { icon: Layers, label: "Merge & Split" },
+  { icon: Lock, label: "Secure Processing" },
+];
+
+const features = [
+  {
+    icon: FileText,
+    label: "12+ PDF Tools",
+    description: "Convert, merge, split, and edit your documents directly in your browser without any server uploads.",
+  },
+  {
+    icon: Zap,
+    label: "Lightning Fast",
+    description: "Experience zero wait times. Everything runs instantly on your local machine using WebAssembly.",
+  },
+  {
+    icon: Shield,
+    label: "100% Secure & Private",
+    description: "Your files never leave your device. Complete privacy for your sensitive documents.",
+  },
+];
 
 const HeroSection = () => {
+  const controls = useAnimation();
+  const ref = React.useRef(null);
+  const isInView = useInView(ref, { once: true, amount: 0.1 });
+
+  React.useEffect(() => {
+    if (isInView) {
+      controls.start("visible");
+    }
+  }, [controls, isInView]);
+
+  const titleWords = [
+    "THE",
+    "ULTIMATE", 
+    "PDF",
+    "TOOLKIT",
+    "FOR",
+    "PROFESSIONALS",
+  ];
+
   const scrollToTools = () => {
     const toolsSection = document.getElementById('tools');
     if (toolsSection) {
@@ -13,159 +63,148 @@ const HeroSection = () => {
     }
   };
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-        delayChildren: 0.3,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.8, ease: 'easeOut' } as any,
-    },
-  };
-
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-neutral-50 via-primary-50/30 to-accent-50/30 pt-16">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <motion.div
-          animate={{ y: [0, 30, 0] }}
-          transition={{ duration: 8, repeat: Infinity }}
-          className="absolute top-20 right-20 w-72 h-72 bg-primary-200/20 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{ y: [0, -30, 0] }}
-          transition={{ duration: 10, repeat: Infinity }}
-          className="absolute bottom-20 left-20 w-72 h-72 bg-accent-200/20 rounded-full blur-3xl"
-        />
-        <motion.div
-          animate={{ x: [0, 30, 0] }}
-          transition={{ duration: 12, repeat: Infinity }}
-          className="absolute top-1/2 left-1/2 w-96 h-96 bg-primary-100/10 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"
-        />
-      </div>
+    <div className="container mx-auto px-4 min-h-screen bg-background pt-16">
+      <main>
+        <section className="container py-24">
+          <div className="flex flex-col items-center text-center">
+            <motion.h1
+              initial={{ filter: "blur(10px)", opacity: 0, y: 50 }}
+              animate={{ filter: "blur(0px)", opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="relative font-mono text-4xl font-bold sm:text-5xl md:text-6xl lg:text-7xl max-w-4xl mx-auto leading-tight"
+            >
+              {titleWords.map((text, index) => (
+                <motion.span
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ 
+                    delay: index * 0.15, 
+                    duration: 0.6 
+                  }}
+                  className={`inline-block mx-2 md:mx-4 ${text === 'PDF' || text === 'TOOLKIT' ? 'text-joedy-cyan' : ''}`}
+                >
+                  {text}
+                </motion.span>
+              ))}
+            </motion.h1>
 
-      <div className="relative z-10 container-max text-center">
-        <motion.div
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="space-y-8"
-        >
-          {/* Logo and Title Section */}
-          <motion.div variants={itemVariants} className="space-y-6">
-            <div className="flex items-center justify-center mb-8">
-              <div className="relative w-64 h-16 md:w-80 md:h-20">
-                <Image 
-                  src="/logo.png" 
-                  alt="JoedyTools Logo" 
-                  fill 
-                  className="object-contain"
-                  priority
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-              <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
-                <span className="gradient-text">PDF Tools</span>
-                <br />
-                Made Simple
-              </h1>
-              <p className="text-xl md:text-2xl text-neutral-600 max-w-3xl mx-auto">
-                Free, secure, and professional PDF tools for everyone. Convert, merge, split, compress, and edit your documents directly in your browser.
-              </p>
-            </div>
-          </motion.div>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1.2, duration: 0.6 }}
+              className="mx-auto mt-8 max-w-2xl text-xl text-muted-foreground font-mono"
+            >
+              Free, secure, and powerful PDF tools. Convert, merge, split, compress, and edit your documents directly in your browser.
+            </motion.p>
 
-          {/* Key Features */}
-          <motion.div
-            variants={itemVariants}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-4xl mx-auto my-12"
-          >
-            {[
-              { icon: FileText, label: '12+ Tools', desc: 'Convert, merge, split & more' },
-              { icon: Zap, label: 'Lightning Fast', desc: 'Quick document processing' },
-              { icon: Shield, label: 'Secure & Private', desc: 'Local browser processing' },
-            ].map((feature, idx) => (
-              <motion.div
-                key={idx}
-                whileHover={{ y: -8 }}
-                className="card-hover p-6"
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.8, duration: 0.6 }}
+              className="mt-12 flex flex-wrap justify-center gap-6"
+            >
+              {labels.map((feature, index) => (
+                <motion.div
+                  key={feature.label}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ 
+                    delay: 1.8 + (index * 0.15), 
+                    duration: 0.6,
+                    type: "spring",
+                    stiffness: 100,
+                    damping: 10
+                  }}
+                  className="flex items-center gap-2 px-6"
+                >
+                  <feature.icon className="h-5 w-5 text-joedy-cyan" />
+                  <span className="text-sm font-mono text-foreground">{feature.label}</span>
+                </motion.div>
+              ))}
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ 
+                delay: 2.4, 
+                duration: 0.6,
+                type: "spring",
+                stiffness: 100,
+                damping: 10
+              }}
+              className="flex flex-col sm:flex-row gap-4 mt-12"
+            >
+              <Button
+                size="lg"
+                onClick={scrollToTools}
+                className="cursor-pointer rounded-none bg-joedy-navy hover:bg-joedy-navy-light font-mono text-white"
               >
-                <div className="flex flex-col items-center space-y-3">
-                  <div className="p-3 bg-primary-100 rounded-lg">
-                    <feature.icon className="h-6 w-6 text-primary-600" />
-                  </div>
-                  <h3 className="font-semibold text-neutral-900">{feature.label}</h3>
-                  <p className="text-sm text-neutral-600">{feature.desc}</p>
+                EXPLORE TOOLS <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="cursor-pointer rounded-none font-mono border-joedy-navy text-joedy-navy hover:bg-joedy-navy hover:text-white"
+              >
+                LEARN MORE
+              </Button>
+            </motion.div>
+          </div>
+        </section>
+
+        <section className="container pb-24" ref={ref}>
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ 
+              delay: 3.0, 
+              duration: 0.6,
+              type: "spring",
+              stiffness: 100,
+              damping: 10
+            }}
+            className="text-center text-4xl font-mono font-bold mb-12"
+          >
+            Unlock the Power of PDFs
+          </motion.h2>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 3.2, duration: 0.6 }}
+            className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto"
+          >
+            {features.map((feature, index) => (
+              <motion.div
+                key={feature.label}
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ 
+                  delay: 3.2 + (index * 0.2), 
+                  duration: 0.6,
+                  type: "spring",
+                  stiffness: 100,
+                  damping: 10
+                }}
+                className="flex flex-col items-center text-center p-8 bg-background border border-neutral-200 hover:border-joedy-cyan transition-colors duration-300 shadow-sm"
+              >
+                <div className="mb-6 rounded-full bg-blue-50 p-4">
+                  <feature.icon className="h-8 w-8 text-joedy-navy" />
                 </div>
+                <h3 className="mb-4 text-xl font-mono font-bold text-foreground">
+                  {feature.label}
+                </h3>
+                <p className="text-muted-foreground font-mono text-sm leading-relaxed">
+                  {feature.description}
+                </p>
               </motion.div>
             ))}
           </motion.div>
-
-          {/* Call to Action */}
-          <motion.div
-            variants={itemVariants}
-            className="flex flex-col sm:flex-row gap-4 justify-center items-center"
-          >
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={scrollToTools}
-              className="btn btn-primary btn-lg"
-            >
-              <span>Explore Tools</span>
-              <ArrowRight className="h-5 w-5 ml-2" />
-            </motion.button>
-            
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="btn btn-primary-outline btn-lg"
-            >
-              Learn More
-            </motion.button>
-          </motion.div>
-
-          {/* Stats */}
-          <motion.div
-            variants={itemVariants}
-            className="grid grid-cols-3 gap-6 max-w-md mx-auto mt-16 pt-8 border-t border-neutral-200"
-          >
-            {[
-              { value: '12+', label: 'Tools' },
-              { value: 'Free', label: 'Always' },
-              { value: '100%', label: 'Secure' },
-            ].map((stat, idx) => (
-              <div key={idx} className="text-center">
-                <div className="text-2xl md:text-3xl font-bold gradient-text">{stat.value}</div>
-                <div className="text-sm text-neutral-600 mt-1">{stat.label}</div>
-              </div>
-            ))}
-          </motion.div>
-
-          {/* Scroll Indicator */}
-          <motion.div
-            animate={{ y: [0, 10, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="absolute bottom-8 left-1/2 -translate-x-1/2 cursor-pointer"
-            onClick={scrollToTools}
-          >
-            <ArrowRight className="h-6 w-6 text-neutral-400 rotate-90" />
-          </motion.div>
-        </motion.div>
-      </div>
-    </section>
+        </section>
+      </main>
+    </div>
   );
 };
 

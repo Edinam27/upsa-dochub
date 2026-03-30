@@ -3,8 +3,10 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -12,80 +14,82 @@ const Header = () => {
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   const navItems = [
-    { name: 'Home', href: '/' },
-    { name: 'Tools', href: '/tools' },
-    { name: 'Features', href: '/#features' },
-    { name: 'Support', href: '/support' },
+    { name: 'SOLUTIONS', href: '/tools' },
+    { name: 'FEATURES', href: '/#features' },
+    { name: 'RESOURCES', href: '#' },
+    { name: 'SUPPORT', href: '/support' },
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-neutral-200 shadow-sm">
-      <div className="container-max">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center space-x-3 group">
-            <div className="relative w-40 h-10">
-              <Image 
-                src="/logo.png" 
-                alt="JoedyTools Logo" 
-                fill 
-                className="object-contain object-left"
-                priority
-              />
-            </div>
-          </Link>
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-neutral-200 transition-all duration-300">
+      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2">
+          <div className="relative w-40 h-10">
+            <Image 
+              src="/logo.png" 
+              alt="JoedyTools" 
+              fill 
+              className="object-contain object-left"
+              priority
+            />
+          </div>
+        </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="text-neutral-700 hover:text-primary-600 transition-colors font-medium text-sm"
-              >
-                {item.name}
-              </Link>
-            ))}
-          </nav>
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center space-x-8">
+          {navItems.map((item) => (
+            <Link
+              key={item.name}
+              href={item.href}
+              className="text-sm font-mono text-foreground hover:text-joedy-cyan transition-colors"
+            >
+              {item.name}
+            </Link>
+          ))}
+        </nav>
 
-          {/* Actions */}
-          <div className="hidden md:flex items-center space-x-4"></div>
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={toggleMenu}
-            className="md:hidden text-neutral-700 hover:text-primary-600 transition-colors"
-            aria-label="Toggle menu"
+        {/* Desktop Actions & Mobile Menu */}
+        <div className="flex items-center space-x-4">
+          <Button
+            variant="default"
+            className="rounded-none hidden md:inline-flex bg-joedy-navy hover:bg-joedy-navy-light font-mono text-white"
           >
-            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+            GET STARTED <ArrowRight className="ml-2 w-4 h-4" />
+          </Button>
+
+          {/* Mobile Navigation (Sheet) */}
+          <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+            <SheetTrigger asChild>
+              <Button variant="ghost" size="icon" className="md:hidden">
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle menu</span>
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+              <div className="flex flex-col h-full mt-6">
+                <nav className="flex flex-col gap-6">
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      onClick={() => setIsMenuOpen(false)}
+                      className="text-lg font-mono text-foreground hover:text-joedy-cyan transition-colors"
+                    >
+                      {item.name}
+                    </Link>
+                  ))}
+                </nav>
+                <div className="mt-auto pb-8">
+                  <Button className="w-full cursor-pointer rounded-none bg-joedy-navy hover:bg-joedy-navy-light font-mono text-white">
+                    GET STARTED <ArrowRight className="ml-2 w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </SheetContent>
+          </Sheet>
         </div>
       </div>
-
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden glass border-t border-neutral-200 bg-white/95"
-          >
-            <div className="container-max px-4 py-4 space-y-4">
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className="block text-neutral-700 hover:text-primary-600 transition-colors font-medium"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </header>
   );
 };
