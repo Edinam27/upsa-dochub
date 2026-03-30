@@ -2246,6 +2246,9 @@ class PDFToWordConverter extends PDFProcessor {
         structure = this.detectStructure(blocks);
     }
     
+    // Group lines into flowing paragraphs (Smallpdf heuristic style)
+    structure = this.groupLinesIntoParagraphs(structure);
+    
     // Generate Children
     const children = [];
     
@@ -2258,6 +2261,77 @@ class PDFToWordConverter extends PDFProcessor {
     }
     
     return children;
+  }
+
+  private groupLinesIntoParagraphs(structure: any[]): any[] {
+      const result = [];
+      let currentParagraph: any = null;
+
+      for (const element of structure) {
+          if (element.type === 'table') {
+              if (currentParagraph) {
+                  result.push(currentParagraph);
+                  currentParagraph = null;
+              }
+              result.push(element);
+              continue;
+          }
+
+          // It's a text line
+          if (!currentParagraph) {
+              currentParagraph = {
+                  type: 'paragraph',
+                  lines: [element],
+                  y: element.y,
+                  x: element.x,
+                  width: element.width,
+                  height: element.height
+              };
+          } else {
+              const lastLine = currentParagraph.lines[currentParagraph.lines.length - 1];
+              
+              // Heuristics for paragraph continuation
+              const verticalGap = element.y - (lastLine.y + lastLine.height);
+              const approxLineHeight = lastLine.height > 0 ? lastLine.height : 12;
+              
+              // Check if left margin is similar (tolerance of 30 units)
+              const isMarginSimilar = Math.abs(element.x - lastLine.x) < 30 || Math.abs(element.x - currentParagraph.x) < 30;
+              
+              // Check if it's a new list item
+              const firstItem = element.items[0];
+              const text = firstItem ? firstItem.text.trim() : '';
+              const isListMarker = /^([•\-\*]|\d+\.|\w\.)\s/.test(text) || /^[•\-\*]$/.test(text);
+
+              // Check if the previous line was too short to be a wrapping line (might be a heading or end of paragraph)
+              // If the previous line's width is much shorter than the paragraph's max width, it might be the end of a paragraph.
+              const isPrevLineShort = lastLine.width > 0 && currentParagraph.width > 0 && lastLine.width < currentParagraph.width * 0.6;
+
+              if (verticalGap < approxLineHeight * 1.8 && isMarginSimilar && !isListMarker && !isPrevLineShort) {
+                  // Add to current paragraph
+                  currentParagraph.lines.push(element);
+                  currentParagraph.height = (element.y + element.height) - currentParagraph.y;
+                  currentParagraph.width = Math.max(currentParagraph.width, element.width);
+                  currentParagraph.x = Math.min(currentParagraph.x, element.x);
+              } else {
+                  // Start a new paragraph
+                  result.push(currentParagraph);
+                  currentParagraph = {
+                      type: 'paragraph',
+                      lines: [element],
+                      y: element.y,
+                      x: element.x,
+                      width: element.width,
+                      height: element.height
+                  };
+              }
+          }
+      }
+
+      if (currentParagraph) {
+          result.push(currentParagraph);
+      }
+
+      return result;
   }
 
 
@@ -2394,60 +2468,66 @@ class PDFToWordConverter extends PDFProcessor {
     }
 
   private createParagraph(element: any, Paragraph: any, TextRun: any, ImageRun: any, options: any): any {
-      element.items.sort((a: any, b: any) => a.x - b.x);
-      
-      const children = [];
-      let lastX = 0; 
-      
+      const children: any[] = [];
+      let bullet: any = undefined;
+      let indent: any = undefined;
       const preserveLayout = options?.preserveLayout !== false;
 
-      // Check for list markers
-      let bullet: any = undefined;
-      // Only check the first text item
-      const firstTextIndex = element.items.findIndex((i: any) => i.type === 'text');
-      if (firstTextIndex !== -1) {
-          const firstItem = element.items[firstTextIndex];
-          const text = firstItem.text.trim();
+      // Ensure we are working with an array of lines
+      const lines = element.type === 'paragraph' ? element.lines : [element];
+
+      for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          line.items.sort((a: any, b: any) => a.x - b.x);
           
-          // Bullet points: •, -, *
-          if (/^[•\-\*]$/.test(text) || /^[•\-\*]\s/.test(text)) {
-             bullet = { level: 0 };
-             // Strip the bullet char, accounting for potential leading spaces in original text
-             element.items[firstTextIndex].text = firstItem.text.replace(/^\s*[•\-\*]\s?/, '');
+          let lastX = 0;
+
+          // Check for list markers on the very first line
+          if (i === 0) {
+              const firstTextIndex = line.items.findIndex((item: any) => item.type === 'text');
+              if (firstTextIndex !== -1) {
+                  const firstItem = line.items[firstTextIndex];
+                  const text = firstItem.text.trim();
+
+                  if (/^[•\-\*]$/.test(text) || /^[•\-\*]\s/.test(text)) {
+                      bullet = { level: 0 };
+                      line.items[firstTextIndex].text = firstItem.text.replace(/^\s*[•\-\*]\s?/, '');
+                  }
+              }
+              const firstItemOverall = line.items[0];
+              if (firstItemOverall && preserveLayout && !bullet) {
+                  indent = Math.round(firstItemOverall.x * 10);
+              }
+          } else {
+              // Add a space between lines to ensure text flows naturally in Word
+              children.push(new TextRun({ text: " " }));
           }
-          // Numbered lists: 1., 1), a., a)
-          // We won't try to reconstruct the numbering sequence logic for now, 
-          // just treat them as bullets or leave them as text.
-          // Treating them as text is safer to avoid breaking references.
+
+          for (const item of line.items) {
+              if (item.type === 'image') {
+                  children.push(new ImageRun({
+                      data: item.data,
+                      transformation: { width: item.width, height: item.height }
+                  }));
+              } else {
+                 if (preserveLayout && lastX > 0 && item.x - lastX > 20 && i === 0) {
+                     // Only add tabs for gaps on the first line or within a line, 
+                     // but avoid breaking paragraph flow too much
+                     children.push(new TextRun({ text: "\t" }));
+                 }
+
+                 children.push(new TextRun({
+                     text: item.text,
+                     size: options?.maintainFormatting !== false ? Math.round((item.fontSize || 12) * 2) : 24,
+                     font: options?.maintainFormatting !== false && item.fontName ? this.mapFont(item.fontName) : 'Calibri',
+                     bold: options?.maintainFormatting !== false && item.fontName ? this.isBold(item.fontName) : false,
+                     italics: options?.maintainFormatting !== false && item.fontName ? this.isItalic(item.fontName) : false
+                 }));
+              }
+              lastX = item.x + item.width;
+          }
       }
 
-      // Calculate indent only if preserving layout AND not a list (lists handle their own indent)
-      const firstItem = element.items[0];
-      const indent = (preserveLayout && !bullet) ? Math.round(firstItem.x * 10) : undefined; 
-      
-      for (const item of element.items) {
-          if (item.type === 'image') {
-              children.push(new ImageRun({
-                  data: item.data,
-                  transformation: { width: item.width, height: item.height }
-              }));
-          } else {
-             // Add tabs/spaces for gaps if we are trying to preserve layout
-             if (preserveLayout && lastX > 0 && item.x - lastX > 20) {
-                 children.push(new TextRun({ text: "\t" }));
-             }
-             
-             children.push(new TextRun({ 
-                 text: item.text,
-                 size: options?.maintainFormatting !== false ? Math.round((item.fontSize || 12) * 2) : 24, // Half-points
-                 font: options?.maintainFormatting !== false && item.fontName ? this.mapFont(item.fontName) : 'Calibri',
-                 bold: options?.maintainFormatting !== false && item.fontName ? this.isBold(item.fontName) : false,
-                 italics: options?.maintainFormatting !== false && item.fontName ? this.isItalic(item.fontName) : false
-             }));
-          }
-          lastX = item.x + item.width;
-      }
-      
       return new Paragraph({
           children: children,
           indent: indent ? { left: indent } : undefined,
