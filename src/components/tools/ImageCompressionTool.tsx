@@ -222,7 +222,7 @@ export default function ImageCompressionTool({ onProcess, isProcessing }: ImageC
       {/* Header */}
       <div className="border-b border-gray-200 pb-4">
         <div className="flex items-center space-x-3">
-          <Minimize2 className="w-5 h-5 text-upsa-blue" />
+          <Minimize2 className="w-5 h-5 text-joedy-cyan" />
           <h2 className="text-lg font-semibold text-gray-900">
             Image Compression Tool
           </h2>
@@ -238,8 +238,8 @@ export default function ImageCompressionTool({ onProcess, isProcessing }: ImageC
           {...getRootProps()}
           className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
             isDragActive
-              ? 'border-upsa-blue bg-blue-50'
-              : 'border-gray-300 hover:border-upsa-blue hover:bg-gray-50'
+              ? 'border-joedy-cyan bg-blue-50'
+              : 'border-gray-300 hover:border-joedy-cyan hover:bg-gray-50'
           }`}
         >
           <input {...getInputProps()} />
@@ -320,7 +320,7 @@ export default function ImageCompressionTool({ onProcess, isProcessing }: ImageC
               <select
                 value={options.format}
                 onChange={(e) => handleOptionChange('format', e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-upsa-gold focus:border-transparent"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-joedy-cyan focus:border-transparent"
               >
                 <option value="original">Keep Original</option>
                 <option value="jpeg">JPEG</option>
@@ -338,7 +338,7 @@ export default function ImageCompressionTool({ onProcess, isProcessing }: ImageC
                 type="number"
                 value={options.maxWidth}
                 onChange={(e) => handleOptionChange('maxWidth', parseInt(e.target.value))}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-upsa-gold focus:border-transparent"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-joedy-cyan focus:border-transparent"
                 min="100"
                 max="4000"
               />
@@ -353,7 +353,7 @@ export default function ImageCompressionTool({ onProcess, isProcessing }: ImageC
                 type="number"
                 value={options.maxHeight}
                 onChange={(e) => handleOptionChange('maxHeight', parseInt(e.target.value))}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-upsa-gold focus:border-transparent"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-joedy-cyan focus:border-transparent"
                 min="100"
                 max="4000"
               />
@@ -369,7 +369,7 @@ export default function ImageCompressionTool({ onProcess, isProcessing }: ImageC
                 type="checkbox"
                 checked={options.maintainAspectRatio}
                 onChange={(e) => handleOptionChange('maintainAspectRatio', e.target.checked)}
-                className="w-4 h-4 text-upsa-blue border-gray-300 rounded focus:ring-upsa-gold"
+                className="w-4 h-4 text-joedy-navy border-gray-300 rounded focus:ring-joedy-cyan"
               />
               <span className="text-sm text-gray-700">Maintain aspect ratio</span>
             </label>
@@ -379,7 +379,7 @@ export default function ImageCompressionTool({ onProcess, isProcessing }: ImageC
                 type="checkbox"
                 checked={options.removeMetadata}
                 onChange={(e) => handleOptionChange('removeMetadata', e.target.checked)}
-                className="w-4 h-4 text-upsa-blue border-gray-300 rounded focus:ring-upsa-gold"
+                className="w-4 h-4 text-joedy-navy border-gray-300 rounded focus:ring-joedy-cyan"
               />
               <span className="text-sm text-gray-700">Remove metadata (EXIF data)</span>
             </label>
@@ -408,7 +408,7 @@ export default function ImageCompressionTool({ onProcess, isProcessing }: ImageC
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div 
-              className="bg-gradient-to-r from-upsa-blue to-upsa-gold h-2 rounded-full transition-all duration-300"
+              className="bg-gradient-to-r from-joedy-navy to-joedy-cyan h-2 rounded-full transition-all duration-300"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -421,7 +421,7 @@ export default function ImageCompressionTool({ onProcess, isProcessing }: ImageC
         whileTap={{ scale: 0.98 }}
         onClick={handleCompress}
         disabled={isProcessing || isCompressing || files.length === 0}
-        className="w-full bg-gradient-to-r from-upsa-blue to-upsa-gold text-white font-semibold py-3 px-6 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2"
+        className="w-full btn-primary py-3 px-6 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all duration-200 flex items-center justify-center space-x-2"
       >
         {isCompressing ? (
           <>
@@ -448,7 +448,7 @@ export default function ImageCompressionTool({ onProcess, isProcessing }: ImageC
             <h3 className="font-medium text-gray-900">Compression Results</h3>
             <button
               onClick={downloadAll}
-              className="bg-upsa-blue text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+              className="bg-joedy-navy text-white px-4 py-2 rounded-lg hover:bg-joedy-navy-light transition-colors flex items-center space-x-2"
             >
               <Download className="w-4 h-4" />
               <span>Download All</span>

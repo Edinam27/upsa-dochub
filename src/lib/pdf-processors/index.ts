@@ -3062,19 +3062,23 @@ class RepairPDFProcessor extends PDFProcessor {
 }
 
 // Image to PDF Processor
-class ImageToPDFProcessor {
-  constructor(private options: ProcessingOptions = {}) {}
+  class ImageToPDFProcessor extends PDFProcessor {
+    constructor(options: ProcessingOptions = {}) {
+      super(options);
+    }
 
-  async process(files: File[]): Promise<ProcessedFile[]> {
-    if (files.length === 0) {
+    async process(files: File | File[]): Promise<ProcessedFile[]> {
+      const fileArray = Array.isArray(files) ? files : [files];
+      
+      if (fileArray.length === 0) {
       throw errorUtils.createError('INVALID_INPUT', 'No image files provided');
     }
 
     try {
-      const pdfDoc = await PDFDocument.create();
+        const pdfDoc = await PDFDocument.create();
 
-      for (const file of files) {
-        const imageBytes = await file.arrayBuffer();
+        for (const file of fileArray) {
+          const imageBytes = await file.arrayBuffer();
         let image;
         
         const fileName = file.name.toLowerCase();

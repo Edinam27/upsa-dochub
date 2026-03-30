@@ -122,8 +122,8 @@ export default function ToolPage() {
       let results: any[] = [];
       
       // Handle specific processors that accept File[] vs File
-      if (toolId === 'pdf-merge' || toolId === 'merge') {
-        // PDFMerger accepts File[]
+      if (toolId === 'pdf-merge' || toolId === 'merge' || toolId === 'images-to-pdf') {
+        // PDFMerger and ImageToPDFProcessor accepts File[]
         results = await (processor as any).process(files);
       } else {
         // For others (split, compress, etc.), process each file individually
